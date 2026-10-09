@@ -1,0 +1,36 @@
+{
+  "id": "cross_product_root_fraction",
+  "root_variable": "z",
+  "substitutions": {
+    "lam": "lambda",
+    "A": "X_00(z,lambda*z)",
+    "B": "X_11(z,lambda*z)",
+    "C": "X_02(z,lambda*z)",
+    "Q": "X_01(z,z)"
+  },
+  "assumptions": [
+    "0 < lam",
+    "Q != 0",
+    "C = -A",
+    "lam*A*B = Q^2",
+    "0 < Q^2-lam^2*A^2"
+  ],
+  "steps": [
+    "次数2の漸化式と根条件より C=-A。",
+    "交差積の行列式とWronskianより lam*A*B=Q^2、Q=-2/(pi*z)。",
+    "u(t)=X_00(z,t) のBessel方程式を積分すると Q^2-lam^2*A^2=(2/z^2)*integral(lam*z,z,t*u(t)^2) > 0。",
+    "分母を lam*A*(B-lam*A) に因数分解し、非零性を用いて約分する。"
+  ],
+  "sources": [
+    "https://dlmf.nist.gov/10.6.E1",
+    "https://dlmf.nist.gov/10.6.E10",
+    "https://dlmf.nist.gov/10.5.E2",
+    "https://dlmf.nist.gov/10.2.E1"
+  ],
+  "formal_obligations": [
+    "Bessel Y and X definitions",
+    "root recurrence",
+    "Wronskian scaling",
+    "positive energy integral"
+  ]
+}

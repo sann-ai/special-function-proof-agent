@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "gamma",
+    "arg": {
+      "op": "add",
+      "args": [
+        {
+          "op": "var",
+          "name": "a"
+        },
+        {
+          "op": "int",
+          "value": 1
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "a"
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "var",
+          "name": "a"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "status": "proved",
+  "statement": "∀ (n : ℤ) (x : ℝ), 0 < x → (((BesselProofAgent.J (n - (1 : ℤ)) x) + (BesselProofAgent.J (n + (1 : ℤ)) x)) + (BesselProofAgent.J n x)) = (((((2 : ℂ) * (n : ℂ)) / (x : ℂ)) + (1 : ℂ)) * (BesselProofAgent.J n x))",
+  "environment": {
+    "lean-toolchain": "8733782dc070a99b312039cda424f601b80f3be6f6f512627da5ba25adc27632",
+    "lake-manifest.json": "25648cabc3e1ce08668b7d4ae91d14facb6599d78c79263a7a8bedf29fdf55d0",
+    "lakefile.toml": "b6d0555f00c8a712ee224c75a90f9a32f6c1d69ee85635d05cf8df0189a7207a",
+    "BesselProofAgent.lean": "b5cdb5a09a1526bdfed0f77a0663b39b148c0801905199a1d49713fcf85bf576",
+    "BesselProofAgent/Basic.lean": "d58249366aeb1248ea498d7418dc11a6afc9b18f4fcd2a3cce903a01a4d8da6f",
+    "BesselProofAgent/Calculus.lean": "62ba7a53d97fbc32059bb9a63c4ccea6f8a84d3d116f4463224a4b5e67042a75",
+    "BesselProofAgent/Derivative.lean": "12749753b9805d04d4dd8317eb2a9a8e17e2a07343a68b223ddf69ff24101948",
+    "BesselProofAgent/Examples.lean": "78ed25b22701aec27969045ea94f164ae05ed599fe6e9f2398c521183cbe851a",
+    "BesselProofAgent/NonintegerCalculus.lean": "15b4b6709900baf6ddd84984c42205373e9310666f2b21252632f22a494965fc",
+    "BesselProofAgent/OriginSingularBessel.lean": "c0cd353a5a5a4e8ca04a309a9896dc0aa7de579214bb5a607dbfb25173d52cab",
+    "BesselProofAgent/RealCalculus.lean": "754a717ea5704e34751f15576e78e960e07a143a4866bb84c4655030cede14b8",
+    "BesselProofAgent/Recurrence.lean": "ac74881ddb342a12218e0db00082dbac10f6922caae5a65b78a1bdaab319e94f",
+    "BesselProofAgent/SingularIntegrals.lean": "f0e6708aeeeb85a1eb1c0951ff631ee09c0ce18ac4cd0f05a1cba0570a633101",
+    "SpecialFunctionProofAgent.lean": "8ca07acda9e18c4f420a999e5b15dd24b56b221da6dd5e1fb2e8c59f941d0e64",
+    "special_function_agent/registry.py": "0c477b9f4b0428a2f3edc31b2b36041eb1d161973caa273fb9f5fbf4712c34e6",
+    "SpecialFunctionProofAgent/Beta.lean": "e963f30f49998b5d87edcf7d0498472e7045fc062c1bf1cc5424930fbb528198",
+    "SpecialFunctionProofAgent/Gamma.lean": "07a9421489235b82427e8f540c5d0bd934af347cb120cea17e7b9b609aceb374"
+  },
+  "attempts": [
+    {
+      "accepted": true,
+      "stdout": "proof_attempt.lean:10:4: warning: Unused tactic linter: `linear_combination -hrec` does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nproof_attempt.lean:11:4: warning: Unused tactic linter: `(try simp only [hrec]) <;> ring` does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nproof_attempt.lean:10:4: warning: this tactic is never executed\n\nNote: This linter can be disabled with `set_option linter.unreachableTactic false`\nproof_attempt.lean:11:4: warning: this tactic is never executed\n\nNote: This linter can be disabled with `set_option linter.unreachableTactic false`\nBESSEL_AUDIT_BEGIN\n'BesselAgentCandidate.target' depends on axioms: [propext, Classical.choice, Quot.sound]\nBESSEL_AUDIT_END\n",
+      "stderr": "",
+      "exit_code": 0,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "proof"
+    }
+  ],
+  "certificate_kind": "proof",
+  "certificate_sha256": "71193a15e7814fe0a03565e777463915a6150196928ecd9c32105af404d9dfda",
+  "request_sha256": "4a00e677812cea8cc68791516d1f14bb0f6895cbb37f9d0acd30ac09672a4496"
+}

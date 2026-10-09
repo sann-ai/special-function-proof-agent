@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "direct"
+      ]
+    },
+    "recipe": {
+      "type": "string",
+      "enum": [
+        "gamma_recurrence",
+        "beta_integral",
+        "gamma_scaled_integral",
+        "ring"
+      ]
+    }
+  },
+  "required": [
+    "mode",
+    "recipe"
+  ],
+  "additionalProperties": false
+}

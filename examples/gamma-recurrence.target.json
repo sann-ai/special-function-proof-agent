@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "gamma",
+    "arg": {
+      "op": "add",
+      "args": [
+        {
+          "op": "var",
+          "name": "x"
+        },
+        {
+          "op": "int",
+          "value": 1
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "x"
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  }
+}

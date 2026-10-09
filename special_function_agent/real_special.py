@@ -1,0 +1,247 @@
+"""Closed real Gamma/Beta proof recipes, preserving the entire fixed target."""
+from __future__ import annotations
+
+from copy import deepcopy
+from fractions import Fraction
+
+from .core import InputError, NeedsConditions, _keys, _run_lean, _save_json, _sha, environment
+from .registry import CONVENTIONS
+
+RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring')
+SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral'}
+
+
+def has_special(data):
+    from .real_bessel import _walk
+    return data.get('schema_version') == 2 and any(n.get('op') in SPECIAL_OPS for n in _walk([data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]))
+
+
+def validate_proof(data):
+    from .real_bessel import _validate_expr, labels
+    if 'proof' not in data:
+        return
+    proof = data['proof']
+    if not isinstance(proof, dict):
+        raise InputError('A proof plan must be an object.')
+    mode = proof.get('mode')
+    if mode == 'diagnostic':
+        _keys(proof, {'mode'})
+    elif mode == 'direct':
+        _keys(proof, {'mode', 'recipe'})
+        if proof['recipe'] not in RECIPES:
+            raise InputError('Unknown real special-function recipe.')
+    elif mode == 'steps':
+        _keys(proof, {'mode', 'steps'})
+        steps = proof['steps']
+        if not isinstance(steps, list) or not 1 <= len(steps) <= 12:
+            raise InputError('A step proof needs one to twelve equality steps.')
+        previous = data['lhs']
+        for step in steps:
+            _keys(step, {'before', 'after', 'recipe', 'reason', 'conditions'})
+            for side in ('before', 'after'):
+                _validate_expr(step[side], data['variables'])
+            if step['before'] != previous:
+                raise InputError('Every step must start at the preceding fixed endpoint.')
+            if step['recipe'] not in RECIPES or not isinstance(step['reason'], str) or len(step['reason']) > 2000:
+                raise InputError('Use a registered recipe and a short reason.')
+            if not isinstance(step['conditions'], list) or any(not isinstance(c, str) or c not in labels(data) for c in step['conditions']):
+                raise InputError('Step conditions must be drawn from the exact target conditions.')
+            previous = step['after']
+        if previous != data['rhs']:
+            raise InputError('The last step must end at the original right-hand side.')
+    else:
+        raise InputError('Use direct, steps, or diagnostic proof mode.')
+
+
+def _var(name): return {'op': 'var', 'name': name}
+def _int(value): return {'op': 'int', 'value': value}
+def _bin(op, a, b): return {'op': op, 'args': [a, b]}
+def _gamma(arg): return {'op': 'gamma', 'arg': arg}
+def _neg(arg): return {'op': 'neg', 'arg': arg}
+def _rpow(a, b): return {'op': 'rpow', 'base': a, 'exponent': b}
+
+
+def match_identity(lhs, rhs):
+    """Match only the three proved formulas, independent of free/bound names."""
+    for left, right, reverse in ((lhs, rhs, False), (rhs, lhs, True)):
+        if left.get('op') == 'gamma':
+            arg = left['arg']
+            if arg.get('op') == 'add' and arg['args'][1] == _int(1):
+                x = arg['args'][0]
+                if x.get('op') == 'var' and right == _bin('mul', x, _gamma(x)):
+                    return {'recipe': 'gamma_recurrence', 'arguments': [x], 'reverse': reverse}
+        if left.get('op') == 'integral' and left['lower'] == _int(0):
+            t = _var(left['var'])
+            body = left['body']
+            if body.get('op') != 'mul': continue
+            first, second = body['args']
+            if first.get('op') != 'rpow' or first['base'] != t: continue
+            exponent = first['exponent']
+            if exponent.get('op') != 'sub' or exponent['args'][1] != _int(1): continue
+            a = exponent['args'][0]
+            if a.get('op') != 'var': continue
+            if left['upper'] == _int(1) and second.get('op') == 'rpow' and second['base'] == _bin('sub', _int(1), t):
+                exponent = second['exponent']
+                if exponent.get('op') != 'sub' or exponent['args'][1] != _int(1): continue
+                b = exponent['args'][0]
+                if b.get('op') == 'var' and right == _bin('div', _bin('mul', _gamma(a), _gamma(b)), _gamma(_bin('add', a, b))):
+                    return {'recipe': 'beta_integral', 'arguments': [a, b], 'reverse': reverse}
+            if left['upper'] == {'op': 'infinity'} and second.get('op') == 'exp':
+                arg = second['arg']
+                if arg.get('op') == 'mul' and arg['args'][0].get('op') == 'neg' and arg['args'][1] == t:
+                    r = arg['args'][0]['arg']
+                elif arg.get('op') == 'neg' and arg['arg'].get('op') == 'mul' and arg['arg']['args'][1] == t:
+                    r = arg['arg']['args'][0]
+                else: continue
+                if r.get('op') == 'var' and right == _bin('mul', _rpow(r, _neg(a)), _gamma(a)):
+                    return {'recipe': 'gamma_scaled_integral', 'arguments': [a, r], 'reverse': reverse}
+    return None
+
+
+def default_proof(data, route='direct'):
+    from .real_bessel import labels
+    matched = match_identity(data['lhs'], data['rhs'])
+    recipe = matched['recipe'] if matched else 'ring'
+    if route == 'diagnostic': return {'mode': route}
+    if route == 'direct': return {'mode': route, 'recipe': recipe}
+    reasons = {'gamma_recurrence': '正の引数におけるGammaの漸化式を適用する。',
+               'beta_integral': '正の2パラメータに対するEulerのBeta積分を適用する。',
+               'gamma_scaled_integral': '正の形状・尺度パラメータに対するGamma積分を適用する。',
+               'ring': '元の全条件の下で実数の代数式を整理する。'}
+    return {'mode': 'steps', 'steps': [{'before': deepcopy(data['lhs']), 'after': deepcopy(data['rhs']),
+             'recipe': recipe, 'reason': reasons[recipe], 'conditions': labels(data)}]}
+
+
+def lean_expr(node, names):
+    op = node['op']
+    ev = lambda n: lean_expr(n, names)
+    if op == 'int': return f'({node["value"]} : ℝ)'
+    if op == 'var': return names[node['name']]
+    if op == 'neg': return f'(-{ev(node["arg"])})'
+    if op in {'add', 'sub', 'mul', 'div'}:
+        return '(' + ev(node['args'][0]) + {'add':' + ', 'sub':' - ', 'mul':' * ', 'div':' / '}[op] + ev(node['args'][1]) + ')'
+    if op == 'pow': return f'({ev(node["base"])} ^ {node["exponent"]})'
+    if op == 'rpow': return f'Real.rpow {ev(node["base"])} {ev(node["exponent"])}'
+    if op in {'gamma', 'exp'}: return f'({"Real.Gamma" if op == "gamma" else "Real.exp"} {ev(node["arg"])})'
+    if op == 'integral':
+        bound = f'b{len(names)}'
+        body = lean_expr(node['body'], {**names, node['var']: bound})
+        if node['upper'] == {'op':'infinity'}:
+            return f'(∫ {bound} in Set.Ioi {ev(node["lower"])}, {body})'
+        return f'(∫ {bound} in {ev(node["lower"])}..{ev(node["upper"])}, {body})'
+    raise InputError('This expression has no registered full real Lean translation.')
+
+
+def _condition(atom, names):
+    from .real_bessel import RELATIONS
+    relation = RELATIONS[atom['relation']].replace('!=', '≠').replace('>=', '≥').replace('<=', '≤')
+    if atom['op'] == 'compare':
+        p, q = atom['value']['numerator'], atom['value']['denominator']
+        return f'{names[atom["variable"]]} {relation} ({p} / {q} : ℝ)'
+    return f'{lean_expr(atom["lhs"], names)} {relation} (0 : ℝ)'
+
+
+def _recipe(recipe, lhs, rhs, names):
+    if recipe == 'ring': return ['ring']
+    match = match_identity(lhs, rhs)
+    if not match or match['recipe'] != recipe:
+        raise InputError('This recipe does not match the exact equality endpoints.')
+    args = ' '.join(lean_expr(a, names) for a in match['arguments'])
+    hypotheses = ' '.join('(by linarith)' for _ in match['arguments'])
+    fact = f'SpecialFunctionProofAgent.{recipe} {args} {hypotheses}'
+    if match['reverse']: fact = f'({fact}).symm'
+    return [f'simpa only [neg_mul, Real.rpow_eq_pow] using ({fact})']
+
+
+def render(data):
+    validate_proof(data)
+    names = {name: f'v{i}' for i, name in enumerate(sorted(data['variables']))}
+    if any(kind != 'real' for kind in data['variables'].values()):
+        raise InputError('The initial Gamma/Beta formal recipes use real parameters.')
+    binders = ' '.join(f'({names[n]} : ℝ)' for n in sorted(names))
+    conditions = ' '.join(f'(h{i} : {_condition(a, names)})' for i,a in enumerate(data['assumptions']))
+    proposition = f'{lean_expr(data["lhs"], names)} = {lean_expr(data["rhs"], names)}'
+    lines = ['import SpecialFunctionProofAgent', '', 'open scoped Real', 'open MeasureTheory', '',
+             'namespace BesselAgentCandidate', '', f'theorem target {binders} {conditions} : {proposition} := by']
+    proof = data['proof']
+    if proof['mode'] == 'direct':
+        lines += ['  '+line for line in _recipe(proof['recipe'], data['lhs'], data['rhs'], names)]
+    elif proof['mode'] == 'steps':
+        for i,step in enumerate(proof['steps']):
+            lines += [f'  have step_{i+1} : {lean_expr(step["before"], names)} = {lean_expr(step["after"], names)} := by']
+            lines += ['    '+line for line in _recipe(step['recipe'], step['before'], step['after'], names)]
+        chain = 'step_1'
+        for i in range(1,len(proof['steps'])): chain = f'({chain}).trans step_{i+1}'
+        lines += [f'  exact {chain}']
+    else: raise InputError('Diagnostic mode has no full Lean certificate.')
+    lines += ['', 'end BesselAgentCandidate', '', '#eval IO.println "BESSEL_AUDIT_BEGIN"',
+              '#print axioms BesselAgentCandidate.target', '#eval IO.println "BESSEL_AUDIT_END"', '']
+    return '\n'.join(lines)
+
+
+def verify(data, output_dir, timeout):
+    from .real_bessel import display, labels, domains, _walk
+    from .real_numeric import diagnose
+    numeric = diagnose(data)
+    analysis = match_identity(data['lhs'], data['rhs'])
+    result = {'status':'unresolved', 'reason':'no_accepted_full_certificate',
+              'statement':display(data['lhs'])+' = '+display(data['rhs']), 'conditions':labels(data),
+              'environment':environment(), 'conventions':CONVENTIONS, 'full_function_proof':False,
+              'analysis':analysis, 'numerical':numeric, 'attempts':[],
+              'request_sha256':_sha((output_dir/'request.json').read_bytes())}
+    bounds = domains(data)
+    pending = []
+    if analysis:
+        for arg in analysis['arguments']:
+            lo = bounds[arg['name']][0]
+            if not lo or not (lo[0] > 0 or lo == (0, True)): pending.append(arg['name']+' > 0')
+    # Reject direct special-function singularities even when used in a ring identity.
+    from .real_bessel import _positive, domain_obligations
+    pending += domain_obligations(data, None)
+    for node in _walk([data['lhs'], data['rhs']]):
+        if node.get('op') == 'gamma' and not _positive(node['arg'], bounds):
+            pending.append(display(node['arg'])+' > 0')
+    if pending:
+        result.update(status='needs_conditions', reason='domain_conditions_required', pending_domain_conditions=sorted(set(pending)))
+    elif data['proof']['mode'] != 'diagnostic':
+        try:
+            source = render(data)
+        except InputError as exc:
+            result['reason'] = str(exc)
+        else:
+            path = output_dir/'proof_attempt.lean'
+            path.write_text(source, encoding='utf-8')
+            checked = _run_lean(path, timeout)
+            result['attempts'].append(checked)
+            if checked['accepted']:
+                (output_dir/'certificate.lean').write_text(source, encoding='utf-8')
+                result.update(status='proved', reason='full_lean_certificate', full_function_proof=True,
+                              certificate_kind='proof', certificate_sha256=_sha(source.encode()))
+    _save_json(output_dir/'analysis.json', analysis or {'status':'no_matching_template'})
+    _save_json(output_dir/'numerical.json', numeric)
+    _save_json(output_dir/'result.json', result)
+    lines = ['# Special Function Proof Agent', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
+             '完全Lean証明：'+result['status'], '数値診断：'+numeric['diagnostic']]
+    if data['proof']['mode'] == 'steps':
+        lines += ['', '構造化ステップ（各等式を元の全条件で検査）：']
+        for i,step in enumerate(data['proof']['steps'],1):
+            lines += [f'{i}. {display(step["before"])} = {display(step["after"])}', '   '+step['reason']]
+    (output_dir/'report.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+    return result
+
+
+def replay(data, result, output_dir, timeout):
+    if result.get('status') != 'proved' or result.get('full_function_proof') is not True:
+        raise InputError('This run has no full special-function certificate.')
+    if result.get('certificate_kind') != 'proof':
+        raise InputError('Certificate kind and full proof status disagree.')
+    source = render(data)
+    certificate = output_dir/'certificate.lean'
+    if result.get('environment') != environment() or result.get('conventions') != CONVENTIONS:
+        raise InputError('The mathematical environment or conventions changed.')
+    if certificate.read_text(encoding='utf-8') != source or result.get('certificate_sha256') != _sha(source.encode()):
+        raise InputError('Saved certificate differs from the fixed target and recipe.')
+    if result.get('request_sha256') != _sha((output_dir/'request.json').read_bytes()):
+        raise InputError('The saved request changed.')
+    checked = _run_lean(certificate, timeout)
+    return {'status':'proved' if checked['accepted'] else 'unresolved', 'replayed':checked['accepted'], 'verification':checked}

@@ -1,0 +1,129 @@
+{
+  "status": "unresolved",
+  "diagnostic": "no_mismatch_found",
+  "backend": "mpmath",
+  "full_bessel_proof": false,
+  "full_function_proof": false,
+  "precision_digits": 60,
+  "checked_samples": 9,
+  "samples": [
+    {
+      "values": {
+        "a": "0.5",
+        "r": "0.5"
+      },
+      "lhs": "2.50662827463100050241576528481103370082296709141",
+      "rhs": "2.50662827463100050241576528481104525300698674061",
+      "absolute_difference": "1.15521840196492004475819274779404068747036238572e-32",
+      "comparison_tolerance": "2.50662827463100050241576528481104525300698674061e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "r": "1.0"
+      },
+      "lhs": "1.77245385090551602729816748334113363061352980692",
+      "rhs": "1.77245385090551602729816748334114518279754945612",
+      "absolute_difference": "1.15521840196492004475819274779404068747036238572e-32",
+      "comparison_tolerance": "1.77245385090551602729816748334114518279754945612e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "r": "2.0"
+      },
+      "lhs": "1.2533141373155002512078826424055110743194737211",
+      "rhs": "1.2533141373155002512078826424055226265034933703",
+      "absolute_difference": "1.15521840196492004475819274779404068747036238572e-32",
+      "comparison_tolerance": "1.2533141373155002512078826424055226265034933703e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "r": "0.5"
+      },
+      "lhs": "2.0",
+      "rhs": "2.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "r": "1.0"
+      },
+      "lhs": "1.0",
+      "rhs": "1.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "r": "2.0"
+      },
+      "lhs": "0.5",
+      "rhs": "0.5",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "r": "0.5"
+      },
+      "lhs": "4.0",
+      "rhs": "4.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "4.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "r": "1.0"
+      },
+      "lhs": "1.0",
+      "rhs": "1.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "r": "2.0"
+      },
+      "lhs": "0.25",
+      "rhs": "0.25",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    }
+  ],
+  "candidates": [],
+  "skipped_reasons": [],
+  "excluded_by_conditions": 0,
+  "root_search": {
+    "method": "bounded_sign_changes_then_secant",
+    "interval_cap": 60,
+    "grid_step": "0.5",
+    "roots_per_parameter_sample": 3,
+    "exhaustive": false,
+    "variable": null
+  },
+  "max_samples": 27,
+  "rigorous_interval_enclosures": false,
+  "max_root_grid_points": 720,
+  "time_limit_seconds": 30,
+  "comparison_relative_tolerance": "1e-30",
+  "root_residual_tolerance": "1e-35",
+  "explanation": "明示条件内の有限標本を計算します。根は符号変化から精密化し、根条件と全追加条件を再確認します。数値一致と差の候補を保存し、元命題の形式的な証明状態はLean検査の欄で確認します。",
+  "backend_version": "1.3.0"
+}

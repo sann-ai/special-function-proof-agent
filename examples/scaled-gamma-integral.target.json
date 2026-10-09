@@ -1,0 +1,108 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "r": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "a",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    },
+    {
+      "op": "compare",
+      "variable": "r",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": 0
+    },
+    "upper": {
+      "op": "infinity"
+    },
+    "body": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "rpow",
+          "base": {
+            "op": "var",
+            "name": "t"
+          },
+          "exponent": {
+            "op": "sub",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "op": "exp",
+          "arg": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "neg",
+                "arg": {
+                  "op": "var",
+                  "name": "r"
+                }
+              },
+              {
+                "op": "var",
+                "name": "t"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "rpow",
+        "base": {
+          "op": "var",
+          "name": "r"
+        },
+        "exponent": {
+          "op": "neg",
+          "arg": {
+            "op": "var",
+            "name": "a"
+          }
+        }
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "var",
+          "name": "a"
+        }
+      }
+    ]
+  }
+}

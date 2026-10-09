@@ -1,0 +1,10 @@
+Return one JSON proof plan matching the response schema. Do not use tools or edit files.
+The exact schema_version 2 target fixes every variable type, binding, assumption and equality.
+Use Real.Gamma, Real.rpow, Real.exp, real interval integrals and integrals on Set.Ioi.
+Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
+integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
+Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.
+For steps, use original endpoints with a concise Japanese reason and exact supplied conditions.
+Requested route: direct
+Fixed target JSON:
+{"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "x"}], "lhs": {"arg": {"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, "op": "gamma"}, "rhs": {"args": [{"name": "x", "op": "var"}, {"arg": {"name": "x", "op": "var"}, "op": "gamma"}], "op": "mul"}, "schema_version": 2, "variables": {"x": "real"}}

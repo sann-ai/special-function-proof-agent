@@ -1,0 +1,94 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "gamma",
+    "arg": {
+      "op": "add",
+      "args": [
+        {
+          "op": "var",
+          "name": "x"
+        },
+        {
+          "op": "int",
+          "value": 1
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "x"
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "gamma",
+          "arg": {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "x"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "x"
+            },
+            {
+              "op": "gamma",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        "recipe": "gamma_recurrence",
+        "reason": "正の引数におけるGammaの漸化式を適用する。",
+        "conditions": [
+          "x is real",
+          "x > 0"
+        ]
+      }
+    ]
+  }
+}

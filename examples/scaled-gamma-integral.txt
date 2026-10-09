@@ -1,0 +1,1 @@
+int(0,infinity,t^(a-1)*exp(-r*t),t)=r^(-a)*Gamma(a); a>0,r>0

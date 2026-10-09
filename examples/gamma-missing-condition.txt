@@ -1,0 +1,1 @@
+Gamma(a+1)=a*Gamma(a); a real

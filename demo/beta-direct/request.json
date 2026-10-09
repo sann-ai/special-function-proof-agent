@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "a",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    },
+    {
+      "op": "compare",
+      "variable": "b",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": 0
+    },
+    "upper": {
+      "op": "int",
+      "value": 1
+    },
+    "body": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "rpow",
+          "base": {
+            "op": "var",
+            "name": "t"
+          },
+          "exponent": {
+            "op": "sub",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "op": "rpow",
+          "base": {
+            "op": "sub",
+            "args": [
+              {
+                "op": "int",
+                "value": 1
+              },
+              {
+                "op": "var",
+                "name": "t"
+              }
+            ]
+          },
+          "exponent": {
+            "op": "sub",
+            "args": [
+              {
+                "op": "var",
+                "name": "b"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "gamma",
+            "arg": {
+              "op": "var",
+              "name": "a"
+            }
+          },
+          {
+            "op": "gamma",
+            "arg": {
+              "op": "var",
+              "name": "b"
+            }
+          }
+        ]
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "var",
+              "name": "b"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "beta_integral"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "recipe": "gamma_recurrence",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

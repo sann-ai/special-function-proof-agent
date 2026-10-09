@@ -1,0 +1,10 @@
+Return one JSON proof plan matching the response schema. Do not use tools or edit files.
+The exact schema_version 2 target fixes every variable type, binding, assumption and equality.
+Use Real.Gamma, Real.rpow, Real.exp, real interval integrals and integrals on Set.Ioi.
+Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
+integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
+Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.
+For steps, use original endpoints with a concise Japanese reason and exact supplied conditions.
+Requested route: steps
+Fixed target JSON:
+{"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "a"}, {"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "b"}], "lhs": {"body": {"args": [{"base": {"name": "t", "op": "var"}, "exponent": {"args": [{"name": "a", "op": "var"}, {"op": "int", "value": 1}], "op": "sub"}, "op": "rpow"}, {"base": {"args": [{"op": "int", "value": 1}, {"name": "t", "op": "var"}], "op": "sub"}, "exponent": {"args": [{"name": "b", "op": "var"}, {"op": "int", "value": 1}], "op": "sub"}, "op": "rpow"}], "op": "mul"}, "lower": {"op": "int", "value": 0}, "op": "integral", "upper": {"op": "int", "value": 1}, "var": "t"}, "rhs": {"args": [{"args": [{"arg": {"name": "a", "op": "var"}, "op": "gamma"}, {"arg": {"name": "b", "op": "var"}, "op": "gamma"}], "op": "mul"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "b", "op": "var"}], "op": "add"}, "op": "gamma"}], "op": "div"}, "schema_version": 2, "variables": {"a": "real", "b": "real"}}

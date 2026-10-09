@@ -1,0 +1,14 @@
+{
+  "recipe": "gamma_scaled_integral",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "a"
+    },
+    {
+      "op": "var",
+      "name": "r"
+    }
+  ],
+  "reverse": false
+}
