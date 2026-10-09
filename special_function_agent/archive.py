@@ -125,7 +125,7 @@ def _details(record: dict, result: dict) -> str:
     return "\n".join(lines)
 
 
-def _load_record(entry: Path, expected_id: str | None = None) -> dict:
+def _load_record(entry: Path, expected_id: str | None = None, *, legacy_bessel: bool = False) -> dict:
     record_id = expected_id or entry.name
     if entry.is_symlink() or not entry.is_dir() or not RECORD_ID.fullmatch(record_id):
         raise InputError("Invalid archive entry path.")
@@ -164,6 +164,12 @@ def _load_record(entry: Path, expected_id: str | None = None) -> dict:
         raise InputError("Archive request and verification target disagree.")
     canonical = _target_or_none(request)
     key = _digest(_json_bytes(canonical)) if canonical is not None else None
+    if legacy_bessel and canonical is not None and canonical.get('schema_version') == 2:
+        # Upstream v2 predates the independent function-conventions identity field.
+        legacy = {name: value for name, value in canonical.items() if name != 'conventions'}
+        legacy_key = _digest(_json_bytes(legacy))
+        if record.get('target_sha256') == legacy_key:
+            key = legacy_key
     if record.get("target_sha256") != key:
         raise InputError("Archive target hash and request disagree.")
     if record.get("environment_sha256") != _digest(_json_bytes(record.get("environment"))):
@@ -338,7 +344,7 @@ def import_bessel(directory: Path, archive_root: Path | str | None = None, *, ti
     from .real_special import has_special
     directory = Path(directory)
     if (directory / 'verification').is_dir():
-        _load_record(directory)  # An archive entry must pass its full manifest first.
+        _load_record(directory, legacy_bessel=True)  # Validate the source manifest and upstream identity.
         directory = directory / 'verification'
     request = load_json(directory / 'request.json')
     previous = load_json(directory / 'result.json')

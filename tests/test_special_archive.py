@@ -149,6 +149,39 @@ class SpecialArchiveTests(unittest.TestCase):
             self.assertEqual(record['request'], load_json(source/'request.json'))
         self.assertEqual(before, snapshot(source))
 
+    def test_legacy_bessel_v2_archive_identity_is_imported_explicitly(self):
+        # Recreate the original archive's v2 identity, before this project's conventions field.
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            old = archive.register_verification(ROOT/'demo/cross-product', base/'old')
+            entry = Path(old['record_dir'])
+            legacy = archive.canonical_target(old['request'])
+            legacy.pop('conventions')
+            metadata = load_json(entry/'record.json')
+            metadata['target_sha256'] = archive._digest(archive._json_bytes(legacy))
+            (entry/'record.json').write_text(json.dumps(metadata))
+            manifest = load_json(entry/'manifest.json')
+            manifest['files']['record.json'] = archive._digest((entry/'record.json').read_bytes())
+            (entry/'manifest.json').write_text(json.dumps(manifest))
+            before = snapshot(entry)
+            # The normal independent archive reader keeps its stronger identity contract.
+            with self.assertRaises(InputError):
+                archive.show_record(old['id'], base/'old')
+            with patch('special_function_agent.real_bessel._run_lean', return_value=ACCEPTED), \
+                 patch('special_function_agent.real_numeric.importlib.import_module', side_effect=ImportError):
+                imported = archive.import_bessel(entry, base/'new')
+                self.assertEqual(imported['status'], 'unresolved')
+                self.assertFalse(imported['result']['full_bessel_proof'])
+                self.assertTrue(imported['result']['conditional_lean']['accepted'])
+                self.assertEqual(imported['provenance']['source_environment'], metadata['environment'])
+            self.assertEqual(before, snapshot(entry))
+            with (entry/'verification'/'request.json').open('a') as stream:
+                stream.write('\n')
+            with patch('special_function_agent.real_bessel._run_lean') as lean:
+                with self.assertRaisesRegex(InputError, 'changed'):
+                    archive.import_bessel(entry, base/'rejected')
+                lean.assert_not_called()
+
     def test_import_rejects_changed_request_certificate_and_hashes_before_lean(self):
         for tamper in ('request', 'certificate', 'certificate_hash'):
             with self.subTest(tamper=tamper), tempfile.TemporaryDirectory() as folder:
