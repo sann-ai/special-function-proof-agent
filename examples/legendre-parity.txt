@@ -1,0 +1,1 @@
+P_n(-x)=(-1)^n*P_n(x); n natural,x real

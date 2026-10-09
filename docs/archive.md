@@ -10,7 +10,7 @@ python3 -m special_function_agent archive import-bessel /path/to/bessel/verifica
 
 v2の同一性には自由変数名・型・積分の束縛名、全仮定、両辺、関数規約の版を含みます。仮定の順序だけは正規化し、式の変形や変数名の付け替えは別の命題として保存します。環境はLean/toolchain/lockfile/全数学モジュール/関数登録表のハッシュで確認します。
 
-完全Leanの proved/refuted 記録は登録前と再利用前に再検査します。Yの条件付き記録のreplayは `conditional_replayed` と `full_bessel_proof:false` を返し、元命題の未解決状態を保持します。数値診断は独立の `numerical.json` に保存します。
+完全Leanの proved/refuted 記録は登録前と再利用前に再検査します。固定半整数 `YNoninteger` の完全証明は `full_bessel_proof:true`、従来Y・交差積の条件付き記録のreplayは `conditional_replayed` と `full_bessel_proof:false` を返します。後者の元命題は未解決状態を保持します。数値診断は独立の `numerical.json` に保存します。
 
 ## 記録操作の詳細
 
@@ -87,7 +87,7 @@ python3 -m special_function_agent.generate demo/target.json --route direct \
 条件を変更した命題や、数学的変形で同値になる別の式は、それぞれの入力として扱います。
 同一命題の再試行には毎回新しい記録IDを付けます。
 
-Y・交差積のschema version 2でも、変数、スカラー条件、関数値の根・非零条件を
+従来Y・交差積のschema version 2でも、変数、スカラー条件、関数値の根・非零条件を
 命題IDに含めます。診断結果、自然言語解析、条件付きLean証明、数値結果を保存し、
 元命題は `unresolved`、定義域条件の確認が必要な入力は `needs_conditions` として記録します。条件付き証明の再検査結果も、元命題の
 完全なLean証明の再検査と区別して返します。条件付きLeanの再検査が通った場合は
@@ -114,7 +114,7 @@ JSON索引とMarkdown目録は記録本体から再構成します。索引の�
 
 ## 数学環境を更新したとき
 
-Hermite/erfを追加した版では数学モジュールのハッシュが変わります。以前のGamma/Beta記録を `archive replay` すると環境差を検出します。命題の同一性は維持し、元記録を残して同じ証明計画を新環境で検査します。
+数学モジュールや関数登録表の更新で、保存証拠の環境ハッシュが変わります。Legendre/Laguerre/Jacobiと非整数Yを追加した版でも、以前のGamma/Beta/Hermite/erf記録を `archive replay` すると環境差を検出します。既存関数の命題IDに用いる規約の版は維持し、元記録を残して同じ証明計画を新環境で検査します。
 
 ```sh
 python3 -m special_function_agent archive show RECORD_ID
@@ -123,4 +123,6 @@ python3 -m special_function_agent verify /path/to/verification/request.json --ou
 python3 -m special_function_agent archive replay NEW_RECORD_ID
 ```
 
-その後、同じtargetと同じrouteで生成器を実行すると、新環境の証拠を再検査して再利用できます。対象の型・全条件・関数規約は毎回一致を確認します。Hermiteの自然数次数とBesselの整数次数、物理学規約Hと確率論規約Heは、それぞれ独立した命題として保存します。
+その後、同じtargetと同じrouteで生成器を実行すると、新環境の証拠を再検査して再利用できます。結果の `reuse.ai_called: false` と元記録IDで再利用を確認します。公開済みGamma/BetaとHermite/erfの保存証拠を一時archiveへ複製し、環境差の検出、同じrequestの明示再検証、新証拠のreplay、AIを呼ばない再利用、旧記録のバイト列保持を確認しています。
+
+対象の型・全条件・関数規約は毎回一致を確認します。多項式の自然数次数とBesselの整数次数、物理学規約Hと確率論規約He、一般化Laguerre/Jacobiのパラメータ、明示した `YNoninteger` と従来Yは、それぞれのASTと規約を保存します。新しい多項式族と非整数Yは規約version 3、Hermite/erfはversion 2、従来Gamma/Betaはversion 1を使います。

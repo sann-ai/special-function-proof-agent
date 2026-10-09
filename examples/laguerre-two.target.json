@@ -1,0 +1,112 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "laguerre",
+    "order": {
+      "op": "int",
+      "value": 2
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "pow",
+                "base": {
+                  "op": "var",
+                  "name": "x"
+                },
+                "exponent": 2
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 2
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          {
+                            "op": "int",
+                            "value": 2
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "int",
+                    "value": 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 2
+      }
+    ]
+  }
+}

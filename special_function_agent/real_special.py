@@ -6,10 +6,10 @@ from fractions import Fraction
 
 from .core import InputError, NeedsConditions, _keys, _run_lean, _save_json, _sha, environment
 from .registry import conventions
-from . import classical
+from . import classical, orthogonal, bessel_y_formal
 
-RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES
-SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'erf', 'pi', 'sqrt', 'deriv'}
+RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES + orthogonal.RECIPES + bessel_y_formal.RECIPES
+SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger', 'erf', 'pi', 'sqrt', 'deriv'}
 
 
 def has_special(data):
@@ -99,7 +99,7 @@ def match_identity(lhs, rhs):
                 else: continue
                 if r.get('op') == 'var' and right == _bin('mul', _rpow(r, _neg(a)), _gamma(a)):
                     return {'recipe': 'gamma_scaled_integral', 'arguments': [a, r], 'reverse': reverse}
-    return classical.match(lhs, rhs)
+    return classical.match(lhs, rhs) or orthogonal.match(lhs, rhs) or bessel_y_formal.match(lhs, rhs)
 
 
 def default_proof(data, route='direct'):
@@ -113,6 +113,8 @@ def default_proof(data, route='direct'):
                'gamma_scaled_integral': '正の形状・尺度パラメータに対するGamma積分を適用する。',
                'ring': '元の全条件の下で実数の代数式を整理する。'}
     reasons.update(classical.REASONS)
+    reasons.update(orthogonal.REASONS)
+    reasons.update(bessel_y_formal.REASONS)
     return {'mode': 'steps', 'steps': [{'before': deepcopy(data['lhs']), 'after': deepcopy(data['rhs']),
              'recipe': recipe, 'reason': reasons[recipe], 'conditions': labels(data)}]}
 
@@ -125,12 +127,20 @@ def lean_expr(node, names, types=None):
     if op == 'var':
         value = names[node['name']]
         return f'({value} : ℝ)' if types.get(node['name']) == 'nat' else value
+    if op == 'rational': return f'({node["numerator"]} / {node["denominator"]} : ℝ)'
     if op == 'pi': return 'Real.pi'
     if op == 'sqrt': return f'(Real.sqrt {ev(node["arg"])})'
     if op == 'erf': return f'(SpecialFunctionProofAgent.erf {ev(node["arg"])})'
     if op in {'hermite_h', 'hermite_he'}:
         fn = 'hermiteH' if op == 'hermite_h' else 'hermiteHe'
         return f'(SpecialFunctionProofAgent.{fn} {classical.lean_natural(node["order"], names)} {ev(node["arg"])})'
+    if op in {'legendre', 'laguerre', 'jacobi'}:
+        fn = {'legendre': 'legendreP', 'laguerre': 'laguerreL', 'jacobi': 'jacobiP'}[op]
+        parameters = ([node['alpha']] if op in {'laguerre', 'jacobi'} else []) + ([node['beta']] if op == 'jacobi' else [])
+        args = ' '.join([classical.lean_natural(node['order'], names), *map(ev, parameters), ev(node['arg'])])
+        return f'(SpecialFunctionProofAgent.{fn} {args})'
+    if op == 'bessel_y_noninteger':
+        return f'(SpecialFunctionProofAgent.besselYNoninteger {ev(node["order"])} {ev(node["arg"])})'
     if op == 'deriv':
         index = len(names)
         while f'd{index}' in names.values():
@@ -170,6 +180,10 @@ def _recipe(recipe, lhs, rhs, names, types=None):
     match = match_identity(lhs, rhs)
     if not match or match['recipe'] != recipe:
         raise InputError('This recipe does not match the exact equality endpoints.')
+    if recipe in bessel_y_formal.RECIPES:
+        return bessel_y_formal.proof_lines(match, names, lambda a: lean_expr(a, names, types))
+    if recipe in orthogonal.RECIPES:
+        return orthogonal.proof_lines(match, names, lambda a: lean_expr(a, names, types))
     if recipe in classical.RECIPES:
         return classical.proof_lines(match, names, lambda a: lean_expr(a, names, types))
     args = ' '.join(lean_expr(a, names, types) for a in match['arguments'])
@@ -229,9 +243,12 @@ def verify(data, output_dir, timeout):
               'environment':environment(), 'conventions':conventions(data), 'full_function_proof':False,
               'analysis':analysis, 'numerical':numeric, 'attempts':[],
               'request_sha256':_sha((output_dir/'request.json').read_bytes())}
+    if bessel_y_formal.contains(data):
+        result['full_bessel_proof'] = False
+        result['formal_scope'] = bessel_y_formal.FORMAL_SCOPE
     bounds = domains(data)
     pending = []
-    if analysis and analysis['recipe'] not in classical.RECIPES:
+    if analysis and analysis['recipe'] in {'gamma_recurrence', 'beta_integral', 'gamma_scaled_integral'}:
         for arg in analysis['arguments']:
             lo = bounds[arg['name']][0]
             if not lo or not (lo[0] > 0 or lo == (0, True)): pending.append(arg['name']+' > 0')
@@ -257,6 +274,8 @@ def verify(data, output_dir, timeout):
                 (output_dir/'certificate.lean').write_text(source, encoding='utf-8')
                 result.update(status='proved', reason='full_lean_certificate', full_function_proof=True,
                               certificate_kind='proof', certificate_sha256=_sha(source.encode()))
+    if bessel_y_formal.contains(data):
+        result['full_bessel_proof'] = result['full_function_proof']
     _save_json(output_dir/'analysis.json', analysis or {'status':'no_matching_template'})
     _save_json(output_dir/'numerical.json', numeric)
     _save_json(output_dir/'result.json', result)
@@ -278,6 +297,9 @@ def replay(data, result, output_dir, timeout):
         raise InputError('This run has no full special-function certificate.')
     if result.get('certificate_kind') != 'proof':
         raise InputError('Certificate kind and full proof status disagree.')
+    if bessel_y_formal.contains(data) and (result.get('full_bessel_proof') is not True or
+                                        result.get('formal_scope') != bessel_y_formal.FORMAL_SCOPE):
+        raise InputError('The noninteger Bessel proof status disagrees with the full certificate.')
     source = render(data)
     certificate = output_dir/'certificate.lean'
     if result.get('environment') != environment() or result.get('conventions') != conventions(data):
@@ -287,4 +309,4 @@ def replay(data, result, output_dir, timeout):
     if result.get('request_sha256') != _sha((output_dir/'request.json').read_bytes()):
         raise InputError('The saved request changed.')
     checked = _run_lean(certificate, timeout)
-    return {'status':'proved' if checked['accepted'] else 'unresolved', 'replayed':checked['accepted'], 'verification':checked}
+    return {'status':'proved' if checked['accepted'] else 'unresolved', 'replayed':checked['accepted'], 'verification':checked, **({'full_bessel_proof': checked['accepted']} if bessel_y_formal.contains(data) else {})}

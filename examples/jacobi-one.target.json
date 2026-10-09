@@ -1,0 +1,86 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "jacobi",
+    "order": {
+      "op": "int",
+      "value": 1
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    },
+    "beta": {
+      "op": "var",
+      "name": "b"
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "var",
+                "name": "b"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "var",
+                        "name": "b"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "int",
+                    "value": 2
+                  }
+                ]
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 2
+      }
+    ]
+  }
+}

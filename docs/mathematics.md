@@ -1,12 +1,14 @@
 # 共通v2の数理仕様
 
-v2は実数型の自由変数（最大3個）、次数変数nの型、構造化した全仮定、左辺・右辺を保存します。Besselのnは整数、Hermiteのnは自然数として宣言します。識別子は安全ASCII名、積分は `var` フィールドで束縛し、自由変数との同名衝突を拒否します。微分は実変数名を明示して保存します。固定したmathlibの意味とプロジェクトの追加定義を、関数別登録表と環境ハッシュに含めます。
+v2は実数型の自由変数（最大3個）、次数変数nの型、構造化した全仮定、左辺・右辺を保存します。Besselのnは整数、Hermite・Legendre・Laguerre・Jacobiのnは自然数として宣言します。識別子は安全ASCII名、積分は `var` フィールドで束縛し、自由変数との同名衝突を拒否します。微分は実変数名を明示して保存し、他の自由実変数を固定します。Leanへの変換は入れ子の微分と積分に別々の束縛名を割り当てます。固定したmathlibの意味とプロジェクトの追加定義を、関数別登録表と環境ハッシュに含めます。
 
 - `gamma {arg}`：`Real.Gamma`。
 - `exp {arg}`：`Real.exp`。
 - `rpow {base, exponent}`：`Real.rpow`。指数も実数ASTです。
 - `pi`、`sqrt {arg}`：`Real.pi`、`Real.sqrt`。
 - `hermite_h {order, arg}`、`hermite_he {order, arg}`：物理学規約H、確率論規約He。次数は自然数です。
+- `legendre {order, arg}`、`laguerre {order, alpha, arg}`、`jacobi {order, alpha, beta, arg}`：標準多項式。次数は自然数、引数とパラメータは実数です。
+- `bessel_y_noninteger {order, arg}`：正実軸の標準非整数Y。CLIの次数は−1/2、1/2、3/2の `rational {numerator, denominator}` に対応します。
 - `erf {arg}`：後述する標準の実誤差関数。
 - `deriv {var, arg}`：指定した自由実変数の実微分を、その変数の現在値で評価します。
 - `integral {var, lower, upper, body}`：有限上端は向き付き実区間積分。`upper: {"op":"infinity"}` は `Set.Ioi lower` 上のルベーグ積分。`infinity`は積分上端だけで許可します。
@@ -94,15 +96,38 @@ CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です
 
 代表入力は `D_x(erf(x))=2/sqrt(pi)*exp(-x^2); x real` と `int(a,b,exp(-t^2),t)=sqrt(pi)/2*(erf(b)-erf(a)); a real,b real` です。これらの例は、実数型の宣言のみを条件として全域を検査します。
 
+## Legendre・Laguerre・Jacobi
+
+自然数次数nと実数の引数xを使います。一般化Laguerreのα、Jacobiのα,βは有限多項式の定義で全実数を扱い、通常のLaguerreはα=0です。微分公式はn≥1の条件で次数を1下げ、Laguerreはα、Jacobiはα,βをそれぞれ1増やします。微分変数以外のパラメータを固定して適用します。定義・正規化・正確な補題と直交性へ進む際の条件は[専用仕様](orthogonal-polynomials.md)に記載しています。
+
+両経路で検証する公開入力は、次の `.txt` と同名の `.target.json` です。
+
+- Legendre：`legendre-parity`、`legendre-zero`、`legendre-one`、`legendre-two`、`legendre-right`、`legendre-left`。全自然数での偶奇性・両端値と0〜2次の値です。
+- Laguerre：`laguerre-zero`、`laguerre-one`、`laguerre-two`、`ordinary-laguerre-one`、`ordinary-laguerre-two`、`laguerre-derivative`。全実パラメータの低次数値、通常規約の値とn≥1の微分です。
+- Jacobi：`jacobi-zero`、`jacobi-one`、`jacobi-two`、`jacobi-derivative`、`jacobi-legendre`。全実パラメータの低次数値、n≥1の微分、全自然数でのα=β=0からLegendreへの特殊化です。
+
+## 正実軸の非整数Bessel Y
+
+`SpecialFunctionProofAgent/BesselY.lean` は既存の `Complex.besselJ` を正実軸で実数値へ接続し、標準のJによる接続式から `besselYNoninteger` を定義します。x>0、sin(πa)≠0の条件で、次数反転・漸化式・微分・Bessel微分方程式を証明します。[標準定義、条件付き整数極限、残る接続](bessel-y-formalization.md)を参照してください。
+
+CLIは `YNoninteger(order,x)` の明示名を使い、固定次数−1/2・1/2・3/2とx>0で次の2式をdirect/stepsの両経路へ接続します。
+
+```text
+YNoninteger(-1/2,x)+YNoninteger(3/2,x)=YNoninteger(1/2,x)/x; x>0
+D_x(YNoninteger(1/2,x))=(YNoninteger(-1/2,x)-YNoninteger(3/2,x))/2; x>0
+```
+
+公開例は `examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` です。半整数での正弦の非零性はLeanで証明し、入力からはx>0を確認します。元の全命題と公理監査が通れば `proved`、`full_function_proof: true`、`full_bessel_proof: true` を保存します。
+
 ## 証明の接続・監査と現在の範囲
 
-`classical.py` はH/Heの規約、微分変数、次数、積分端点、係数を含む等式構造を照合し、対応する公開Lean補題を選びます。`real_special.py` は元の全変数・全仮定・左右辺から対象定理を生成します。directとstepsは同じ固定対象を検査し、stepsでは各等式の端点連結も確認します。
+`classical.py`、`orthogonal.py`、`bessel_y_formal.py` は関数規約、微分変数、次数、パラメータ、積分端点、係数を含む等式構造を照合し、対応する公開Lean補題を選びます。`real_special.py` は元の全変数・全仮定・左右辺から対象定理を生成します。directとstepsは同じ固定対象を検査し、stepsでは各等式の端点連結も確認します。
 
-Hermite・erfの公開定義と17公開定理は固定Lean/mathlibでコンパイルし、`#print axioms` を実行しました。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。生成証明もこの許可集合で監査し、元入力・証明ソース・規約・環境の同一性を再検証時に確認します。数学的対象の登録表には、H/Heの区別、自然数次数、erfの正規化、微分変数と積分方向を含めます。
+追加関数の公開定義と定理は固定Lean/mathlibでコンパイルし、`#print axioms` を実行しました。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。生成証明もこの許可集合で監査し、元入力・証明ソース・規約・環境の同一性を再検証時に確認します。数学的対象の登録表には、H/Heの区別、自然数次数、多項式のパラメータ規約、erfの正規化、非整数Yの定義と次数範囲、微分変数と積分方向を含めます。
 
 v2の完全証明経路は上記の登録公式と実数環の整理を対象とします。Hermiteは自然数次数・実引数、erfは実引数の微分・初期値・奇関数性・Gaussian有限区間積分を扱います。複素erf、erfc、誤差関数の近似式・近似誤差の評価、Gaussianの一般変形や無限区間公式は追加の定義・補題・レシピを要する範囲です。数値診断は既存mpmathによる有限標本、条件の残差、差の候補、計算できなかった理由を記録します。Hermiteの数値計算は次数0〜40・引数の絶対値60以下を対象とし、範囲外では理由を保存します。近似誤差の厳密な区間評価は今後の対象です。
 
-Bessel Yと交差積Xは正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、元の全命題の状態は `unresolved`、`full_bessel_proof: false` です。Yの定義から微分・積分公式、正エネルギー積分、分母非零性までつなぐ形式証明を、後続の検査義務として保持します。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
+従来の `Y_n`・`Y(order,x)` と交差積Xは正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、元の全命題の状態は `unresolved`、`full_bessel_proof: false` です。整数Yの標準次数微分による定義と、±整数次数でのJの微分可能性を前提とする極限補題を公開しています。残る義務はこの次数微分可能性、次数と引数の微分交換、正規化したWronskian、正エネルギー積分と分母非零性の証明です。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
 
 ## 引き継いだBessel v1の基盤
 
@@ -267,9 +292,9 @@ CLIは `t^(1/4)*J_{-3/4}(t)`、下端0、上端xの組を構造で認識し、
 
 ## 第2種Yと交差積の診断経路
 
-schema version 2では複数の実変数、J・Y、および
+従来の診断用schema version 2では複数の実変数、J・Y、および
 `X_nm(s,t) = J_n(s)*Y_m(t) - Y_n(s)*J_m(t)` を入力し、関数値の根・非零条件を保持する。
-固定したmathlibでBessel Yの定義と解析的補題を形式証明へ接続する工程が残っており、
+整数Yの次数微分による定義から、標準の引数微分・Wronskian・積分公式を接続する工程が残っており、
 元命題の判定は `unresolved`、定義域条件の追加確認が必要な場合は `needs_conditions` とする。
 証拠は自然言語解析、条件付きLean証明、数値診断に分けて記録する。
 

@@ -2,7 +2,7 @@
 
 プロジェクト全体のルールは [AGENTS.md](../AGENTS.md) にあります。入力をparseし、全仮定・型・束縛を確認してから検証します。ユーザーが指定した全条件を保存し、証明候補で追加しません。
 
-ローカルで登録済みGamma/Beta/Hermite/erfレシピを使う場合：
+ローカルで登録済みのGamma/Beta/Hermite/erf、Legendre/Laguerre/Jacobi、固定半整数Yレシピを使えます。例えばBeta積分は次のように検査します。
 
 ```sh
 python3 -m special_function_agent verify examples/beta-integral.txt --route direct --output runs/beta-direct
@@ -28,6 +28,22 @@ python3 -m special_function_agent.generate examples/erf-derivative.target.json -
 
 依頼例：「物理学規約のHermite微分公式を `n natural,n>0,x real` の全条件で検証してください。次に誤差関数の微分と、任意実端点のGaussian積分をステップ経路で検証してください。各段階で定義・規約・条件を保持し、証拠を保存してreplayしてください。」
 
+## 多項式と固定半整数Y
+
+Legendre/Laguerre/Jacobiは自然数次数を使い、引数とパラメータを実数として宣言します。微分では他のパラメータを固定し、次数 `n-1` の下限条件を元入力から確認します。Laguerreの通常規約はα=0です。[定義・対応公式](orthogonal-polynomials.md)を参照してください。
+
+```sh
+python3 -m special_function_agent verify examples/jacobi-derivative.txt --route direct --output runs/jacobi-direct
+python3 -m special_function_agent verify examples/yhalf-derivative.txt --route steps --output runs/yhalf-steps
+python3 -m special_function_agent replay runs/yhalf-steps
+```
+
+依頼例：「`examples/jacobi-derivative.txt` を、自然数n≥1、実数a,b,xの条件で検証してください。a,bを固定したx微分として、元式・全条件・規約を確認し、両経路の証明を保存してreplayしてください。」
+
+依頼例：「`examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` を直接・ステップ両経路で検証してください。明示名 `YNoninteger` の固定次数−1/2・1/2・3/2と正の実引数を保持し、Leanの完全証明と保存証明のreplayを確認してください。」
+
+`YNoninteger` は標準のJ接続式から定義した非整数Yへ接続します。整数Yは次数微分の定義と、次数方向の微分可能性を明示前提に持つ極限補題まで実装しています。[Yの形式化範囲](bessel-y-formalization.md)に各条件と残る義務を記載しています。
+
 ## 引き継いだBesselの操作例
 
 # Codexから使う手順
@@ -47,12 +63,13 @@ python3 -m special_function_agent.generate examples/erf-derivative.target.json -
 5. 証拠と日本語レポートの保存場所、アーカイブ記録IDを示す。保存証拠の再検査が必要な場合は
    `archive replay RECORD_ID` を使う。
 
-Bessel Y・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
+従来の `Y_n`・`Y(order,x)`・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
 `python3 -m special_function_agent verify INPUT --output DIR --archive` で診断する。
 生成器へ渡した場合も診断へ進み、元の式と全条件を保持する。
 今回の交差積の例には `examples/cross-product-root.txt` を使う。
 報告では、元命題の `unresolved`、条件付き代数証明のLean検査、自然言語の解析、
-数値診断の結果をそれぞれ示す。残るBessel Yの定義・標準公式・積分正値性の形式化と、
+数値診断の結果をそれぞれ示す。残る整数次数でのJの次数微分可能性、次数と引数の微分交換、
+Wronskianの正規化、正エネルギー積分と分母非零性の形式化、および
 数値バックエンド未導入などの実行状況も保存された結果に沿って説明する。
 
 外部の個人用保存先は上流GitHubへのcommit対象に含めません。配布用の共通例へ追加する場合は、

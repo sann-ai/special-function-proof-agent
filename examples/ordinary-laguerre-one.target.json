@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "laguerre",
+    "order": {
+      "op": "int",
+      "value": 1
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "int",
+      "value": 0
+    }
+  },
+  "rhs": {
+    "op": "sub",
+    "args": [
+      {
+        "op": "int",
+        "value": 1
+      },
+      {
+        "op": "var",
+        "name": "x"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+Jacobi(n,0,0,x)=P_n(x); n natural,x real

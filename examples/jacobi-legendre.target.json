@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "jacobi",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "int",
+      "value": 0
+    },
+    "beta": {
+      "op": "int",
+      "value": 0
+    }
+  },
+  "rhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  }
+}

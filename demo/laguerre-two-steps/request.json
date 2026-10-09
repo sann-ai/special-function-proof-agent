@@ -1,0 +1,229 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "laguerre",
+    "order": {
+      "op": "int",
+      "value": 2
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "pow",
+                "base": {
+                  "op": "var",
+                  "name": "x"
+                },
+                "exponent": 2
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 2
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          {
+                            "op": "int",
+                            "value": 2
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "int",
+                    "value": 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 2
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "laguerre",
+          "order": {
+            "op": "int",
+            "value": 2
+          },
+          "arg": {
+            "op": "var",
+            "name": "x"
+          },
+          "alpha": {
+            "op": "var",
+            "name": "a"
+          }
+        },
+        "after": {
+          "op": "div",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "pow",
+                      "base": {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      "exponent": 2
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 2
+                            },
+                            {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "a"
+                                },
+                                {
+                                  "op": "int",
+                                  "value": 2
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "var",
+                          "name": "x"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        "recipe": "laguerre_values",
+        "reason": "一般化Laguerreの標準有限和から低次数を評価する。",
+        "conditions": [
+          "a is real",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

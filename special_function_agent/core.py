@@ -550,7 +550,7 @@ def lean_expr(node: dict[str, Any], sort: str = "complex") -> str:
 
 def display_expr(node: dict[str, Any]) -> str:
     op = node["op"]
-    if op in {"bessel_y", "bessel_cross", "gamma", "exp", "rpow", "hermite_h", "hermite_he", "erf", "pi"} or (op in {"integral", "deriv"} and "var" in node):
+    if op in {"bessel_y", "bessel_cross", "gamma", "exp", "rpow", "hermite_h", "hermite_he", "legendre", "laguerre", "jacobi", "bessel_y_noninteger", "erf", "pi"} or (op in {"integral", "deriv"} and "var" in node):
         from .real_bessel import display
         return display(node)
     if op == "int":

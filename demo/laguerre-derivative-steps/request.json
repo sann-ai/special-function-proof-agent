@@ -1,0 +1,144 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "n",
+      "relation": "ge",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "laguerre",
+      "order": {
+        "op": "var",
+        "name": "n"
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      },
+      "alpha": {
+        "op": "var",
+        "name": "a"
+      }
+    }
+  },
+  "rhs": {
+    "op": "neg",
+    "arg": {
+      "op": "laguerre",
+      "order": {
+        "op": "sub",
+        "args": [
+          {
+            "op": "var",
+            "name": "n"
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      },
+      "alpha": {
+        "op": "add",
+        "args": [
+          {
+            "op": "var",
+            "name": "a"
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      }
+    }
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "deriv",
+          "var": "x",
+          "arg": {
+            "op": "laguerre",
+            "order": {
+              "op": "var",
+              "name": "n"
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            },
+            "alpha": {
+              "op": "var",
+              "name": "a"
+            }
+          }
+        },
+        "after": {
+          "op": "neg",
+          "arg": {
+            "op": "laguerre",
+            "order": {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "n"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            },
+            "alpha": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "recipe": "laguerre_derivative",
+        "reason": "一般化Laguerreの有限和を微分し、次数を1下げてパラメータを1上げる公式を適用する。",
+        "conditions": [
+          "a is real",
+          "n is nat",
+          "x is real",
+          "n >= 1"
+        ]
+      }
+    ]
+  }
+}

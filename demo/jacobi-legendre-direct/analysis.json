@@ -1,0 +1,18 @@
+{
+  "recipe": "jacobi_legendre",
+  "theorem": "jacobiP_zero_zero",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "reverse": false
+}

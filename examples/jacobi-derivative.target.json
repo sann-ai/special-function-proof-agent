@@ -1,0 +1,134 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real",
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "n",
+      "relation": "ge",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "jacobi",
+      "order": {
+        "op": "var",
+        "name": "n"
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      },
+      "alpha": {
+        "op": "var",
+        "name": "a"
+      },
+      "beta": {
+        "op": "var",
+        "name": "b"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "div",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "n"
+                      },
+                      {
+                        "op": "var",
+                        "name": "a"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "name": "b"
+                  }
+                ]
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "op": "int",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "op": "jacobi",
+        "order": {
+          "op": "sub",
+          "args": [
+            {
+              "op": "var",
+              "name": "n"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        },
+        "alpha": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "beta": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "b"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

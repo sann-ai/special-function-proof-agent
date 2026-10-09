@@ -14,7 +14,8 @@ from typing import Any
 from .core import InputError, NeedsConditions, _keys, _expr, _constant, _run_lean, _save_json, _sha, environment
 
 VARIABLES = {'n', 'x', 'z', 'lambda', 's', 'w', 't'}
-RESERVED_NAMES = {'J', 'Y', 'X', 'H', 'He', 'Gamma', 'gamma', 'exp', 'erf', 'pi', 'sqrt', 'int',
+POLYNOMIAL_OPS = {'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi'}
+RESERVED_NAMES = {'J', 'Y', 'X', 'H', 'He', 'P', 'L', 'Legendre', 'Laguerre', 'Jacobi', 'YNoninteger', 'Gamma', 'gamma', 'exp', 'erf', 'pi', 'sqrt', 'int',
                   'infinity', 'inf', 'D', 'Dx', 'Dt', 'd'}
 RELATIONS = {'gt': '>', 'ge': '>=', 'lt': '<', 'le': '<=', 'eq': '=', 'ne': '!='}
 CROSS_DEFINITION = 'X_nm(s,t) = J_n(s)*Y_m(t) - Y_n(s)*J_m(t)'
@@ -64,8 +65,9 @@ def _convert(node):
     if op == 'integral':
         return {'op': op, 'var': node['variable'], 'lower': _convert(node['lower']),
                 'upper': _convert(node['upper']), 'body': _convert(node['arg'])}
-    if op in {'bessel_j', 'bessel_y', 'hermite_h', 'hermite_he'}:
-        return {'op': op, 'order': _order(node['order']), 'arg': _convert(node['arg'])}
+    if op in {'bessel_j', 'bessel_y', 'bessel_y_noninteger'} | POLYNOMIAL_OPS:
+        return {'op': op, 'order': _order(node['order']), 'arg': _convert(node['arg']),
+                **{p: _convert(node[p]) for p in ('alpha', 'beta') if p in node}}
     if op == 'bessel_cross':
         return {'op': op, 'orders': [_order(a) for a in node['orders']], 'args': [_convert(a) for a in node['args']]}
     if op == 'power':
@@ -98,6 +100,7 @@ def _parts(raw):
         raise NeedsConditions('State the real domain, for example x > 0 or 0 < lambda < 1, z > 0.')
     if len(raw) > 8192:
         raise InputError('Conditions exceed the text length limit.')
+    raw = raw.replace(r'\alpha', 'alpha').replace(r'\beta', 'beta').replace('α', 'alpha').replace('β', 'beta')
     raw = raw.replace(r'\lambda', 'lambda').replace('λ', 'lambda').replace('、', ',').replace('，', ',')
     raw = raw.replace(r'\mathbb{Z}', 'Z').replace(r'\mathbb{R}', 'R').replace(r'\mathbb{N}', 'N').replace(r'\in', 'in').replace('∈', 'in').replace('ℤ', 'Z').replace('ℝ', 'R').replace('ℕ', 'N')
     for old, new in [(r'\geq', '>='), (r'\leq', '<='), (r'\neq', '!='), (r'\ge', '>='), (r'\le', '<='), (r'\ne', '!='), ('≥', '>='), ('≤', '<='), ('≠', '!=')]:
@@ -171,51 +174,51 @@ def parse_target(text, conditions):
     names = _free_names([lhs, rhs, assumptions]) | real_stated
     names |= {a['variable'] for a in assumptions if a['op'] == 'compare'}
     if 'n' in names and order_type is None:
-        raise NeedsConditions('State n integer for Bessel orders or n natural for Hermite orders.')
+        raise NeedsConditions('State n integer for Bessel orders or n natural for Polynomial orders.')
     target = {'schema_version': 2, 'variables': {name: order_type if name == 'n' else 'real' for name in sorted(names)},
               'assumptions': assumptions, 'lhs': lhs, 'rhs': rhs}
     validate(target, require_proof=False)
     return target
 
 
-def _hermite_order(node, variables):
+def _polynomial_order(node, variables):
     """Validate the small natural-order grammar and return a required lower bound."""
     if not isinstance(node, dict):
-        raise InputError('Hermite orders require a natural literal or n with a small offset.')
+        raise InputError('Polynomial orders require a natural literal or n with a small offset.')
     if node.get('op') == 'int':
         _keys(node, {'op', 'value'})
         if type(node['value']) is not int or not 0 <= node['value'] <= 1000:
-            raise InputError('Literal Hermite orders must be natural numbers bounded by 1000.')
+            raise InputError('Literal Polynomial orders must be natural numbers bounded by 1000.')
         return 0
     if node.get('op') == 'var':
         _keys(node, {'op', 'name'})
         if node['name'] != 'n' or variables.get('n') != 'nat':
-            raise InputError('Hermite order n requires the natural-number type.')
+            raise InputError('Polynomial order n requires the natural-number type.')
         return 0
     if node.get('op') in {'add', 'sub'}:
         _keys(node, {'op', 'args'})
         args = node['args']
         if not isinstance(args, list) or len(args) != 2 or args[0] != {'op': 'var', 'name': 'n'}:
-            raise InputError('Shifted Hermite orders have the form n+k or n-k.')
-        _hermite_order(args[0], variables)
+            raise InputError('Shifted Polynomial orders have the form n+k or n-k.')
+        _polynomial_order(args[0], variables)
         if not isinstance(args[1], dict) or args[1].get('op') != 'int':
-            raise InputError('A Hermite order offset must be an integer from 0 to 12.')
-        _hermite_order(args[1], variables)
+            raise InputError('A Polynomial order offset must be an integer from 0 to 12.')
+        _polynomial_order(args[1], variables)
         if args[1]['value'] > 12:
-            raise InputError('A Hermite order offset must be an integer from 0 to 12.')
+            raise InputError('A Polynomial order offset must be an integer from 0 to 12.')
         return args[1]['value'] if node['op'] == 'sub' else 0
-    raise InputError('Hermite orders support natural literals, n, n+k, or n-k.')
+    raise InputError('Polynomial orders support natural literals, n, n+k, or n-k.')
 
 
 def validate_order_domains(nodes, bounds):
     for node in _walk(nodes):
-        if node.get('op') in {'hermite_h', 'hermite_he'}:
+        if node.get('op') in POLYNOMIAL_OPS:
             order = node['order']
             if order.get('op') == 'sub':
                 required = order['args'][1]['value']
                 lower = bounds.get('n', [None, None, set()])[0]
                 if lower is None or lower[0] < required:
-                    raise NeedsConditions(f'The Hermite order n-{required} requires an explicit domain implying n >= {required}.')
+                    raise NeedsConditions(f'The Polynomial order n-{required} requires an explicit domain implying n >= {required}.')
 
 
 def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=frozenset()):
@@ -274,6 +277,15 @@ def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=fr
         if node['upper'] != {'op': 'infinity'}:
             child(node['upper'], True)
         _validate_expr(node['body'], variables, depth+1, budget, scalar, bound | {name})
+    elif op == 'bessel_y_noninteger' and not scalar:
+        _keys(node, {'op', 'order', 'arg'})
+        from .core import _fixed_exponent
+        _fixed_exponent(node['order'])
+        order = node['order']
+        degree = Fraction(order['numerator'], order['denominator']) if order['op'] == 'rational' else Fraction(order['value'])
+        if degree not in {Fraction(-1, 2), Fraction(1, 2), Fraction(3, 2)}:
+            raise InputError('YNoninteger currently supports the fixed orders -1/2, 1/2, 3/2; integer Y uses the diagnostic Y notation.')
+        child(node['arg'], True)
     elif op in {'bessel_j', 'bessel_y', 'bessel_cross'} and not scalar:
         cross = op == 'bessel_cross'
         _keys(node, {'op', 'orders', 'args'} if cross else {'op', 'order', 'arg'})
@@ -290,9 +302,12 @@ def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=fr
                 raise InputError('Bessel order n requires the integer type.')
         for arg in args:
             child(arg, True)
-    elif op in {'hermite_h', 'hermite_he'} and not scalar:
-        _keys(node, {'op', 'order', 'arg'})
-        _hermite_order(node['order'], variables)
+    elif op in POLYNOMIAL_OPS and not scalar:
+        parameters = ('alpha', 'beta') if op == 'jacobi' else ('alpha',) if op == 'laguerre' else ()
+        _keys(node, {'op', 'order', 'arg'} | set(parameters))
+        for parameter in parameters:
+            child(node[parameter], True)
+        _polynomial_order(node['order'], variables)
         child(node['arg'], True)
     else:
         raise InputError(f'Unsupported real diagnostic operation {op!r}.')
@@ -400,6 +415,11 @@ def display(node):
     if op == 'deriv': return f'D_{node["var"]}({display(node["arg"])})'
     if op in {'hermite_h', 'hermite_he'}:
         return f'{"H" if op == "hermite_h" else "He"}_{{{display(node["order"])}}}({display(node["arg"])})'
+    if op == 'bessel_y_noninteger': return f'YNoninteger({display(node["order"])},{display(node["arg"])})'
+    if op == 'legendre': return f'P_{{{display(node["order"])}}}({display(node["arg"])})'
+    if op in {'laguerre', 'jacobi'}:
+        parameters = [node['alpha']] + ([node['beta']] if op == 'jacobi' else [])
+        return ('Laguerre' if op == 'laguerre' else 'Jacobi') + '(' + ','.join(map(display, [node['order'], *parameters, node['arg']])) + ')'
     if op == 'infinity': return 'infinity'
     if op == 'integral': return f'int({display(node["lower"])},{display(node["upper"])},{display(node["body"])},{node["var"]})'
     if op in {'bessel_j', 'bessel_y'}:
@@ -482,7 +502,7 @@ def domain_obligations(data, template):
         if n['op'] == 'pow': return n['exponent'] == 0 or nonzero(n['base'])
         return False
     for node in _walk([data['lhs'], data['rhs'], data['assumptions']]):
-        if node.get('op') in {'bessel_j', 'bessel_y', 'bessel_cross'}:
+        if node.get('op') in {'bessel_j', 'bessel_y', 'bessel_cross', 'bessel_y_noninteger'}:
             for arg in node['args'] if node['op'] == 'bessel_cross' else [node['arg']]:
                 if not _positive(arg, bounds):
                     pending.append(display(arg)+' > 0')

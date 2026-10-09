@@ -1,0 +1,111 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "legendre",
+    "order": {
+      "op": "int",
+      "value": 2
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "sub",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "int",
+                "value": 3
+              },
+              {
+                "op": "pow",
+                "base": {
+                  "op": "var",
+                  "name": "x"
+                },
+                "exponent": 2
+              }
+            ]
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 2
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "legendre",
+          "order": {
+            "op": "int",
+            "value": 2
+          },
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        },
+        "after": {
+          "op": "div",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 3
+                    },
+                    {
+                      "op": "pow",
+                      "base": {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      "exponent": 2
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        "recipe": "legendre_values",
+        "reason": "shifted Legendreとの変換と有限和から標準Legendreの低次数を評価する。",
+        "conditions": [
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

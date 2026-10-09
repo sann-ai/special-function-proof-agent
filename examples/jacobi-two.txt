@@ -1,0 +1,1 @@
+Jacobi(2,a,b,x)=(a+1)*(a+2)/2+(a+b+3)*(a+2)*((x-1)/2)+(a+b+3)*(a+b+4)/2*((x-1)/2)^2; a real,b real,x real

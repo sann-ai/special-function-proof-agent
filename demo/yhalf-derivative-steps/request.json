@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "bessel_y_noninteger",
+      "order": {
+        "op": "rational",
+        "numerator": 1,
+        "denominator": 2
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "sub",
+        "args": [
+          {
+            "op": "bessel_y_noninteger",
+            "order": {
+              "op": "rational",
+              "numerator": -1,
+              "denominator": 2
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          },
+          {
+            "op": "bessel_y_noninteger",
+            "order": {
+              "op": "rational",
+              "numerator": 3,
+              "denominator": 2
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 2
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "deriv",
+          "var": "x",
+          "arg": {
+            "op": "bessel_y_noninteger",
+            "order": {
+              "op": "rational",
+              "numerator": 1,
+              "denominator": 2
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "div",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "bessel_y_noninteger",
+                  "order": {
+                    "op": "rational",
+                    "numerator": -1,
+                    "denominator": 2
+                  },
+                  "arg": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                },
+                {
+                  "op": "bessel_y_noninteger",
+                  "order": {
+                    "op": "rational",
+                    "numerator": 3,
+                    "denominator": 2
+                  },
+                  "arg": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        "recipe": "bessel_y_half_derivative",
+        "reason": "非整数次数Yの標準接続とJの微分から、半整数Yの対称微分公式を適用する。",
+        "conditions": [
+          "x is real",
+          "x > 0"
+        ]
+      }
+    ]
+  }
+}

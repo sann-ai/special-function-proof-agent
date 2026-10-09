@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "neg",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "rpow",
+        "base": {
+          "op": "int",
+          "value": -1
+        },
+        "exponent": {
+          "op": "var",
+          "name": "n"
+        }
+      },
+      {
+        "op": "legendre",
+        "order": {
+          "op": "var",
+          "name": "n"
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "legendre_parity"
+  }
+}

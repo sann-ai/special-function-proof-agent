@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "add",
+    "args": [
+      {
+        "op": "bessel_y_noninteger",
+        "order": {
+          "op": "rational",
+          "numerator": -1,
+          "denominator": 2
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      {
+        "op": "bessel_y_noninteger",
+        "order": {
+          "op": "rational",
+          "numerator": 3,
+          "denominator": 2
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "bessel_y_noninteger",
+        "order": {
+          "op": "rational",
+          "numerator": 1,
+          "denominator": 2
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      {
+        "op": "var",
+        "name": "x"
+      }
+    ]
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "bessel_y_half_recurrence"
+  }
+}

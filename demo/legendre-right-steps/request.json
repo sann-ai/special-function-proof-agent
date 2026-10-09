@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "int",
+      "value": 1
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 1
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "int",
+            "value": 1
+          }
+        },
+        "after": {
+          "op": "int",
+          "value": 1
+        },
+        "recipe": "legendre_endpoints",
+        "reason": "標準Legendreの有限和と鏡映公式から指定された端点の値を評価する。",
+        "conditions": [
+          "n is nat"
+        ]
+      }
+    ]
+  }
+}

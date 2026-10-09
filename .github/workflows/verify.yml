@@ -29,5 +29,7 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Compile mathematical examples and print axiom dependencies
         run: lake env lean BesselProofAgent/Examples.lean
-      - name: Reverify AI-generated saved proofs
+      - name: Audit all public special-function definitions and theorems
+        run: python3 scripts/audit_special_functions.py
+      - name: Reverify saved proofs
         run: python3 scripts/replay_examples.py

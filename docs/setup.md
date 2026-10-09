@@ -2,7 +2,7 @@
 
 保存済み候補の検証には Python 3.12以上、Git、elan が管理する固定版の Lean / Lake を使います。Python追加パッケージは不要です。最初のツール・依存取得にはネット接続が必要で、Lean、mathlib、ビルドキャッシュは数GB規模になります。
 
-Y・交差積を含む診断経路の数値計算は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、入力解析、対応する自然言語解析、条件付きLean検査、アーカイブ保存を続けます。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
+数値診断は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、対応する完全Lean証明、従来Y・交差積の条件付きLean検査、アーカイブ保存とreplayを続けます。Legendre/Laguerre/Jacobiと固定半整数 `YNoninteger` もこの手順を使います。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
 
 macOS・Linuxでは、[Lean公式のインストール案内](https://lean-lang.org/install/)に従って elan を導入し、`python3`、`git`、`elan` がターミナルから利用できる状態にしてください。以下はmacOS・Linux向けの手順です。Windows向けの初回手順は未検証です。
 
@@ -51,6 +51,17 @@ python3 -m special_function_agent replay demo/direct
 
 `proved` と、再検査時の `replayed: true` を確認します。これらの操作はCodex CLI、AIへの接続、APIキーを使いません。固定環境の取得とビルドが完了した端末ではローカルで実行できます。
 
+今回追加した関数を確認する場合：
+
+```sh
+python3 -m special_function_agent verify examples/jacobi-derivative.txt --route direct --output runs/first-jacobi
+python3 -m special_function_agent replay runs/first-jacobi
+python3 -m special_function_agent verify examples/yhalf-derivative.txt --route steps --output runs/first-yhalf
+python3 -m special_function_agent replay runs/first-yhalf
+```
+
+Jacobiの例は自然数n≥1と実数a,b,x、Yの例は固定半整数次数とx>0を明示しています。[多項式の規約](orthogonal-polynomials.md)と[Yの対応範囲](bessel-y-formalization.md)を参照してください。
+
 全保存例とテストを実行する場合:
 
 ```sh
@@ -70,7 +81,7 @@ codex login status
 python3 -m special_function_agent.generate demo/target.json --route direct --output runs/my-first-generation
 ```
 
-モデル・推論量の条件と生成経路の指定はREADMEの「AIで新しい候補を生成する」を参照してください。セットアップや環境診断がCodexをインストールしたりログインしたりすることはありません。
+モデル・推論量の条件と生成経路の指定はREADMEの「Codexへの依頼例」を参照してください。セットアップや環境診断がCodexをインストールしたりログインしたりすることはありません。
 
 ## 準備に失敗した場合
 
@@ -78,7 +89,7 @@ python3 -m special_function_agent.generate demo/target.json --route direct --out
 - 固定版Leanが未導入: 上記の `elan toolchain install` を実行してください。doctorは自動ダウンロードを行いません。
 - 依存が未取得・キャッシュが不足: ネット接続と空き容量を確認して `lake exe cache get`、`lake build` を実行してください。
 - 依存コミットがlockfileと異なる: 利用中のソースと3つの固定環境ファイルを確認してください。新しいclone・ZIP展開先で手順をやり直すと、既存作業を保持して切り分けられます。
-- 保存証明の再検査が環境差分を報告: 記録に対応する版のソース・固定環境を使ってください。現行版で再評価するときは、保存入力を `verify` に渡して新しい出力先へ記録します。
+- 保存証明の再検査が環境差分を報告: 記録に対応する版のソース・固定環境を使ってください。現行版で再評価するときは、保存した `request.json` を `verify --archive` に渡して新しい出力先へ記録します。[環境更新時の再検査と再利用](archive.md#数学環境を更新したとき)を参照してください。
 
 ## 確認した環境と範囲
 

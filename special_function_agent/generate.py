@@ -42,7 +42,11 @@ def output_schema(route: str, target: dict | None = None) -> dict:
             obj({"op":{"type":"string", "enum":["add","sub","mul","div"]}, "args":{"type":"array","items":ref,"minItems":2,"maxItems":2}}),
             obj({"op":{"type":"string", "enum":["gamma","exp","erf","sqrt"]}, "arg":ref}),
             obj({"op":{"const":"pi"}}),
-            obj({"op":{"type":"string", "enum":["hermite_h","hermite_he"]}, "order":ref, "arg":ref}),
+            obj({"op":{"type":"string", "enum":["hermite_h","hermite_he","legendre"]}, "order":ref, "arg":ref}),
+            obj({"op":{"const":"laguerre"}, "order":ref, "alpha":ref, "arg":ref}),
+            obj({"op":{"const":"bessel_y_noninteger"}, "order":ref, "arg":ref}),
+            obj({"op":{"const":"rational"}, "numerator":{"type":"integer"}, "denominator":{"type":"integer","minimum":1}}),
+            obj({"op":{"const":"jacobi"}, "order":ref, "alpha":ref, "beta":ref, "arg":ref}),
             obj({"op":{"const":"deriv"}, "var":{"type":"string","enum":derivative_names}, "arg":ref}),
             obj({"op":{"const":"pow"}, "base":ref, "exponent":{"type":"integer","minimum":0,"maximum":12}}),
             obj({"op":{"const":"rpow"}, "base":ref, "exponent":ref}),
@@ -100,6 +104,18 @@ hermite_he_values (He0=1,He1=x), hermite_h_recurrence (H(n+1)=2xHn-2nH(n-1)),
 erf_derivative (D_x erf(x)=2exp(-x^2)/sqrt(pi)), erf_zero, erf_odd, gaussian_integral
 (integral a..b exp(-t^2)=sqrt(pi)/2*(erf(b)-erf(a)), with arbitrary real endpoints.
 Use deriv {var,arg}, hermite_h/hermite_he {order,arg}, erf/sqrt {arg}, pi {op:"pi"}.
+Orthogonal families use natural degree and real parameters: legendre {order,arg},
+laguerre {order,alpha,arg}, jacobi {order,alpha,beta,arg}. P is standard Legendre,
+ordinary L is alpha=0. Jacobi/Laguerre are finite polynomial extensions for all real parameters.
+Recipes: legendre_values (degrees 0,1,2), legendre_parity (P_n(-x)=(-1)^n P_n(x)),
+legendre_endpoints (P_n(1)=1, P_n(-1)=(-1)^n), laguerre_values and jacobi_values (0,1,2),
+laguerre_derivative (D_x L_n^alpha=-L_(n-1)^(alpha+1)),
+jacobi_derivative (D_x P_n^(alpha,beta)=(n+alpha+beta+1)/2*P_(n-1)^(alpha+1,beta+1)),
+jacobi_legendre (Jacobi(n,0,0,x)=Legendre(n,x)). Derivative lowering requires n>=1 from the fixed input.
+YNoninteger uses bessel_y_noninteger {order,arg}; order is an exact rational object and must be
+-1/2,1/2,3/2. Positive x is required. Recipes bessel_y_half_recurrence and bessel_y_half_derivative
+apply Y(-1/2,x)+Y(3/2,x)=Y(1/2,x)/x and D_x Y(1/2,x)=(Y(-1/2,x)-Y(3/2,x))/2.
+Integer Y and cross products retain their diagnostic route; do not substitute an integer in YNoninteger.
 Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
 integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
 Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.

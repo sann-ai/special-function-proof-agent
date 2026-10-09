@@ -1,0 +1,30 @@
+{
+  "recipe": "jacobi_derivative",
+  "theorem": "jacobiP_derivative",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    },
+    {
+      "op": "var",
+      "name": "a"
+    },
+    {
+      "op": "var",
+      "name": "b"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "positive_degree": {
+    "op": "var",
+    "name": "n"
+  },
+  "reverse": false
+}

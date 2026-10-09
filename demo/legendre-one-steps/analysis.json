@@ -1,0 +1,11 @@
+{
+  "recipe": "legendre_values",
+  "theorem": "legendreP_one",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

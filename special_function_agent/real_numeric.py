@@ -35,7 +35,7 @@ def diagnose(data):
         report['skipped_reasons'] = ['mpmath is not available in this Python environment; no package was installed.']
         return report
     report['backend_version'] = mp.__version__
-    classical = any(n.get('op') in {'hermite_h', 'hermite_he', 'erf'} for n in _walk([data['lhs'], data['rhs']]))
+    classical = any(n.get('op') in {'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi', 'erf'} for n in _walk([data['lhs'], data['rhs']]))
     roots = [a for a in data['assumptions'] if a['op'] == 'expr_compare' and a['relation'] == 'eq']
     if len(roots) > 1:
         report.update(diagnostic='unsupported_root_system', skipped_reasons=['Automatic sampling supports one function-value root equation.'])
@@ -96,6 +96,24 @@ def diagnose(data):
             if n != int(n) or not 0 <= n <= 40 or abs(x) > 60:
                 raise ValueError('Numerical Hermite scope: natural degree <= 40 and |argument| <= 60.')
             return mp.hermite(int(n), x) if op == 'hermite_h' else mp.hermite(int(n), x/mp.sqrt(2))/mp.sqrt(2)**int(n)
+        if op in {'legendre', 'laguerre', 'jacobi'}:
+            n, x = ev(node['order']), ev(node['arg'])
+            if n != int(n) or not 0 <= n <= 40 or abs(x) > 60:
+                raise ValueError('Numerical polynomial scope: natural degree <= 40 and |argument| <= 60.')
+            if op == 'legendre': return mp.legendre(int(n), x)
+            a = ev(node['alpha'])
+            # Evaluate the finite polynomial extension even at negative integral parameters,
+            # where the hypergeometric mpmath entry points can return NaN.
+            n = int(n)
+            if op == 'laguerre':
+                return mp.fsum(mp.rf(a+k+1, n-k) * (-x)**k / (mp.factorial(n-k)*mp.factorial(k)) for k in range(n+1))
+            b = ev(node['beta'])
+            return mp.fsum(mp.rf(n+a+b+1, k) * mp.rf(a+k+1, n-k) * ((x-1)/2)**k /
+                           (mp.factorial(k)*mp.factorial(n-k)) for k in range(n+1))
+        if op == 'bessel_y_noninteger':
+            order, x = ev(node['order']), ev(node['arg'])
+            if x <= 0: raise ValueError('Bessel Y requires a positive argument.')
+            return mp.bessely(order, x)
         if op == 'deriv':
             return mp.diff(lambda x: evaluate(node['arg'], {**values, node['var']:x}, budget), values[node['var']])
         if op == 'integral':

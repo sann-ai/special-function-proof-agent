@@ -19,14 +19,29 @@ FAMILIES = {**BASE_FAMILIES,
 }
 
 
+CLASSICAL_FAMILY_NAMES = tuple(FAMILIES)
+FAMILIES.update({
+    'bessel_y_noninteger': {'module': 'SpecialFunctionProofAgent.BesselY', 'definition': 'DLMF 10.2.3 real positive-axis Y from Complex.besselJ; fixed orders -1/2,1/2,3/2', 'formal_scope': 'half-order recurrence and symmetric derivative; x>0'},
+    'legendre': {'module': 'SpecialFunctionProofAgent.Legendre', 'definition': 'standard P_n(x)=shiftedLegendre_n((1-x)/2), natural degree', 'formal_scope': 'parity, endpoints and degrees zero through two'},
+    'laguerre': {'module': 'SpecialFunctionProofAgent.Laguerre', 'definition': 'DLMF 18.5.12 generalized L_n^(alpha), finite polynomial sum for real alpha; L_n means alpha=0', 'formal_scope': 'derivative lowering degree and raising alpha; initial values'},
+    'jacobi': {'module': 'SpecialFunctionProofAgent.Jacobi', 'definition': 'DLMF 18.5.7 P_n^(alpha,beta), finite polynomial sum for real alpha,beta', 'formal_scope': 'derivative lowering degree and raising both parameters; initial values; Legendre specialization'},
+})
+
+
 def conventions(data):
     """Keep the original families' identity stable while versioning new conventions."""
-    def contains_new(node):
+    def contains(node, ops):
         if isinstance(node, dict):
-            return node.get('op') in {'hermite_h', 'hermite_he', 'erf'} or any(contains_new(v) for v in node.values())
-        return isinstance(node, list) and any(contains_new(v) for v in node)
-    if contains_new([data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]):
-        return {**CONVENTIONS, 'version': 2, 'families': FAMILIES,
+            return node.get('op') in ops or any(contains(v, ops) for v in node.values())
+        return isinstance(node, list) and any(contains(v, ops) for v in node)
+    nodes = [data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]
+    if contains(nodes, {'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger'}):
+        return {**CONVENTIONS, 'version': 3, 'families': FAMILIES,
+                'polynomial_degree': 'natural number; subtraction requires the stated lower bound',
+                'polynomial_parameters': 'real finite polynomial extension; Laguerre alpha=0 is the ordinary convention',
+                'derivative': 'real derivative in the explicitly named variable, at its current value'}
+    if contains(nodes, {'hermite_h', 'hermite_he', 'erf'}):
+        return {**CONVENTIONS, 'version': 2, 'families': {k: FAMILIES[k] for k in CLASSICAL_FAMILY_NAMES},
                 'hermite_degree': 'natural number; subtraction requires the stated lower bound',
                 'derivative': 'real derivative in the explicitly named variable, at its current value'}
     return CONVENTIONS

@@ -1,0 +1,66 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "laguerre",
+    "order": {
+      "op": "int",
+      "value": 2
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "int",
+      "value": 0
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "pow",
+                "base": {
+                  "op": "var",
+                  "name": "x"
+                },
+                "exponent": 2
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "int",
+                    "value": 4
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "int",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 2
+      }
+    ]
+  }
+}

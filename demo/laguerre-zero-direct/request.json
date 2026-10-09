@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "laguerre",
+    "order": {
+      "op": "int",
+      "value": 0
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 1
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "laguerre_values"
+  }
+}

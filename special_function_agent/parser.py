@@ -14,8 +14,8 @@ from .core import InputError, NeedsConditions, _condition_domains, validate_requ
 
 
 TOKEN = re.compile(r"\s+|\\[A-Za-z]+|\\[,!;:]|[0-9]+|[A-Za-z]+|[_^{}()+\-*/=,;']")
-EXTENDED_TOKEN = re.compile(r"\s+|\\[A-Za-z]+|\\[,!;:]|[0-9]+|(?:He|[JYXHD])(?=_)|[A-Za-z][A-Za-z0-9_]*|[_^{}()+\-*/=,;']")
-TEX_BUILTINS = {"frac", "dfrac", "tfrac", "int", "sqrt", "left", "right", "cdot", "times", "operatorname", "lambda", "Gamma", "exp", "infty", "pi"}
+EXTENDED_TOKEN = re.compile(r"\s+|\\[A-Za-z]+|\\[,!;:]|[0-9]+|(?:He|[JYXHDPL])(?=_)|[A-Za-z][A-Za-z0-9_]*|[_^{}()+\-*/=,;']")
+TEX_BUILTINS = {"frac", "dfrac", "tfrac", "int", "sqrt", "left", "right", "cdot", "times", "operatorname", "lambda", "Gamma", "exp", "infty", "pi", "alpha", "beta"}
 TEX_RESERVED = TEX_BUILTINS | {"newcommand", "def", "DeclareMathOperator", "begin", "end", "text", "quad", "qquad", "in", "mathbb", "le", "leq", "ge", "geq", "ne", "neq", "prime"}
 
 
@@ -236,6 +236,8 @@ class _Parser:
         self.variables = {"n", "x", "t"} | ({"z", "lambda", "s", "w"} if extended else set())
         if extended:
             text = text.replace(r"\lambda", " lambda ").replace("λ", " lambda ").replace("∞", " infinity ")
+            for source, target in ((r"\alpha", "alpha"), (r"\beta", "beta"), ("α", "alpha"), ("β", "beta")):
+                text = text.replace(source, " "+target+" ")
         text = text.replace("−", "-").replace(r"\prime", "'").strip()
         text = re.sub(r"\\(?:frac|dfrac|tfrac)\s*\{\s*d\s*\}\s*\{\s*d\s*([xt])\s*\}", lambda m: " D" + m[1] + " ", text)
         text = re.sub(r"\bd\s*/\s*d\s*([xt])\b", lambda m: " D" + m[1] + " ", text)
@@ -297,7 +299,7 @@ class _Parser:
 
     def _starts_atom(self) -> bool:
         token = self.peek()
-        return self.index not in self.stops and token is not None and (token.isdigit() or token in self.variables or token in {"J", "D", "Dx", "Dt", "int", "sqrt", "(", "{", r"\frac", r"\int", r"\sqrt"} or (self.extended and token in {"Y", "X", "H", "He", "Gamma", "gamma", "exp", "erf", "pi", r"\Gamma", r"\exp", r"\pi"}))
+        return self.index not in self.stops and token is not None and (token.isdigit() or token in self.variables or token in {"J", "D", "Dx", "Dt", "int", "sqrt", "(", "{", r"\frac", r"\int", r"\sqrt"} or (self.extended and token in {"Y", "X", "H", "He", "P", "L", "Legendre", "Laguerre", "Jacobi", "YNoninteger", "Gamma", "gamma", "exp", "erf", "pi", r"\Gamma", r"\exp", r"\pi"}))
 
     def unary(self) -> dict:
         if self.peek() == "+":
@@ -358,6 +360,19 @@ class _Parser:
         if self.extended and token in {"Gamma", "gamma", r"\Gamma", "exp", r"\exp", "erf"}:
             self.take()
             return {"op": "exp" if token in {"exp", r"\exp"} else "erf" if token == "erf" else "gamma", "arg": self.group()}
+        if self.extended and token in {"Legendre", "Laguerre", "Jacobi", "YNoninteger"}:
+            self.take()
+            self.take("(")
+            order = self.expression()
+            parameters = []
+            for _ in range({"Legendre": 0, "Laguerre": 1, "Jacobi": 2, "YNoninteger": 0}[token]):
+                self.take(",")
+                parameters.append(self.expression())
+            self.take(",")
+            arg = self.expression()
+            self.take(")")
+            return {"op": "bessel_y_noninteger" if token == "YNoninteger" else token.lower(), "order": order, "arg": arg,
+                    **dict(zip(("alpha", "beta"), parameters))}
         if token == r"\frac":
             self.take()
             return _binary("div", self.group(), self.group())
@@ -392,14 +407,30 @@ class _Parser:
             args.append(self.expression())
             self.take(")")
             return {"op": "bessel_cross", "orders": orders, "args": args}
-        if token == "J" or (self.extended and token in {"Y", "H", "He"}):
+        if token == "J" or (self.extended and token in {"Y", "H", "He", "P", "L"}):
             self.take()
+            parameters = None
             prime = self.peek() == "'"
             if prime:
                 self.take()
             if self.peek() == "_":
                 self.take()
                 order = self.script()
+                if token in {"P", "L"} and self.peek() == "^" and self.tokens[self.index + 1:self.index + 2] != ["'"] and self.tokens[self.index + 1:self.index + 4] != ["{", "'", "}"]:
+                    self.take("^")
+                    opener = self.take()
+                    if opener not in {"{", "("}:
+                        raise NeedsConditions("Use Jacobi(n,alpha,beta,x) or Laguerre(n,alpha,x); associated Legendre P_n^m is unsupported.")
+                    nested = opener == "{" and self.peek() == "("
+                    if nested: self.take("(")
+                    parameters = [self.expression()]
+                    if token == "P":
+                        if self.peek() != ",":
+                            raise NeedsConditions("Jacobi requires two parameters P_n^(alpha,beta); associated Legendre P_n^m is unsupported.")
+                        self.take(",")
+                        parameters.append(self.expression())
+                    self.take(")" if opener == "(" or nested else "}")
+                    if nested: self.take("}")
                 if self.tokens[self.index:self.index + 2] == ["^", "'"]:
                     self.index += 1
                 elif self.tokens[self.index:self.index + 4] == ["^", "{", "'", "}"]:
@@ -418,8 +449,11 @@ class _Parser:
                 self.take(",")
                 arg = self.expression()
                 self.take(")")
-            family = {"J": "bessel_j", "Y": "bessel_y", "H": "hermite_h", "He": "hermite_he"}[token]
+            family = {"J": "bessel_j", "Y": "bessel_y", "H": "hermite_h", "He": "hermite_he", "P": "legendre", "L": "laguerre"}[token]
             result = {"op": family, "order": order, "arg": arg}
+            if token == "L": result["alpha"] = parameters[0] if parameters is not None else _integer(0)
+            if token == "P" and parameters is not None:
+                result.update(op="jacobi", alpha=parameters[0], beta=parameters[1])
             if prime:
                 if arg.get("op") != "var" or (not self.extended and arg.get("name") not in {"x", "t"}):
                     raise NeedsConditions("Prime notation requires a variable argument; use an explicit derivative for a composition.")
@@ -607,7 +641,7 @@ def _paper_notation(text: str) -> tuple[str, str | None]:
             (text[top_end:].strip() and not text[top_end:].lstrip().startswith(";"))):
         raise NeedsConditions("数式環境の外に別の式があります。検証対象を1つにまとめてください。")
     text = "".join(parts)
-    text = re.sub(r"\\operatorname\s*\{(J|Y|X|H|He|Gamma|exp|erf)\}", r" \1 ", text)
+    text = re.sub(r"\\operatorname\s*\{(J|Y|X|H|He|P|L|Legendre|Laguerre|Jacobi|YNoninteger|Gamma|exp|erf)\}", r" \1 ", text)
     # A text block begins a trailing condition section. Its entire content survives.
     embedded = None
     marker = re.search(r"\\text\b", text)

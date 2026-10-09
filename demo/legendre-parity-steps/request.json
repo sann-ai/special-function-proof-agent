@@ -1,0 +1,103 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "neg",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "rpow",
+        "base": {
+          "op": "int",
+          "value": -1
+        },
+        "exponent": {
+          "op": "var",
+          "name": "n"
+        }
+      },
+      {
+        "op": "legendre",
+        "order": {
+          "op": "var",
+          "name": "n"
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "neg",
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "rpow",
+              "base": {
+                "op": "int",
+                "value": -1
+              },
+              "exponent": {
+                "op": "var",
+                "name": "n"
+              }
+            },
+            {
+              "op": "legendre",
+              "order": {
+                "op": "var",
+                "name": "n"
+              },
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        "recipe": "legendre_parity",
+        "reason": "標準Legendreとshifted Legendreの変換から、自然数次数の鏡映公式を適用する。",
+        "conditions": [
+          "n is nat",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

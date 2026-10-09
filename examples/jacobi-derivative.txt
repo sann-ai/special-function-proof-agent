@@ -1,0 +1,1 @@
+D_x(Jacobi(n,a,b,x))=(n+a+b+1)/2*Jacobi(n-1,a+1,b+1,x); n natural,n>=1,a real,b real,x real

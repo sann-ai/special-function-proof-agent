@@ -1,0 +1,30 @@
+Return one JSON proof plan matching the response schema. Do not use tools or edit files.
+The exact schema_version 2 target fixes every variable type, binding, assumption and equality.
+Use Real.Gamma, Real.rpow, Real.exp, real interval integrals and integrals on Set.Ioi.
+Hermite H means physicists, He means probabilists; degree n is natural, while Bessel uses integer degree.
+H_n(x)=sqrt(2)^n*He_n(sqrt(2)*x). erf uses its Gaussian integral definition on all real inputs.
+Do not add x>0 for Hermite or erf. For H/He derivatives and n-1 degrees, retain the input n>=1 condition.
+Additional recipes: hermite_h_derivative, hermite_he_derivative, hermite_h_values (H0=1,H1=2x),
+hermite_he_values (He0=1,He1=x), hermite_h_recurrence (H(n+1)=2xHn-2nH(n-1)),
+erf_derivative (D_x erf(x)=2exp(-x^2)/sqrt(pi)), erf_zero, erf_odd, gaussian_integral
+(integral a..b exp(-t^2)=sqrt(pi)/2*(erf(b)-erf(a)), with arbitrary real endpoints.
+Use deriv {var,arg}, hermite_h/hermite_he {order,arg}, erf/sqrt {arg}, pi {op:"pi"}.
+Orthogonal families use natural degree and real parameters: legendre {order,arg},
+laguerre {order,alpha,arg}, jacobi {order,alpha,beta,arg}. P is standard Legendre,
+ordinary L is alpha=0. Jacobi/Laguerre are finite polynomial extensions for all real parameters.
+Recipes: legendre_values (degrees 0,1,2), legendre_parity (P_n(-x)=(-1)^n P_n(x)),
+legendre_endpoints (P_n(1)=1, P_n(-1)=(-1)^n), laguerre_values and jacobi_values (0,1,2),
+laguerre_derivative (D_x L_n^alpha=-L_(n-1)^(alpha+1)),
+jacobi_derivative (D_x P_n^(alpha,beta)=(n+alpha+beta+1)/2*P_(n-1)^(alpha+1,beta+1)),
+jacobi_legendre (Jacobi(n,0,0,x)=Legendre(n,x)). Derivative lowering requires n>=1 from the fixed input.
+YNoninteger uses bessel_y_noninteger {order,arg}; order is an exact rational object and must be
+-1/2,1/2,3/2. Positive x is required. Recipes bessel_y_half_recurrence and bessel_y_half_derivative
+apply Y(-1/2,x)+Y(3/2,x)=Y(1/2,x)/x and D_x Y(1/2,x)=(Y(-1/2,x)-Y(3/2,x))/2.
+Integer Y and cross products retain their diagnostic route; do not substitute an integer in YNoninteger.
+Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
+integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
+Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.
+For steps, use original endpoints with a concise Japanese reason and exact supplied conditions.
+Requested route: direct
+Fixed target JSON:
+{"assumptions": [{"op": "compare", "relation": "ge", "value": {"denominator": 1, "numerator": 1}, "variable": "n"}], "lhs": {"arg": {"alpha": {"name": "a", "op": "var"}, "arg": {"name": "x", "op": "var"}, "op": "laguerre", "order": {"name": "n", "op": "var"}}, "op": "deriv", "var": "x"}, "rhs": {"arg": {"alpha": {"args": [{"name": "a", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, "arg": {"name": "x", "op": "var"}, "op": "laguerre", "order": {"args": [{"name": "n", "op": "var"}, {"op": "int", "value": 1}], "op": "sub"}}, "op": "neg"}, "schema_version": 2, "variables": {"a": "real", "n": "nat", "x": "real"}}

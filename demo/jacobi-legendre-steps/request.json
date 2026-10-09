@@ -1,0 +1,81 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "jacobi",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "int",
+      "value": 0
+    },
+    "beta": {
+      "op": "int",
+      "value": 0
+    }
+  },
+  "rhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "jacobi",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "var",
+            "name": "x"
+          },
+          "alpha": {
+            "op": "int",
+            "value": 0
+          },
+          "beta": {
+            "op": "int",
+            "value": 0
+          }
+        },
+        "after": {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        },
+        "recipe": "jacobi_legendre",
+        "reason": "Jacobiの両パラメータが0の有限和を標準Legendreの定義へ接続する。",
+        "conditions": [
+          "n is nat",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

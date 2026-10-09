@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "int",
+      "value": 1
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 1
+  }
+}

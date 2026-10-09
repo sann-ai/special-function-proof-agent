@@ -1,17 +1,19 @@
 # Special Function Proof Agent
 
-特殊関数の入力を固定した命題へ変換し、制限された証明候補をLeanで検査・保存する独立ツールです。Codexからの依頼とターミナルの両方で利用できます。[Bessel Proof Agentの固定版](UPSTREAM.md)を基盤に、Gamma/Betaの実積分、Hermite多項式と誤差関数へ拡張しました。ライセンスは[MIT](LICENSE)です。
+特殊関数の入力を固定した命題へ変換し、制限された証明候補をLeanで検査・保存する独立ツールです。Codexからの依頼とターミナルの両方で利用できます。[Bessel Proof Agentの固定版](UPSTREAM.md)を基盤に、Gamma/Betaの実積分、Hermite・Legendre・Laguerre・Jacobi多項式、誤差関数、正実軸の非整数Bessel Yへ拡張しました。ライセンスは[MIT](LICENSE)です。
 
 ## 対応する関数と公式
 
 - **完全Lean証明**：正の引数で `Gamma(x+1)=x*Gamma(x)`、正の `a,b` でEulerのBeta積分、正の `a,r` でscaled Gamma積分。直接証明と、理由を添えた等式ステップ証明の両経路があります。
 - **Hermite**：物理学規約 `H_n` と確率論規約 `He_n` を区別し、自然数 `n>=1` で両規約の微分公式と `H` の3項漸化式をLean証明します。両規約の0・1次の値にも対応します。
 - **誤差関数**：Gaussian積分で定義した実 `erf` の微分、零点での値、奇関数性、任意の実端点間のGaussian積分をLean証明します。負の引数・逆向きの積分にも対応します。
+- **Legendre・Laguerre・Jacobi**：自然数次数、実数の引数・パラメータで0〜2次の値をLean証明します。Legendreの偶奇性と両端値、正次数Laguerre/Jacobiの微分、JacobiからLegendreへの特殊化にも対応します。パラメータは有限多項式の定義で全実数を扱います。[定義・公式・条件](docs/orthogonal-polynomials.md)。
 - **Bessel J**：引き継いだv1の符号・漸化式・微分・積分・有理数冪の閉じた証明レシピ。[詳しい対応式](docs/bessel-v1.md)。
-- **実Bessel J/Y・交差積**：正の引数で構造化入力、数値診断、既知の根条件に対する解析テンプレートと条件付き代数Lean。元のY命題は `unresolved`、`full_bessel_proof: false` と保存します。
+- **非整数Bessel Y**：明示名 `YNoninteger`、固定次数−1/2・1/2・3/2、正の実引数で、3項漸化式と1/2次の対称微分公式を直接・ステップ両経路でLean証明します。[標準定義との接続と形式化範囲](docs/bessel-y-formalization.md)。
+- **従来の実Bessel J/Y・交差積**：正の引数で構造化入力、数値診断、既知の根条件に対する解析テンプレートと条件付き代数Lean。従来の `Y_n`・`Y(order,x)`・交差積の元命題は `unresolved`、`full_bessel_proof: false` と保存します。
 - **保存と再検査**：元式・変数型・束縛・全条件・関数規約・環境ハッシュ・証明を保持し、再利用前にLeanで再検査します。
 
-登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` の `Gamma.lean`、`Beta.lean`、`Hermite.lean`、`Erf.lean` にあります。
+登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` にあります。
 
 ## 導入
 
@@ -42,6 +44,8 @@ python3 -m special_function_agent verify examples/scaled-gamma-integral.txt --ro
 python3 -m special_function_agent verify examples/hermite-h-derivative.txt --route direct --output runs/hermite-direct
 python3 -m special_function_agent verify examples/erf-derivative.txt --route steps --output runs/erf-steps
 python3 -m special_function_agent replay runs/erf-steps
+python3 -m special_function_agent verify examples/jacobi-derivative.txt --route direct --output runs/jacobi-direct
+python3 -m special_function_agent verify examples/yhalf-recurrence.txt --route steps --output runs/yhalf-steps
 ```
 
 直接経路は登録された補題を元の命題へ適用します。ステップ経路は各 `before = after` を同じ全条件で検査し、終点をつないで元の等式を証明します。自然言語の理由は候補として保存し、判定は構造化等式とLeanの結果に基づきます。
@@ -70,6 +74,10 @@ python3 -m special_function_agent parse examples/beta-integral.txt --output runs
 
 > 実数全域で `D_x(erf(x))=2*exp(-x^2)/sqrt(pi)` を積分定義から検証してください。自然言語ステップの各等式をLeanで検査し、負の引数を含む数値診断と保存証明のreplayも実行してください。
 
+> `examples/jacobi-derivative.txt` を、自然数 `n>=1` と実数 `a,b,x` の全条件で検証してください。微分ではa,bを固定し、両経路の証明を保存してreplayしてください。
+
+> `examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` の `YNoninteger` を正実軸で検証してください。各式の直接・ステップ両経路をLeanで検査し、保存証明をreplayしてください。
+
 既存のCodex CLIで新たな候補を生成する場合は、本人のCLI認証を利用します。モデルはCLI設定を引き継ぎ、推論量はUltraです。
 
 ```sh
@@ -81,22 +89,22 @@ python3 -m special_function_agent.generate examples/beta-integral.target.json --
 
 ## 入力範囲と判定
 
-v2は最大3個の自由実変数に対応します。次数 `n` はBesselでは整数、Hermiteでは自然数として宣言します。同一入力内の次数型は固定し、異なる型の混在を拒否します。実変数名は予約語を除く `[A-Za-z][A-Za-z0-9_]{0,31}`、積分変数は別の束縛名として保持します。名前・型・自由変数と束縛変数の衝突を検査します。
+v2は最大3個の自由実変数に対応します。次数変数 `n` はBesselでは整数、Hermite・Legendre・Laguerre・Jacobiでは自然数として宣言します。同一入力内の次数型は固定し、異なる型の混在を拒否します。`YNoninteger` は上記3個の固定有理数次数を使います。実変数名は予約語を除く `[A-Za-z][A-Za-z0-9_]{0,31}`、積分変数は別の束縛名として保持します。名前・型・自由変数と束縛変数の衝突を検査します。
 
 - 実数の正性・比較は正確な有理数との比較で指定します。例：`shape > 0`、`0 < lambda < 1`。
 - 関数値の零・非零は `X_01(z,lambda*z)=0`、`Gamma(shape)!=0` のように指定します。
-- `Gamma`、`H_n`、`He_n`、`erf`、`exp`、`sqrt`、`pi`、実数冪、有限区間積分、正の半直線上の積分を構造化できます。完全証明は登録された公式と実数の環計算に対応します。
-- `D_x(expr)` は明示した実変数で微分します。`D(expr)` は自由実変数が1個の場合に使用できます。Hermite次数は非負整数定数または自然数 `n` と小さい整数の加減算です。`H_{n-1}` には `n>=1` 等の明示条件が必要です。`n>0`、`n>=1/2` 等の自然数の離散性を使う条件もLeanで検査します。
+- `Gamma`、`H_n`、`He_n`、`Legendre(n,x)`、`Laguerre(n,alpha,x)`、`Jacobi(n,alpha,beta,x)`、`erf`、`YNoninteger`、`exp`、`sqrt`、`pi`、実数冪、有限区間積分、正の半直線上の積分を構造化できます。通常のLaguerre `L_n(x)` は `alpha=0` です。完全証明は登録された公式と実数の環計算に対応します。
+- `D_x(expr)` は明示した実変数で微分し、他の自由実変数を固定します。`D(expr)` は自由実変数が1個の場合に使用できます。多項式の次数は非負整数定数または自然数 `n` と小さい整数の加減算です。次数 `n-1` には `n>=1` 等の明示条件が必要です。`n>0`、`n>=1/2` 等の自然数の離散性を使う条件もLeanで検査します。
 - `int(0,1,body,t)` と `int(0,infinity,body,t)`、対応するLaTeX記法を使用できます。詳細は[数理仕様](docs/mathematics.md)。
 - 仮定不足は `needs_conditions`、対応レシピ・証明が未完成なら `unresolved`。既存v1で否定命題のLean証明が得られたときは `refuted`。v2の数値不一致は反例候補として保存します。
 
-Yの交差積は `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)`。固定mathlibにこの実Yの接続が揃っていないため、完全証明・条件付き代数証明・数値診断を別項目として扱います。根条件例：
+Yの交差積は `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)`。整数Yから交差積への解析的な接続を検査義務として保持し、条件付き代数証明・数値診断を保存します。根条件例：
 
 ```sh
 python3 -m special_function_agent verify examples/cross-product-root.txt --output runs/cross-product
 ```
 
-この例では左分母の末尾は `X_02`、右分子は微分を含まない `X_00` です。解析テンプレートは根条件・係数・次数・両辺の一致を検査して選択します。Yの定義、漸化式、Wronskian、ODEとエネルギー積分による分母非零性の形式化が後続の作業です。
+この例では左分母の末尾は `X_02`、右分子は微分を含まない `X_00` です。解析テンプレートは根条件・係数・次数・両辺の一致を検査して選択します。整数Yは標準の次数微分式で定義し、次数方向の微分可能性を前提とする極限補題まで形式化しています。残る工程はその微分可能性、次数と引数の微分交換、Wronskianの正規化、正エネルギー積分と分母非零性の証明です。[各検査義務](docs/bessel-y-formalization.md#残る解析的な接続)。
 
 ## 外部archive
 
@@ -115,8 +123,11 @@ Besselからの取り込みは明示した1記録を再検証し、出典と元�
 
 ```sh
 lake build
+python3 scripts/audit_special_functions.py
 SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -v
 python3 scripts/replay_examples.py
 ```
 
-Hermite/erfの上記公式を実装済みです。後続ロードマップは Legendre/Laguerre/Jacobi → hypergeometric/confluent/Airy → associated Legendre/spherical harmonics/elliptic の順です。一般複数根系、Yの微積分、複素枝、近似誤差と漸近剰余の保証も後続範囲です。現在は少数の関数族と閉じたレシピを登録し、必要な証明が完成したものから追加します。
+Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
+
+後続範囲は、多項式の直交性・重み・一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、整数Yの解析的接続、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。

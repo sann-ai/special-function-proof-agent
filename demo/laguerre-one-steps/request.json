@@ -1,0 +1,95 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "laguerre",
+    "order": {
+      "op": "int",
+      "value": 1
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    }
+  },
+  "rhs": {
+    "op": "sub",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "var",
+            "name": "a"
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "op": "var",
+        "name": "x"
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "laguerre",
+          "order": {
+            "op": "int",
+            "value": 1
+          },
+          "arg": {
+            "op": "var",
+            "name": "x"
+          },
+          "alpha": {
+            "op": "var",
+            "name": "a"
+          }
+        },
+        "after": {
+          "op": "sub",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "op": "var",
+              "name": "x"
+            }
+          ]
+        },
+        "recipe": "laguerre_values",
+        "reason": "一般化Laguerreの標準有限和から低次数を評価する。",
+        "conditions": [
+          "a is real",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

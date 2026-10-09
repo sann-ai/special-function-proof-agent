@@ -1,0 +1,1 @@
+Laguerre(2,a,x)=(x^2-2*(a+2)*x+(a+1)*(a+2))/2; a real,x real

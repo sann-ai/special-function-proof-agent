@@ -1,0 +1,15 @@
+{
+  "recipe": "laguerre_values",
+  "theorem": "laguerreL_one",
+  "arguments": [
+    {
+      "op": "int",
+      "value": 0
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

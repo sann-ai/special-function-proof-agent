@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "jacobi",
+    "order": {
+      "op": "int",
+      "value": 0
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    },
+    "beta": {
+      "op": "var",
+      "name": "b"
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 1
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "jacobi_values"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "recipe": "jacobi_values",
+  "theorem": "jacobiP_zero",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "a"
+    },
+    {
+      "op": "var",
+      "name": "b"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

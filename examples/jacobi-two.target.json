@@ -1,0 +1,234 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "jacobi",
+    "order": {
+      "op": "int",
+      "value": 2
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    },
+    "alpha": {
+      "op": "var",
+      "name": "a"
+    },
+    "beta": {
+      "op": "var",
+      "name": "b"
+    }
+  },
+  "rhs": {
+    "op": "add",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "int",
+                        "value": 2
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "int",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          {
+                            "op": "var",
+                            "name": "b"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "int",
+                        "value": 3
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "int",
+                        "value": 2
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "div",
+                "args": [
+                  {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "op": "int",
+                    "value": 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          {
+                            "op": "var",
+                            "name": "b"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "int",
+                        "value": 3
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          {
+                            "op": "var",
+                            "name": "b"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "int",
+                        "value": 4
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "int",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "op": "pow",
+            "base": {
+              "op": "div",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "x"
+                    },
+                    {
+                      "op": "int",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            "exponent": 2
+          }
+        ]
+      }
+    ]
+  }
+}

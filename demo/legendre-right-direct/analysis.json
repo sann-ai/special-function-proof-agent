@@ -1,0 +1,14 @@
+{
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "recipe": "legendre_endpoints",
+  "theorem": "legendreP_at_one",
+  "reverse": false
+}

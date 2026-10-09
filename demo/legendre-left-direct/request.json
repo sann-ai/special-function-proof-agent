@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "legendre",
+    "order": {
+      "op": "var",
+      "name": "n"
+    },
+    "arg": {
+      "op": "int",
+      "value": -1
+    }
+  },
+  "rhs": {
+    "op": "rpow",
+    "base": {
+      "op": "int",
+      "value": -1
+    },
+    "exponent": {
+      "op": "var",
+      "name": "n"
+    }
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "legendre_endpoints"
+  }
+}

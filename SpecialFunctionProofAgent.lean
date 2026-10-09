@@ -2,3 +2,7 @@ import SpecialFunctionProofAgent.Gamma
 import SpecialFunctionProofAgent.Beta
 import SpecialFunctionProofAgent.Hermite
 import SpecialFunctionProofAgent.Erf
+import SpecialFunctionProofAgent.Legendre
+import SpecialFunctionProofAgent.Laguerre
+import SpecialFunctionProofAgent.Jacobi
+import SpecialFunctionProofAgent.BesselY

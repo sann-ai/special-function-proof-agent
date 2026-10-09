@@ -18,7 +18,27 @@ for route in ("direct", "steps", "recurrence-direct", "recurrence-steps", "calcu
               "hermite-h-recurrence-direct", "hermite-h-recurrence-steps",
               "erf-derivative-direct", "erf-derivative-steps", "erf-zero-direct", "erf-zero-steps",
               "erf-odd-direct", "erf-odd-steps", "gaussian-finite-integral-direct", "gaussian-finite-integral-steps",
-              "hermite-ai-direct", "erf-ai-steps"):
+              "hermite-ai-direct", "erf-ai-steps",
+              "legendre-parity-direct", "legendre-parity-steps",
+              "legendre-zero-direct", "legendre-zero-steps",
+              "legendre-one-direct", "legendre-one-steps",
+              "legendre-two-direct", "legendre-two-steps",
+              "legendre-right-direct", "legendre-right-steps",
+              "legendre-left-direct", "legendre-left-steps",
+              "laguerre-zero-direct", "laguerre-zero-steps",
+              "laguerre-one-direct", "laguerre-one-steps",
+              "laguerre-two-direct", "laguerre-two-steps",
+              "ordinary-laguerre-one-direct", "ordinary-laguerre-one-steps",
+              "ordinary-laguerre-two-direct", "ordinary-laguerre-two-steps",
+              "laguerre-derivative-direct", "laguerre-derivative-steps",
+              "jacobi-zero-direct", "jacobi-zero-steps",
+              "jacobi-one-direct", "jacobi-one-steps",
+              "jacobi-two-direct", "jacobi-two-steps",
+              "jacobi-derivative-direct", "jacobi-derivative-steps",
+              "jacobi-legendre-direct", "jacobi-legendre-steps",
+              "yhalf-recurrence-direct", "yhalf-recurrence-steps",
+              "yhalf-derivative-direct", "yhalf-derivative-steps",
+              "laguerre-ai-direct", "yhalf-ai-steps"):
     path = ROOT / "demo" / route / "request.json"
     if not path.exists():
         raise SystemExit(f"Missing saved proof plan: {path}")
