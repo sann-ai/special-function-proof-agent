@@ -1,0 +1,11 @@
+{
+  "recipe": "hermite_he_values",
+  "theorem": "hermiteHe_zero",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

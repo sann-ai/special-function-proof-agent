@@ -33,13 +33,17 @@ def output_schema(route: str, target: dict | None = None) -> dict:
             return obj({"mode":{"type":"string", "enum":["direct"]}, "recipe":recipe})
         from .real_bessel import _walk
         bound = sorted({n['var'] for n in _walk(target) if n.get('op') == 'integral'}) or ['t']
+        derivative_names = sorted(name for name, kind in target['variables'].items() if kind == 'real') or ['x']
         ref = {"$ref":"#/$defs/expr"}
         expr = {"anyOf":[
             obj({"op":{"const":"int"}, "value":{"type":"integer"}}),
             obj({"op":{"const":"var"}, "name":{"type":"string", "enum":sorted(set(target['variables']) | set(bound))}}),
             obj({"op":{"const":"neg"}, "arg":ref}),
             obj({"op":{"type":"string", "enum":["add","sub","mul","div"]}, "args":{"type":"array","items":ref,"minItems":2,"maxItems":2}}),
-            obj({"op":{"type":"string", "enum":["gamma","exp"]}, "arg":ref}),
+            obj({"op":{"type":"string", "enum":["gamma","exp","erf","sqrt"]}, "arg":ref}),
+            obj({"op":{"const":"pi"}}),
+            obj({"op":{"type":"string", "enum":["hermite_h","hermite_he"]}, "order":ref, "arg":ref}),
+            obj({"op":{"const":"deriv"}, "var":{"type":"string","enum":derivative_names}, "arg":ref}),
             obj({"op":{"const":"pow"}, "base":ref, "exponent":{"type":"integer","minimum":0,"maximum":12}}),
             obj({"op":{"const":"rpow"}, "base":ref, "exponent":ref}),
             obj({"op":{"const":"infinity"}}),
@@ -88,6 +92,14 @@ def make_prompt(target: dict, route: str, previous_error: str = "") -> str:
         prompt = """Return one JSON proof plan matching the response schema. Do not use tools or edit files.
 The exact schema_version 2 target fixes every variable type, binding, assumption and equality.
 Use Real.Gamma, Real.rpow, Real.exp, real interval integrals and integrals on Set.Ioi.
+Hermite H means physicists, He means probabilists; degree n is natural, while Bessel uses integer degree.
+H_n(x)=sqrt(2)^n*He_n(sqrt(2)*x). erf uses its Gaussian integral definition on all real inputs.
+Do not add x>0 for Hermite or erf. For H/He derivatives and n-1 degrees, retain the input n>=1 condition.
+Additional recipes: hermite_h_derivative, hermite_he_derivative, hermite_h_values (H0=1,H1=2x),
+hermite_he_values (He0=1,He1=x), hermite_h_recurrence (H(n+1)=2xHn-2nH(n-1)),
+erf_derivative (D_x erf(x)=2exp(-x^2)/sqrt(pi)), erf_zero, erf_odd, gaussian_integral
+(integral a..b exp(-t^2)=sqrt(pi)/2*(erf(b)-erf(a)), with arbitrary real endpoints.
+Use deriv {var,arg}, hermite_h/hermite_he {order,arg}, erf/sqrt {arg}, pi {op:"pi"}.
 Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
 integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
 Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.

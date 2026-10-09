@@ -1,0 +1,1 @@
+D_x(He_n(x))=n*He_{n-1}(x); n natural,n>=1,x real

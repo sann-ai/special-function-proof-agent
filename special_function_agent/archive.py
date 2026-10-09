@@ -41,8 +41,8 @@ def canonical_target(target: dict) -> dict:
     validate_request(result, require_proof=False)
     if result["schema_version"] == 2:
         result["assumptions"] = sorted(result["assumptions"], key=lambda atom: _json_bytes(atom))
-        from .registry import CONVENTIONS
-        return {**result, "conventions": CONVENTIONS}
+        from .registry import conventions
+        return {**result, "conventions": conventions(result)}
     atoms = normalized_conditions(result)
     result.pop("extra_conditions", None)
     if atoms:

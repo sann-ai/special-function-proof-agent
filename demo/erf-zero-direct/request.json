@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "variables": {},
+  "assumptions": [],
+  "lhs": {
+    "op": "erf",
+    "arg": {
+      "op": "int",
+      "value": 0
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 0
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "erf_zero"
+  }
+}

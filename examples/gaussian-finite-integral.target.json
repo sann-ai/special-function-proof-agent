@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "var",
+      "name": "a"
+    },
+    "upper": {
+      "op": "var",
+      "name": "b"
+    },
+    "body": {
+      "op": "exp",
+      "arg": {
+        "op": "neg",
+        "arg": {
+          "op": "pow",
+          "base": {
+            "op": "var",
+            "name": "t"
+          },
+          "exponent": 2
+        }
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "div",
+        "args": [
+          {
+            "op": "sqrt",
+            "arg": {
+              "op": "pi"
+            }
+          },
+          {
+            "op": "int",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "op": "sub",
+        "args": [
+          {
+            "op": "erf",
+            "arg": {
+              "op": "var",
+              "name": "b"
+            }
+          },
+          {
+            "op": "erf",
+            "arg": {
+              "op": "var",
+              "name": "a"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

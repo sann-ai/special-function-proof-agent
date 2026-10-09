@@ -10,7 +10,15 @@ from special_function_agent.core import replay
 for route in ("direct", "steps", "recurrence-direct", "recurrence-steps", "calculus-direct", "calculus-steps",
               "origin-direct", "origin-steps", "gamma-direct", "gamma-steps",
               "beta-direct", "beta-steps", "scaled-gamma-direct", "scaled-gamma-steps",
-              "gamma-ai-direct", "beta-ai-steps"):
+              "gamma-ai-direct", "beta-ai-steps",
+              "hermite-h-derivative-direct", "hermite-h-derivative-steps",
+              "hermite-he-derivative-direct", "hermite-he-derivative-steps",
+              "hermite-h-zero-direct", "hermite-h-zero-steps", "hermite-h-one-direct", "hermite-h-one-steps",
+              "hermite-he-zero-direct", "hermite-he-zero-steps", "hermite-he-one-direct", "hermite-he-one-steps",
+              "hermite-h-recurrence-direct", "hermite-h-recurrence-steps",
+              "erf-derivative-direct", "erf-derivative-steps", "erf-zero-direct", "erf-zero-steps",
+              "erf-odd-direct", "erf-odd-steps", "gaussian-finite-integral-direct", "gaussian-finite-integral-steps",
+              "hermite-ai-direct", "erf-ai-steps"):
     path = ROOT / "demo" / route / "request.json"
     if not path.exists():
         raise SystemExit(f"Missing saved proof plan: {path}")

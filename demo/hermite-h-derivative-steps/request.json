@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "n",
+      "relation": "ge",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "hermite_h",
+      "order": {
+        "op": "var",
+        "name": "n"
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "int",
+            "value": 2
+          },
+          {
+            "op": "var",
+            "name": "n"
+          }
+        ]
+      },
+      {
+        "op": "hermite_h",
+        "order": {
+          "op": "sub",
+          "args": [
+            {
+              "op": "var",
+              "name": "n"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "deriv",
+          "var": "x",
+          "arg": {
+            "op": "hermite_h",
+            "order": {
+              "op": "var",
+              "name": "n"
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 2
+                },
+                {
+                  "op": "var",
+                  "name": "n"
+                }
+              ]
+            },
+            {
+              "op": "hermite_h",
+              "order": {
+                "op": "sub",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "n"
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        "recipe": "hermite_h_derivative",
+        "reason": "物理学規約Hの定義と確率論規約Heとの変換から導いた微分公式を、明示した自然数次数の条件で適用する。",
+        "conditions": [
+          "n is nat",
+          "x is real",
+          "n >= 1"
+        ]
+      }
+    ]
+  }
+}

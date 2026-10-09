@@ -1,0 +1,11 @@
+{
+  "recipe": "erf_derivative",
+  "theorem": "deriv_erf",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

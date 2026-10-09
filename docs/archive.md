@@ -110,3 +110,17 @@ JSON索引とMarkdown目録は記録本体から再構成します。索引の�
 証拠本体の改変・不正なパス・シンボリックリンクはエラーとして停止します。
 数学環境が変わった記録を現在の環境で調べ直すには、その `request.json` を新しい
 出力先で `verify --archive` に渡し、新しい検査履歴を作ります。
+
+
+## 数学環境を更新したとき
+
+Hermite/erfを追加した版では数学モジュールのハッシュが変わります。以前のGamma/Beta記録を `archive replay` すると環境差を検出します。命題の同一性は維持し、元記録を残して同じ証明計画を新環境で検査します。
+
+```sh
+python3 -m special_function_agent archive show RECORD_ID
+# 上のverification_dirに表示されたディレクトリを指定する
+python3 -m special_function_agent verify /path/to/verification/request.json --output runs/rechecked --archive
+python3 -m special_function_agent archive replay NEW_RECORD_ID
+```
+
+その後、同じtargetと同じrouteで生成器を実行すると、新環境の証拠を再検査して再利用できます。対象の型・全条件・関数規約は毎回一致を確認します。Hermiteの自然数次数とBesselの整数次数、物理学規約Hと確率論規約Heは、それぞれ独立した命題として保存します。

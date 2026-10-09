@@ -1,0 +1,1 @@
+D(erf(x))=2/sqrt(pi)*exp(-x^2); x real

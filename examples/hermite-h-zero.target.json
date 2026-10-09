@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "hermite_h",
+    "order": {
+      "op": "int",
+      "value": 0
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 1
+  }
+}

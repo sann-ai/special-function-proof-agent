@@ -5,19 +5,22 @@ from copy import deepcopy
 from fractions import Fraction
 
 from .core import InputError, NeedsConditions, _keys, _run_lean, _save_json, _sha, environment
-from .registry import CONVENTIONS
+from .registry import conventions
+from . import classical
 
-RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring')
-SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral'}
+RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES
+SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'erf', 'pi', 'sqrt', 'deriv'}
 
 
 def has_special(data):
     from .real_bessel import _walk
-    return data.get('schema_version') == 2 and any(n.get('op') in SPECIAL_OPS for n in _walk([data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]))
+    nodes = list(_walk([data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]))
+    return (data.get('schema_version') == 2 and any(n.get('op') in SPECIAL_OPS for n in nodes)
+            and not any(n.get('op') in {'bessel_y', 'bessel_cross'} for n in nodes))
 
 
 def validate_proof(data):
-    from .real_bessel import _validate_expr, labels
+    from .real_bessel import _validate_expr, labels, validate_order_domains, domains
     if 'proof' not in data:
         return
     proof = data['proof']
@@ -40,6 +43,7 @@ def validate_proof(data):
             _keys(step, {'before', 'after', 'recipe', 'reason', 'conditions'})
             for side in ('before', 'after'):
                 _validate_expr(step[side], data['variables'])
+                validate_order_domains(step[side], domains(data))
             if step['before'] != previous:
                 raise InputError('Every step must start at the preceding fixed endpoint.')
             if step['recipe'] not in RECIPES or not isinstance(step['reason'], str) or len(step['reason']) > 2000:
@@ -95,7 +99,7 @@ def match_identity(lhs, rhs):
                 else: continue
                 if r.get('op') == 'var' and right == _bin('mul', _rpow(r, _neg(a)), _gamma(a)):
                     return {'recipe': 'gamma_scaled_integral', 'arguments': [a, r], 'reverse': reverse}
-    return None
+    return classical.match(lhs, rhs)
 
 
 def default_proof(data, route='direct'):
@@ -108,15 +112,32 @@ def default_proof(data, route='direct'):
                'beta_integral': '正の2パラメータに対するEulerのBeta積分を適用する。',
                'gamma_scaled_integral': '正の形状・尺度パラメータに対するGamma積分を適用する。',
                'ring': '元の全条件の下で実数の代数式を整理する。'}
+    reasons.update(classical.REASONS)
     return {'mode': 'steps', 'steps': [{'before': deepcopy(data['lhs']), 'after': deepcopy(data['rhs']),
              'recipe': recipe, 'reason': reasons[recipe], 'conditions': labels(data)}]}
 
 
-def lean_expr(node, names):
+def lean_expr(node, names, types=None):
+    types = types or {}
     op = node['op']
-    ev = lambda n: lean_expr(n, names)
+    ev = lambda n: lean_expr(n, names, types)
     if op == 'int': return f'({node["value"]} : ℝ)'
-    if op == 'var': return names[node['name']]
+    if op == 'var':
+        value = names[node['name']]
+        return f'({value} : ℝ)' if types.get(node['name']) == 'nat' else value
+    if op == 'pi': return 'Real.pi'
+    if op == 'sqrt': return f'(Real.sqrt {ev(node["arg"])})'
+    if op == 'erf': return f'(SpecialFunctionProofAgent.erf {ev(node["arg"])})'
+    if op in {'hermite_h', 'hermite_he'}:
+        fn = 'hermiteH' if op == 'hermite_h' else 'hermiteHe'
+        return f'(SpecialFunctionProofAgent.{fn} {classical.lean_natural(node["order"], names)} {ev(node["arg"])})'
+    if op == 'deriv':
+        index = len(names)
+        while f'd{index}' in names.values():
+            index += 1
+        bound = f'd{index}'
+        body = lean_expr(node['arg'], {**names, node['var']:bound}, types)
+        return f'(deriv (fun ({bound} : ℝ) => {body}) {names[node["var"]]})'
     if op == 'neg': return f'(-{ev(node["arg"])})'
     if op in {'add', 'sub', 'mul', 'div'}:
         return '(' + ev(node['args'][0]) + {'add':' + ', 'sub':' - ', 'mul':' * ', 'div':' / '}[op] + ev(node['args'][1]) + ')'
@@ -125,28 +146,33 @@ def lean_expr(node, names):
     if op in {'gamma', 'exp'}: return f'({"Real.Gamma" if op == "gamma" else "Real.exp"} {ev(node["arg"])})'
     if op == 'integral':
         bound = f'b{len(names)}'
-        body = lean_expr(node['body'], {**names, node['var']: bound})
+        body = lean_expr(node['body'], {**names, node['var']: bound}, types)
         if node['upper'] == {'op':'infinity'}:
             return f'(∫ {bound} in Set.Ioi {ev(node["lower"])}, {body})'
         return f'(∫ {bound} in {ev(node["lower"])}..{ev(node["upper"])}, {body})'
     raise InputError('This expression has no registered full real Lean translation.')
 
 
-def _condition(atom, names):
+def _condition(atom, names, types=None):
+    types = types or {}
     from .real_bessel import RELATIONS
     relation = RELATIONS[atom['relation']].replace('!=', '≠').replace('>=', '≥').replace('<=', '≤')
     if atom['op'] == 'compare':
         p, q = atom['value']['numerator'], atom['value']['denominator']
-        return f'{names[atom["variable"]]} {relation} ({p} / {q} : ℝ)'
-    return f'{lean_expr(atom["lhs"], names)} {relation} (0 : ℝ)'
+        value = lean_expr({'op':'var','name':atom['variable']}, names, types)
+        return f'{value} {relation} ({p} / {q} : ℝ)'
+    return f'{lean_expr(atom["lhs"], names, types)} {relation} (0 : ℝ)'
 
 
-def _recipe(recipe, lhs, rhs, names):
+def _recipe(recipe, lhs, rhs, names, types=None):
+    types = types or {}
     if recipe == 'ring': return ['ring']
     match = match_identity(lhs, rhs)
     if not match or match['recipe'] != recipe:
         raise InputError('This recipe does not match the exact equality endpoints.')
-    args = ' '.join(lean_expr(a, names) for a in match['arguments'])
+    if recipe in classical.RECIPES:
+        return classical.proof_lines(match, names, lambda a: lean_expr(a, names, types))
+    args = ' '.join(lean_expr(a, names, types) for a in match['arguments'])
     hypotheses = ' '.join('(by linarith)' for _ in match['arguments'])
     fact = f'SpecialFunctionProofAgent.{recipe} {args} {hypotheses}'
     if match['reverse']: fact = f'({fact}).symm'
@@ -156,20 +182,34 @@ def _recipe(recipe, lhs, rhs, names):
 def render(data):
     validate_proof(data)
     names = {name: f'v{i}' for i, name in enumerate(sorted(data['variables']))}
-    if any(kind != 'real' for kind in data['variables'].values()):
-        raise InputError('The initial Gamma/Beta formal recipes use real parameters.')
-    binders = ' '.join(f'({names[n]} : ℝ)' for n in sorted(names))
-    conditions = ' '.join(f'(h{i} : {_condition(a, names)})' for i,a in enumerate(data['assumptions']))
-    proposition = f'{lean_expr(data["lhs"], names)} = {lean_expr(data["rhs"], names)}'
+    types = data['variables']
+    if any(kind not in {'real', 'nat'} for kind in types.values()):
+        raise InputError('The formal real recipes use real parameters and natural Hermite degrees.')
+    binders = ' '.join(f'({names[n]} : {"ℕ" if types[n] == "nat" else "ℝ"})' for n in sorted(names))
+    conditions = ' '.join(f'(h{i} : {_condition(a, names, types)})' for i,a in enumerate(data['assumptions']))
+    proposition = f'{lean_expr(data["lhs"], names, types)} = {lean_expr(data["rhs"], names, types)}'
     lines = ['import SpecialFunctionProofAgent', '', 'open scoped Real', 'open MeasureTheory', '',
              'namespace BesselAgentCandidate', '', f'theorem target {binders} {conditions} : {proposition} := by']
+    # Derive integer comparisons from the fixed real-valued rational bounds. This
+    # preserves Nat's discreteness (n>0, n>=1/2, and n!=0 all imply n>=1).
+    from .real_bessel import RELATIONS
+    for i, atom in enumerate(data['assumptions']):
+        if atom['op'] != 'compare' or types[atom['variable']] != 'nat':
+            continue
+        p, q = atom['value']['numerator'], atom['value']['denominator']
+        v = names[atom['variable']]
+        relation = RELATIONS[atom['relation']].replace('!=', '≠').replace('>=', '≥').replace('<=', '≤')
+        lines += [f'  have hn_condition_{i} : ({q} : ℤ) * ({v} : ℤ) {relation} ({p} : ℤ) := by',
+                  f'    have hr : ({q} : ℝ) * ({v} : ℝ) {relation} ({p} : ℝ) := by']
+        lines += [f'      intro hz; apply h{i}; linarith' if atom['relation'] == 'ne' else f'      linarith [h{i}]',
+                  '    exact_mod_cast hr']
     proof = data['proof']
     if proof['mode'] == 'direct':
-        lines += ['  '+line for line in _recipe(proof['recipe'], data['lhs'], data['rhs'], names)]
+        lines += ['  '+line for line in _recipe(proof['recipe'], data['lhs'], data['rhs'], names, types)]
     elif proof['mode'] == 'steps':
         for i,step in enumerate(proof['steps']):
-            lines += [f'  have step_{i+1} : {lean_expr(step["before"], names)} = {lean_expr(step["after"], names)} := by']
-            lines += ['    '+line for line in _recipe(step['recipe'], step['before'], step['after'], names)]
+            lines += [f'  have step_{i+1} : {lean_expr(step["before"], names, types)} = {lean_expr(step["after"], names, types)} := by']
+            lines += ['    '+line for line in _recipe(step['recipe'], step['before'], step['after'], names, types)]
         chain = 'step_1'
         for i in range(1,len(proof['steps'])): chain = f'({chain}).trans step_{i+1}'
         lines += [f'  exact {chain}']
@@ -186,12 +226,12 @@ def verify(data, output_dir, timeout):
     analysis = match_identity(data['lhs'], data['rhs'])
     result = {'status':'unresolved', 'reason':'no_accepted_full_certificate',
               'statement':display(data['lhs'])+' = '+display(data['rhs']), 'conditions':labels(data),
-              'environment':environment(), 'conventions':CONVENTIONS, 'full_function_proof':False,
+              'environment':environment(), 'conventions':conventions(data), 'full_function_proof':False,
               'analysis':analysis, 'numerical':numeric, 'attempts':[],
               'request_sha256':_sha((output_dir/'request.json').read_bytes())}
     bounds = domains(data)
     pending = []
-    if analysis:
+    if analysis and analysis['recipe'] not in classical.RECIPES:
         for arg in analysis['arguments']:
             lo = bounds[arg['name']][0]
             if not lo or not (lo[0] > 0 or lo == (0, True)): pending.append(arg['name']+' > 0')
@@ -222,6 +262,9 @@ def verify(data, output_dir, timeout):
     _save_json(output_dir/'result.json', result)
     lines = ['# Special Function Proof Agent', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
              '完全Lean証明：'+result['status'], '数値診断：'+numeric['diagnostic']]
+    from .real_bessel import _walk
+    if any(node.get('op') in {'hermite_h', 'hermite_he'} for node in _walk([data['lhs'], data['rhs']])):
+        lines += ['', 'Hermite規約：Hは物理学規約、Heは確率論規約。次数は自然数です。']
     if data['proof']['mode'] == 'steps':
         lines += ['', '構造化ステップ（各等式を元の全条件で検査）：']
         for i,step in enumerate(data['proof']['steps'],1):
@@ -237,7 +280,7 @@ def replay(data, result, output_dir, timeout):
         raise InputError('Certificate kind and full proof status disagree.')
     source = render(data)
     certificate = output_dir/'certificate.lean'
-    if result.get('environment') != environment() or result.get('conventions') != CONVENTIONS:
+    if result.get('environment') != environment() or result.get('conventions') != conventions(data):
         raise InputError('The mathematical environment or conventions changed.')
     if certificate.read_text(encoding='utf-8') != source or result.get('certificate_sha256') != _sha(source.encode()):
         raise InputError('Saved certificate differs from the fixed target and recipe.')

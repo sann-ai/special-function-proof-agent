@@ -1,0 +1,15 @@
+{
+  "recipe": "gaussian_integral",
+  "theorem": "gaussian_integral",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "a"
+    },
+    {
+      "op": "var",
+      "name": "b"
+    }
+  ],
+  "reverse": false
+}

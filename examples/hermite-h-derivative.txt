@@ -1,0 +1,1 @@
+D(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real

@@ -1,0 +1,22 @@
+{
+  "recipe": "hermite_h_derivative",
+  "theorem": "hermiteH_derivative",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "positive_degree": {
+    "op": "var",
+    "name": "n"
+  },
+  "reverse": false
+}

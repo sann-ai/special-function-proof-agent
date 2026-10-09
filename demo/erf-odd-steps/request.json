@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "erf",
+    "arg": {
+      "op": "neg",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "neg",
+    "arg": {
+      "op": "erf",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "erf",
+          "arg": {
+            "op": "neg",
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "neg",
+          "arg": {
+            "op": "erf",
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "recipe": "erf_odd",
+        "reason": "Gaussianの偶関数性と積分方向の反転から誤差関数の奇関数性を適用する。",
+        "conditions": [
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

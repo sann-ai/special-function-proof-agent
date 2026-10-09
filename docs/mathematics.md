@@ -1,26 +1,108 @@
 # 共通v2の数理仕様
 
-v2は実数型の自由変数（最大3個）と整数次数n、構造化した全仮定、左辺・右辺を保存します。識別子は安全ASCII名、積分は `var` フィールドで束縛し、自由変数との同名衝突を拒否します。固定したmathlibの意味を関数別登録表と環境ハッシュに含めます。
+v2は実数型の自由変数（最大3個）、次数変数nの型、構造化した全仮定、左辺・右辺を保存します。Besselのnは整数、Hermiteのnは自然数として宣言します。識別子は安全ASCII名、積分は `var` フィールドで束縛し、自由変数との同名衝突を拒否します。微分は実変数名を明示して保存します。固定したmathlibの意味とプロジェクトの追加定義を、関数別登録表と環境ハッシュに含めます。
 
 - `gamma {arg}`：`Real.Gamma`。
 - `exp {arg}`：`Real.exp`。
 - `rpow {base, exponent}`：`Real.rpow`。指数も実数ASTです。
-- `integral {var, lower, upper, body}`：有限上端は実区間積分。`upper: {"op":"infinity"}` は `Set.Ioi lower` 上のルベーグ積分。`infinity`は積分上端だけで許可します。
+- `pi`、`sqrt {arg}`：`Real.pi`、`Real.sqrt`。
+- `hermite_h {order, arg}`、`hermite_he {order, arg}`：物理学規約H、確率論規約He。次数は自然数です。
+- `erf {arg}`：後述する標準の実誤差関数。
+- `deriv {var, arg}`：指定した自由実変数の実微分を、その変数の現在値で評価します。
+- `integral {var, lower, upper, body}`：有限上端は向き付き実区間積分。`upper: {"op":"infinity"}` は `Set.Ioi lower` 上のルベーグ積分。`infinity`は積分上端だけで許可します。
 - 算術はint、var、neg、add/sub/mul/div、非負整数指数pow。比較仮定は有理数とのcompareと、式を0と比較するexpr_compareです。
 
-plain入力は `int(0,1,t^(a-1)*(1-t)^(b-1),t)`、`int(0,infinity,t^(a-1)*exp(-r*t),t)` です。LaTeXの `\Gamma`、`\exp`、`\int_0^1 ... dt`、`\infty` にも対応します。型だけを宣言する `a real` で正性が不足する場合、構造化後の検査は必要な正性を `needs_conditions` として返します。
+plain入力は `int(0,1,t^(a-1)*(1-t)^(b-1),t)`、`D_x(H_n(x))`、`erf(-x)` などです。LaTeXの `\Gamma`、`\exp`、`\int_0^1 ... dt`、`\infty`、`\sqrt{\pi}`、`\operatorname{erf}` にも対応します。全実数を対象とする式には `x real`、自然数次数には `n natural` を使います。正性などの追加条件が必要な式では、その条件を保存して検査し、不足時は `needs_conditions` を返します。
 
-完全証明の初期レシピは次の3式です。各パラメータの正性を元の仮定からLeanで導出します。
+## GammaとBeta
+
+次の3式について、各パラメータの正性を元の仮定からLeanで導出します。
 
 1. `Gamma(x+1)=x*Gamma(x)`、x>0。
 2. `int(0,1,t^(a-1)*(1-t)^(b-1),t)=Gamma(a)*Gamma(b)/Gamma(a+b)`、a,b>0。
 3. `int(0,infinity,t^(a-1)*exp(-r*t),t)=r^(-a)*Gamma(a)`、a,r>0。
 
-Betaでは実関数積分の複素埋込みとmathlibの `Complex.betaIntegral` を結び、実数Gamma比へ戻しています。scaled Gammaはmathlibの実Gamma積分から証明します。結果の公理監査は `propext`、`Classical.choice`、`Quot.sound` のみを許可します。
+Betaでは実関数積分の複素埋込みとmathlibの `Complex.betaIntegral` を結び、実数Gamma比へ戻しています。scaled Gammaはmathlibの実Gamma積分から証明します。Gammaの正引数とBeta分母の非零性は定義域検査にも反映します。
 
-v2の一般式は同じ入力層に保存できます。完全証明は上の構造に一致する等式と実数環の整理が対象です。Gammaの正引数とBeta分母の非零性は定義域検査にも反映します。一般積分の収束・複素枝・極での式の扱いは、対応する検査と証明の追加対象です。
+## Hermiteの規約と微分
 
-Bessel YとXは正実数の数値・解析・条件付き代数証明に対応します。元の全命題の状態は unresolved/full_bessel_proof:falseです。Yの定義から解析公式・正エネルギー積分・分母非零性までつなぐ作業を後続に保持します。
+固定mathlibの `Polynomial.hermite : ℕ → Polynomial ℤ` は確率論規約の多項式です。`SpecialFunctionProofAgent/Hermite.lean` では、その実数での評価を
+
+\[
+\operatorname{He}_n(x)=\operatorname{aeval}_x(\texttt{Polynomial.hermite}\ n),
+\qquad n\in\mathbb N,\ x\in\mathbb R
+\]
+
+として `hermiteHe` に定義します。物理学規約の `hermiteH` は
+
+\[
+H_n(x)=(\sqrt 2)^n\operatorname{He}_n(\sqrt 2\,x)
+\]
+
+と定義し、公開補題 `hermiteH_eq_scaled_hermiteHe` に同じ関係を記録します。入力の `H_n(x)` は物理学規約、`He_n(x)` は確率論規約へそれぞれ接続します。
+
+自然数次数n≥1と任意の実数xについて、
+
+\[
+\frac{d}{dx}\operatorname{He}_n(x)=n\operatorname{He}_{n-1}(x),
+\qquad
+\frac{d}{dx}H_n(x)=2nH_{n-1}(x)
+\]
+
+を `hermiteHe_derivative`、`hermiteH_derivative` で証明します。まずmathlibの多項式の再帰定義から形式微分の次数降下を帰納法で示し、`Polynomial.hasDerivAt_aeval` を用いて実微分に移します。Hの公式は上記スケーリングと合成関数の微分から導きます。`hasDerivAt_hermiteHe_succ` と `hasDerivAt_hermiteH_succ` は次数n+1での微分可能性を含む補題です。
+
+初期値と物理学規約の漸化式も公開します。
+
+\[
+\operatorname{He}_0(x)=1,\quad \operatorname{He}_1(x)=x,
+\qquad H_0(x)=1,\quad H_1(x)=2x,
+\]
+\[
+H_{n+1}(x)=2xH_n(x)-2nH_{n-1}(x),\qquad n\ge1.
+\]
+
+補題名は `hermiteHe_zero`、`hermiteHe_one`、`hermiteH_zero`、`hermiteH_one`、`hermiteH_recurrence` です。全自然数nに対する後続次数形は `hermiteHe_succ_succ`、`hermiteH_succ_succ` にあります。Lean補題を組み合わせると `H_2(x)=4x²−2` も導出できます。CLIの値レシピは0・1次に対応します。
+
+CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です。次数の入力範囲は0〜1000の自然数リテラル、n、n+k、n−kで、kは0〜12です。n−kを含む入力はn≥kを導く元条件を確認します。Leanでは次数を `ℕ`、係数中のnを実数へのキャストとして扱い、減算の下限と微分公式の正次数条件をそれぞれ検査します。
+
+## 実誤差関数とGaussian有限区間積分
+
+`SpecialFunctionProofAgent/Erf.lean` の公開定義 `erf : ℝ → ℝ` は
+
+\[
+\operatorname{erf}(x)=\frac{2}{\sqrt\pi}\int_0^x e^{-t^2}\,dt
+\]
+
+です。実指数関数 `Real.exp` と向き付き `intervalIntegral` を使用します。Gaussianの連続性から任意の有限実区間での可積分性を得て、積分の基本定理に接続します。任意の実数xについて
+
+\[
+\operatorname{erf}'(x)=\frac{2}{\sqrt\pi}e^{-x^2},
+\qquad \operatorname{erf}(0)=0,
+\qquad \operatorname{erf}(-x)=-\operatorname{erf}(x)
+\]
+
+を `deriv_erf`、`erf_zero`、`erf_neg` で証明します。`hasDerivAt_erf` は全実数での微分可能性も与えます。奇関数性の証明にはGaussianの偶関数性と積分方向の反転を使います。
+
+任意の実数端点a,bに対して、`gaussian_integral` は
+
+\[
+\int_a^b e^{-t^2}\,dt
+=\frac{\sqrt\pi}{2}\bigl(\operatorname{erf}(b)-\operatorname{erf}(a)\bigr)
+\]
+
+を与えます。a<b、a=b、a>bの各場合を同じ向き付き積分で扱います。証明は0を基点とする2つの積分の差、erfの定義、`Real.pi_pos` から得る√πの非零性を使います。
+
+代表入力は `D_x(erf(x))=2/sqrt(pi)*exp(-x^2); x real` と `int(a,b,exp(-t^2),t)=sqrt(pi)/2*(erf(b)-erf(a)); a real,b real` です。これらの例は、実数型の宣言のみを条件として全域を検査します。
+
+## 証明の接続・監査と現在の範囲
+
+`classical.py` はH/Heの規約、微分変数、次数、積分端点、係数を含む等式構造を照合し、対応する公開Lean補題を選びます。`real_special.py` は元の全変数・全仮定・左右辺から対象定理を生成します。directとstepsは同じ固定対象を検査し、stepsでは各等式の端点連結も確認します。
+
+Hermite・erfの公開定義と17公開定理は固定Lean/mathlibでコンパイルし、`#print axioms` を実行しました。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。生成証明もこの許可集合で監査し、元入力・証明ソース・規約・環境の同一性を再検証時に確認します。数学的対象の登録表には、H/Heの区別、自然数次数、erfの正規化、微分変数と積分方向を含めます。
+
+v2の完全証明経路は上記の登録公式と実数環の整理を対象とします。Hermiteは自然数次数・実引数、erfは実引数の微分・初期値・奇関数性・Gaussian有限区間積分を扱います。複素erf、erfc、誤差関数の近似式・近似誤差の評価、Gaussianの一般変形や無限区間公式は追加の定義・補題・レシピを要する範囲です。数値診断は既存mpmathによる有限標本、条件の残差、差の候補、計算できなかった理由を記録します。Hermiteの数値計算は次数0〜40・引数の絶対値60以下を対象とし、範囲外では理由を保存します。近似誤差の厳密な区間評価は今後の対象です。
+
+Bessel Yと交差積Xは正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、元の全命題の状態は `unresolved`、`full_bessel_proof: false` です。Yの定義から微分・積分公式、正エネルギー積分、分母非零性までつなぐ形式証明を、後続の検査義務として保持します。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
 
 ## 引き継いだBessel v1の基盤
 

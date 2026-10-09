@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "direct"
+      ]
+    },
+    "recipe": {
+      "type": "string",
+      "enum": [
+        "gamma_recurrence",
+        "beta_integral",
+        "gamma_scaled_integral",
+        "ring",
+        "hermite_h_derivative",
+        "hermite_he_derivative",
+        "hermite_h_values",
+        "hermite_he_values",
+        "hermite_h_recurrence",
+        "erf_derivative",
+        "erf_zero",
+        "erf_odd",
+        "gaussian_integral"
+      ]
+    }
+  },
+  "required": [
+    "mode",
+    "recipe"
+  ],
+  "additionalProperties": false
+}

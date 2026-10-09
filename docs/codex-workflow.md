@@ -2,7 +2,7 @@
 
 プロジェクト全体のルールは [AGENTS.md](../AGENTS.md) にあります。入力をparseし、全仮定・型・束縛を確認してから検証します。ユーザーが指定した全条件を保存し、証明候補で追加しません。
 
-ローカルで登録済みGamma/Betaレシピを使う場合：
+ローカルで登録済みGamma/Beta/Hermite/erfレシピを使う場合：
 
 ```sh
 python3 -m special_function_agent verify examples/beta-integral.txt --route direct --output runs/beta-direct
@@ -13,6 +13,20 @@ python3 -m special_function_agent replay runs/beta-steps
 AIがレシピ/理由を選ぶ場合は `python3 -m special_function_agent.generate examples/beta-integral.target.json --route steps --output runs/beta-ai` を使います。既存Codex CLIのモデルと本人の認証を利用し、Ultraで候補を生成します。targetは生成側へ固定データとして渡し、応答はproofだけを受け取ります。
 
 依頼例：「正のshape,rateについてGamma積分を検証し、元命題のLean状態・数値診断・残る定義域条件を確認してください。直接/ステップ両経路をreplayし、外部archiveに保存してください。」
+
+## Hermiteと誤差関数
+
+`H_n` は物理学規約、`He_n` は確率論規約です。Hermiteの次数は `n natural` と宣言し、微分の `H_{n-1}` / `He_{n-1}` に必要な `n>=1` を元条件に含めます。実数の引数には正値条件は不要です。誤差関数は `erf(x)=2/sqrt(pi)*int(0,x,exp(-t^2),t)` の定義を使います。
+
+```sh
+python3 -m special_function_agent verify examples/hermite-h-derivative.txt --route direct --output runs/hermite-direct
+python3 -m special_function_agent verify examples/erf-derivative.txt --route steps --output runs/erf-steps
+python3 -m special_function_agent verify examples/gaussian-finite-integral.txt --route steps --output runs/gaussian-steps
+python3 -m special_function_agent.generate examples/hermite-h-derivative.target.json --route direct --output runs/hermite-ai --archive
+python3 -m special_function_agent.generate examples/erf-derivative.target.json --route steps --output runs/erf-ai --archive
+```
+
+依頼例：「物理学規約のHermite微分公式を `n natural,n>0,x real` の全条件で検証してください。次に誤差関数の微分と、任意実端点のGaussian積分をステップ経路で検証してください。各段階で定義・規約・条件を保持し、証拠を保存してreplayしてください。」
 
 ## 引き継いだBesselの操作例
 

@@ -14,7 +14,7 @@ from typing import Any
 from .core import InputError, NeedsConditions, _keys, _expr, _constant, _run_lean, _save_json, _sha, environment
 
 VARIABLES = {'n', 'x', 'z', 'lambda', 's', 'w', 't'}
-RESERVED_NAMES = {'J', 'Y', 'X', 'Gamma', 'gamma', 'exp', 'sqrt', 'int',
+RESERVED_NAMES = {'J', 'Y', 'X', 'H', 'He', 'Gamma', 'gamma', 'exp', 'erf', 'pi', 'sqrt', 'int',
                   'infinity', 'inf', 'D', 'Dx', 'Dt', 'd'}
 RELATIONS = {'gt': '>', 'ge': '>=', 'lt': '<', 'le': '<=', 'eq': '=', 'ne': '!='}
 CROSS_DEFINITION = 'X_nm(s,t) = J_n(s)*Y_m(t) - Y_n(s)*J_m(t)'
@@ -48,14 +48,23 @@ def _convert(node):
         return {'op': op, 'args': [_convert(a) for a in node['args']]}
     if op == 'neg':
         return {'op': op, 'arg': _convert(node['arg'])}
-    if op in {'gamma', 'exp'}:
+    if op in {'gamma', 'exp', 'erf', 'sqrt'}:
         return {'op': op, 'arg': _convert(node['arg'])}
-    if op == 'infinity':
-        return {'op': 'infinity'}
+    if op in {'infinity', 'pi'}:
+        return {'op': op}
+    if op == 'deriv':
+        arg = _convert(node['arg'])
+        variable = node.get('variable')
+        if variable is None:
+            names = _free_names(arg) - {'n'}
+            if len(names) != 1:
+                raise NeedsConditions('Specify the differentiation variable as D_x(expression).')
+            variable = next(iter(names))
+        return {'op': op, 'var': variable, 'arg': arg}
     if op == 'integral':
         return {'op': op, 'var': node['variable'], 'lower': _convert(node['lower']),
                 'upper': _convert(node['upper']), 'body': _convert(node['arg'])}
-    if op in {'bessel_j', 'bessel_y'}:
+    if op in {'bessel_j', 'bessel_y', 'hermite_h', 'hermite_he'}:
         return {'op': op, 'order': _order(node['order']), 'arg': _convert(node['arg'])}
     if op == 'bessel_cross':
         return {'op': op, 'orders': [_order(a) for a in node['orders']], 'args': [_convert(a) for a in node['args']]}
@@ -77,6 +86,8 @@ def _free_names(node, bound=frozenset()):
     if node.get('op') == 'integral':
         return (_free_names(node['lower'], bound) | _free_names(node['upper'], bound)
                 | _free_names(node['body'], bound | {node['var']}))
+    if node.get('op') == 'deriv':
+        return ({node['var']} - bound) | _free_names(node['arg'], bound)
     return set().union(*(_free_names(value, bound) for value in node.values()))
 
 
@@ -88,7 +99,7 @@ def _parts(raw):
     if len(raw) > 8192:
         raise InputError('Conditions exceed the text length limit.')
     raw = raw.replace(r'\lambda', 'lambda').replace('λ', 'lambda').replace('、', ',').replace('，', ',')
-    raw = raw.replace(r'\mathbb{Z}', 'Z').replace(r'\mathbb{R}', 'R').replace(r'\in', 'in').replace('∈', 'in').replace('ℤ', 'Z').replace('ℝ', 'R')
+    raw = raw.replace(r'\mathbb{Z}', 'Z').replace(r'\mathbb{R}', 'R').replace(r'\mathbb{N}', 'N').replace(r'\in', 'in').replace('∈', 'in').replace('ℤ', 'Z').replace('ℝ', 'R').replace('ℕ', 'N')
     for old, new in [(r'\geq', '>='), (r'\leq', '<='), (r'\neq', '!='), (r'\ge', '>='), (r'\le', '<='), (r'\ne', '!='), ('≥', '>='), ('≤', '<='), ('≠', '!=')]:
         raw = raw.replace(old, new)
     raw = re.sub(r'\b(?:and|where|for)\b|かつ', ',', raw)
@@ -111,13 +122,19 @@ def _parts(raw):
 def parse_target(text, conditions):
     from .parser import _Parser
     lhs, rhs = _Parser(text, extended=True).equation()
+    lhs, rhs = _convert(lhs), _convert(rhs)
     assumptions = []
-    integer_stated = False
+    order_type = None
     real_stated = set()
-    for part in _parts(conditions):
+    parts = [] if (conditions is None or conditions == '') and not _free_names([lhs, rhs]) else _parts(conditions)
+    for part in parts:
         compact = re.sub(r'\s+', '', part)
-        if compact in {'ninteger', 'ninZ', 'n:Z', 'nは整数', 'n整数'}:
-            integer_stated = True
+        declared_type = ('int' if compact in {'ninteger', 'ninZ', 'n:Z', 'nは整数', 'n整数'} else
+                         'nat' if compact in {'nnatural', 'ninN', 'n:N', 'nは自然数', 'n自然数'} else None)
+        if declared_type:
+            if order_type is not None and order_type != declared_type:
+                raise InputError('Declare n with one order type: integer or natural.')
+            order_type = declared_type
             continue
         real = re.fullmatch(r'([A-Za-z][A-Za-z0-9_]{0,31}?)(?:real|inR|:R|は実数)', compact)
         if real and is_variable_name(real[1]) and real[1] != 'n':
@@ -151,15 +168,54 @@ def parse_target(text, conditions):
                 atom = {'op': 'expr_compare', 'lhs': _convert(expr), 'relation': operator, 'rhs': {'op': 'int', 'value': 0}}
             if atom not in assumptions:
                 assumptions.append(atom)
-    lhs, rhs = _convert(lhs), _convert(rhs)
     names = _free_names([lhs, rhs, assumptions]) | real_stated
     names |= {a['variable'] for a in assumptions if a['op'] == 'compare'}
-    if 'n' in names and not integer_stated:
-        raise NeedsConditions('State n integer for an integer-order variable.')
-    target = {'schema_version': 2, 'variables': {name: 'int' if name == 'n' else 'real' for name in sorted(names)},
+    if 'n' in names and order_type is None:
+        raise NeedsConditions('State n integer for Bessel orders or n natural for Hermite orders.')
+    target = {'schema_version': 2, 'variables': {name: order_type if name == 'n' else 'real' for name in sorted(names)},
               'assumptions': assumptions, 'lhs': lhs, 'rhs': rhs}
     validate(target, require_proof=False)
     return target
+
+
+def _hermite_order(node, variables):
+    """Validate the small natural-order grammar and return a required lower bound."""
+    if not isinstance(node, dict):
+        raise InputError('Hermite orders require a natural literal or n with a small offset.')
+    if node.get('op') == 'int':
+        _keys(node, {'op', 'value'})
+        if type(node['value']) is not int or not 0 <= node['value'] <= 1000:
+            raise InputError('Literal Hermite orders must be natural numbers bounded by 1000.')
+        return 0
+    if node.get('op') == 'var':
+        _keys(node, {'op', 'name'})
+        if node['name'] != 'n' or variables.get('n') != 'nat':
+            raise InputError('Hermite order n requires the natural-number type.')
+        return 0
+    if node.get('op') in {'add', 'sub'}:
+        _keys(node, {'op', 'args'})
+        args = node['args']
+        if not isinstance(args, list) or len(args) != 2 or args[0] != {'op': 'var', 'name': 'n'}:
+            raise InputError('Shifted Hermite orders have the form n+k or n-k.')
+        _hermite_order(args[0], variables)
+        if not isinstance(args[1], dict) or args[1].get('op') != 'int':
+            raise InputError('A Hermite order offset must be an integer from 0 to 12.')
+        _hermite_order(args[1], variables)
+        if args[1]['value'] > 12:
+            raise InputError('A Hermite order offset must be an integer from 0 to 12.')
+        return args[1]['value'] if node['op'] == 'sub' else 0
+    raise InputError('Hermite orders support natural literals, n, n+k, or n-k.')
+
+
+def validate_order_domains(nodes, bounds):
+    for node in _walk(nodes):
+        if node.get('op') in {'hermite_h', 'hermite_he'}:
+            order = node['order']
+            if order.get('op') == 'sub':
+                required = order['args'][1]['value']
+                lower = bounds.get('n', [None, None, set()])[0]
+                if lower is None or lower[0] < required:
+                    raise NeedsConditions(f'The Hermite order n-{required} requires an explicit domain implying n >= {required}.')
 
 
 def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=frozenset()):
@@ -194,8 +250,16 @@ def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=fr
         if type(node['exponent']) is not int or not 0 <= node['exponent'] <= 12:
             raise InputError('Real diagnostics support powers 0..12.')
         child(node['base'])
-    elif op in {'gamma', 'exp'}:
+    elif op == 'pi':
+        _keys(node, {'op'})
+    elif op in {'gamma', 'exp', 'erf', 'sqrt'}:
         _keys(node, {'op', 'arg'})
+        child(node['arg'])
+    elif op == 'deriv' and not scalar:
+        _keys(node, {'op', 'var', 'arg'})
+        name = node['var']
+        if not is_variable_name(name) or variables.get(name) != 'real' or name in bound:
+            raise InputError('A derivative variable must be a declared free real variable, distinct from integral bindings.')
         child(node['arg'])
     elif op == 'rpow':
         _keys(node, {'op', 'base', 'exponent'})
@@ -222,16 +286,21 @@ def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=fr
                 _fixed_exponent(order)
             else:
                 _expr(order, 'int')
-            if any(n.get('op') == 'var' and n.get('name') not in variables for n in _walk(order)):
-                raise InputError('Declare the integer order variable n.')
+            if any(n.get('op') == 'var' and variables.get(n.get('name')) != 'int' for n in _walk(order)):
+                raise InputError('Bessel order n requires the integer type.')
         for arg in args:
             child(arg, True)
+    elif op in {'hermite_h', 'hermite_he'} and not scalar:
+        _keys(node, {'op', 'order', 'arg'})
+        _hermite_order(node['order'], variables)
+        child(node['arg'], True)
     else:
         raise InputError(f'Unsupported real diagnostic operation {op!r}.')
 
 
 def domains(data):
-    result = {name: [None, None, set()] for name in data['variables']}
+    result = {name: [(Fraction(0), False) if kind == 'nat' else None, None, set()]
+              for name, kind in data['variables'].items()}
     for atom in data['assumptions']:
         if atom['op'] != 'compare':
             continue
@@ -249,7 +318,7 @@ def domains(data):
             if domain[1] is None or (q, not edge[1]) < (domain[1][0], not domain[1][1]):
                 domain[1] = edge
     for name, (lo, hi, excluded) in result.items():
-        if data['variables'][name] == 'int':
+        if data['variables'][name] in {'int', 'nat'}:
             if lo:
                 lo = (Fraction(lo[0].numerator//lo[0].denominator+1) if lo[1] else Fraction(-(-lo[0].numerator//lo[0].denominator)), False)
             if hi:
@@ -269,8 +338,8 @@ def validate(data, require_proof=True):
     if not is_extended(data) or not isinstance(data['variables'], dict) or len(data['variables']) > 4:
         raise InputError('Version 2 permits up to four typed free variables.')
     variables = data['variables']
-    if any(not is_variable_name(name) or kind != ('int' if name == 'n' else 'real') for name, kind in variables.items()):
-        raise InputError('Use safe ASCII names of 1 to 32 characters for real variables; n is the integer variable. Function names are reserved.')
+    if any(not is_variable_name(name) or kind not in (('int', 'nat') if name == 'n' else ('real',)) for name, kind in variables.items()):
+        raise InputError('Use safe ASCII names of 1 to 32 characters for real variables; n has type int or nat. Function names are reserved.')
     if sum(kind == 'real' for kind in variables.values()) > 3:
         raise InputError('At most three free real variables are supported.')
     for side in ['lhs', 'rhs']:
@@ -302,7 +371,8 @@ def validate(data, require_proof=True):
     for atom in assumptions:
         if atom['op'] == 'expr_compare' and {**atom, 'relation': 'ne' if atom['relation'] == 'eq' else 'eq'} in assumptions:
             raise NeedsConditions('A function expression cannot be both zero and nonzero.')
-    domains(data)
+    bounds = domains(data)
+    validate_order_domains([data['lhs'], data['rhs'], assumptions], bounds)
     if 'proof' in data:
         from .real_special import has_special, validate_proof
         if has_special(data):
@@ -324,6 +394,12 @@ def display(node):
     if op == 'rpow': return f'({display(node["base"])}^({display(node["exponent"])}))'
     if op == 'gamma': return f'Gamma({display(node["arg"])})'
     if op == 'exp': return f'exp({display(node["arg"])})'
+    if op == 'erf': return f'erf({display(node["arg"])})'
+    if op == 'sqrt': return f'sqrt({display(node["arg"])})'
+    if op == 'pi': return 'pi'
+    if op == 'deriv': return f'D_{node["var"]}({display(node["arg"])})'
+    if op in {'hermite_h', 'hermite_he'}:
+        return f'{"H" if op == "hermite_h" else "He"}_{{{display(node["order"])}}}({display(node["arg"])})'
     if op == 'infinity': return 'infinity'
     if op == 'integral': return f'int({display(node["lower"])},{display(node["upper"])},{display(node["body"])},{node["var"]})'
     if op in {'bessel_j', 'bessel_y'}:
@@ -346,11 +422,13 @@ def labels(data):
 def _positive(node, bounds):
     value = _constant(node)
     if value is not None: return value > 0
+    if node['op'] == 'pi': return True
     if node['op'] == 'var':
         lo = bounds.get(node['name'], [None, None, set()])[0]
         return lo is not None and (lo[0] > 0 or (lo[0] == 0 and lo[1]))
     if node['op'] == 'exp': return True
     if node['op'] == 'gamma': return _positive(node['arg'], bounds)
+    if node['op'] == 'sqrt': return _positive(node['arg'], bounds)
     if node['op'] in {'add', 'mul', 'div'}: return all(_positive(n, bounds) for n in node['args'])
     if node['op'] == 'pow': return node['exponent'] == 0 or _positive(node['base'], bounds)
     return False

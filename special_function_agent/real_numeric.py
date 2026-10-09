@@ -35,6 +35,7 @@ def diagnose(data):
         report['skipped_reasons'] = ['mpmath is not available in this Python environment; no package was installed.']
         return report
     report['backend_version'] = mp.__version__
+    classical = any(n.get('op') in {'hermite_h', 'hermite_he', 'erf'} for n in _walk([data['lhs'], data['rhs']]))
     roots = [a for a in data['assumptions'] if a['op'] == 'expr_compare' and a['relation'] == 'eq']
     if len(roots) > 1:
         report.update(diagnostic='unsupported_root_system', skipped_reasons=['Automatic sampling supports one function-value root equation.'])
@@ -56,14 +57,17 @@ def diagnose(data):
         return all(_scalar_holds(a, {name: value}) for a in scalar if a['variable'] == name)
     def values_for(name):
         lo, hi, _ = bounds[name]
-        values = [Fraction(-1), Fraction(0), Fraction(1)] if name == 'n' else [Fraction(1,5), Fraction(1,2), Fraction(4,5)] if name == 'lambda' else [Fraction(1,2), Fraction(1), Fraction(2)]
+        values = ([Fraction(0), Fraction(1), Fraction(2), Fraction(3)] if data['variables'][name] == 'nat' else
+                  [Fraction(-1), Fraction(0), Fraction(1)] if name == 'n' or classical else
+                  [Fraction(1,5), Fraction(1,2), Fraction(4,5)] if name == 'lambda' else
+                  [Fraction(1,2), Fraction(1), Fraction(2)])
         if lo and hi:
             values += [(lo[0]+hi[0])/2]
         elif lo:
             values += [lo[0]+1]
         elif hi:
             values += [hi[0]-1]
-        if data['variables'][name] == 'int':
+        if data['variables'][name] in {'int', 'nat'}:
             values = [Fraction(int(v)) for v in values]
         return list(dict.fromkeys(v for v in values if eligible(name, v)))[:3]
     skipped = set()
@@ -84,6 +88,16 @@ def diagnose(data):
         if op == 'rpow': return ev(node['base'])**ev(node['exponent'])
         if op == 'gamma': return mp.gamma(ev(node['arg']))
         if op == 'exp': return mp.exp(ev(node['arg']))
+        if op == 'pi': return mp.pi
+        if op == 'sqrt': return mp.sqrt(ev(node['arg']))
+        if op == 'erf': return mp.erf(ev(node['arg']))
+        if op in {'hermite_h', 'hermite_he'}:
+            n, x = ev(node['order']), ev(node['arg'])
+            if n != int(n) or not 0 <= n <= 40 or abs(x) > 60:
+                raise ValueError('Numerical Hermite scope: natural degree <= 40 and |argument| <= 60.')
+            return mp.hermite(int(n), x) if op == 'hermite_h' else mp.hermite(int(n), x/mp.sqrt(2))/mp.sqrt(2)**int(n)
+        if op == 'deriv':
+            return mp.diff(lambda x: evaluate(node['arg'], {**values, node['var']:x}, budget), values[node['var']])
         if op == 'integral':
             lower = ev(node['lower'])
             upper = mp.inf if node['upper'] == {'op':'infinity'} else ev(node['upper'])

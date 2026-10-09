@@ -1,0 +1,6 @@
+{
+  "recipe": "erf_zero",
+  "theorem": "erf_zero",
+  "arguments": [],
+  "reverse": false
+}

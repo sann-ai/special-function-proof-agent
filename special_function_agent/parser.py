@@ -14,8 +14,8 @@ from .core import InputError, NeedsConditions, _condition_domains, validate_requ
 
 
 TOKEN = re.compile(r"\s+|\\[A-Za-z]+|\\[,!;:]|[0-9]+|[A-Za-z]+|[_^{}()+\-*/=,;']")
-EXTENDED_TOKEN = re.compile(r"\s+|\\[A-Za-z]+|\\[,!;:]|[0-9]+|[JYX](?=_)|[A-Za-z][A-Za-z0-9_]*|[_^{}()+\-*/=,;']")
-TEX_BUILTINS = {"frac", "dfrac", "tfrac", "int", "sqrt", "left", "right", "cdot", "times", "operatorname", "lambda", "Gamma", "exp", "infty"}
+EXTENDED_TOKEN = re.compile(r"\s+|\\[A-Za-z]+|\\[,!;:]|[0-9]+|(?:He|[JYXHD])(?=_)|[A-Za-z][A-Za-z0-9_]*|[_^{}()+\-*/=,;']")
+TEX_BUILTINS = {"frac", "dfrac", "tfrac", "int", "sqrt", "left", "right", "cdot", "times", "operatorname", "lambda", "Gamma", "exp", "infty", "pi"}
 TEX_RESERVED = TEX_BUILTINS | {"newcommand", "def", "DeclareMathOperator", "begin", "end", "text", "quad", "qquad", "in", "mathbb", "le", "leq", "ge", "geq", "ne", "neq", "prime"}
 
 
@@ -297,7 +297,7 @@ class _Parser:
 
     def _starts_atom(self) -> bool:
         token = self.peek()
-        return self.index not in self.stops and token is not None and (token.isdigit() or token in self.variables or token in {"J", "D", "Dx", "Dt", "int", "sqrt", "(", "{", r"\frac", r"\int", r"\sqrt"} or (self.extended and token in {"Y", "X", "Gamma", "gamma", "exp", r"\Gamma", r"\exp"}))
+        return self.index not in self.stops and token is not None and (token.isdigit() or token in self.variables or token in {"J", "D", "Dx", "Dt", "int", "sqrt", "(", "{", r"\frac", r"\int", r"\sqrt"} or (self.extended and token in {"Y", "X", "H", "He", "Gamma", "gamma", "exp", "erf", "pi", r"\Gamma", r"\exp", r"\pi"}))
 
     def unary(self) -> dict:
         if self.peek() == "+":
@@ -337,6 +337,8 @@ class _Parser:
             return {"op": "var", "name": token}
         if self.extended and token in {"infinity", "inf", r"\infty"}:
             return {"op": "infinity"}
+        if self.extended and token in {"pi", r"\pi"}:
+            return {"op": "pi"}
         raise InputError("A subscript or exponent requires one symbol, number, or grouped expression.")
 
     def atom(self) -> dict:
@@ -350,9 +352,12 @@ class _Parser:
         if self.extended and token in {"infinity", "inf", r"\infty"}:
             self.take()
             return {"op": "infinity"}
-        if self.extended and token in {"Gamma", "gamma", r"\Gamma", "exp", r"\exp"}:
+        if self.extended and token in {"pi", r"\pi"}:
             self.take()
-            return {"op": "exp" if token in {"exp", r"\exp"} else "gamma", "arg": self.group()}
+            return {"op": "pi"}
+        if self.extended and token in {"Gamma", "gamma", r"\Gamma", "exp", r"\exp", "erf"}:
+            self.take()
+            return {"op": "exp" if token in {"exp", r"\exp"} else "erf" if token == "erf" else "gamma", "arg": self.group()}
         if token == r"\frac":
             self.take()
             return _binary("div", self.group(), self.group())
@@ -387,7 +392,7 @@ class _Parser:
             args.append(self.expression())
             self.take(")")
             return {"op": "bessel_cross", "orders": orders, "args": args}
-        if token == "J" or (self.extended and token == "Y"):
+        if token == "J" or (self.extended and token in {"Y", "H", "He"}):
             self.take()
             prime = self.peek() == "'"
             if prime:
@@ -401,11 +406,11 @@ class _Parser:
                     self.tokens[self.index:self.index + 4] = ["'"]
                 if self.peek() == "'":
                     if prime:
-                        raise NeedsConditions("Only the first Bessel derivative is supported.")
+                        raise NeedsConditions("Only one derivative prime is supported.")
                     prime = True
                     self.take()
                 if self.peek() != "(":
-                    raise NeedsConditions("Clarify the Bessel argument explicitly as J_{order}(argument).")
+                    raise NeedsConditions("Clarify the polynomial or Bessel argument explicitly, for example H_{order}(argument).")
                 arg = self.group()
             else:
                 self.take("(")
@@ -413,16 +418,24 @@ class _Parser:
                 self.take(",")
                 arg = self.expression()
                 self.take(")")
-            result = {"op": "bessel_j" if token == "J" else "bessel_y", "order": order, "arg": arg}
+            family = {"J": "bessel_j", "Y": "bessel_y", "H": "hermite_h", "He": "hermite_he"}[token]
+            result = {"op": family, "order": order, "arg": arg}
             if prime:
-                if arg.get("op") != "var" or arg.get("name") not in {"x", "t"}:
-                    raise NeedsConditions("Prime notation requires the explicit argument x or t; use D for a composition.")
+                if arg.get("op") != "var" or (not self.extended and arg.get("name") not in {"x", "t"}):
+                    raise NeedsConditions("Prime notation requires a variable argument; use an explicit derivative for a composition.")
                 return {"op": "deriv", "arg": result, "variable": arg["name"]}
             return result
         if token in {"D", "Dx", "Dt"}:
             self.take()
+            variable = token[1:] or None
+            if self.extended and token == "D" and self.peek() == "_":
+                self.take()
+                binding = self.script()
+                if binding.get("op") != "var":
+                    raise NeedsConditions("A derivative subscript must be a real variable name.")
+                variable = binding['name']
             arg = self.group() if self.peek() in {"(", "{"} else self.unary()
-            return {"op": "deriv", "arg": arg, "variable": token[1:] or None}
+            return {"op": "deriv", "arg": arg, "variable": variable}
         if token == "int":
             self.take()
             self.take("(")
@@ -594,7 +607,7 @@ def _paper_notation(text: str) -> tuple[str, str | None]:
             (text[top_end:].strip() and not text[top_end:].lstrip().startswith(";"))):
         raise NeedsConditions("数式環境の外に別の式があります。検証対象を1つにまとめてください。")
     text = "".join(parts)
-    text = re.sub(r"\\operatorname\s*\{(J|Y|X|Gamma|exp)\}", r" \1 ", text)
+    text = re.sub(r"\\operatorname\s*\{(J|Y|X|H|He|Gamma|exp|erf)\}", r" \1 ", text)
     # A text block begins a trailing condition section. Its entire content survives.
     embedded = None
     marker = re.search(r"\\text\b", text)
@@ -638,7 +651,7 @@ def parse_identity(text: str, conditions: str | list[str] | None = None) -> dict
             if conditions is not None:
                 raise NeedsConditions("Conditions were supplied twice; retain one explicit condition list.")
             conditions = embedded.strip(" ,; ")
-        extended = bool(re.search(r"\b(?:Y|X|z|lambda|s|w)\b|[YX](?=_)|\\lambda|λ|∞", text + " " + str(conditions or "")))
+        extended = bool(re.search(r"\b(?:Y|X|z|lambda|s|w)\b|[YX](?=_)|\bD_|\\lambda|λ|∞|\\pi", text + " " + str(conditions or "")))
         legacy_names = {"J", "n", "x", "t", "D", "Dx", "Dt", "int", "sqrt", "d", "dx", "dt"}
         extended = extended or any(token[0].isalpha() and token not in legacy_names
                                    or token in {r"\Gamma", r"\exp", r"\infty"}

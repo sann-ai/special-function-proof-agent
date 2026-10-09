@@ -1,0 +1,109 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "erf",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "div",
+        "args": [
+          {
+            "op": "int",
+            "value": 2
+          },
+          {
+            "op": "sqrt",
+            "arg": {
+              "op": "pi"
+            }
+          }
+        ]
+      },
+      {
+        "op": "exp",
+        "arg": {
+          "op": "neg",
+          "arg": {
+            "op": "pow",
+            "base": {
+              "op": "var",
+              "name": "x"
+            },
+            "exponent": 2
+          }
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "deriv",
+          "var": "x",
+          "arg": {
+            "op": "erf",
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 2
+                },
+                {
+                  "op": "sqrt",
+                  "arg": {
+                    "op": "pi"
+                  }
+                }
+              ]
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "neg",
+                "arg": {
+                  "op": "pow",
+                  "base": {
+                    "op": "var",
+                    "name": "x"
+                  },
+                  "exponent": 2
+                }
+              }
+            }
+          ]
+        },
+        "recipe": "erf_derivative",
+        "reason": "誤差関数のGaussian積分による定義に微積分の基本定理を適用する。",
+        "conditions": [
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

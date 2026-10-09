@@ -1,2 +1,4 @@
 import SpecialFunctionProofAgent.Gamma
 import SpecialFunctionProofAgent.Beta
+import SpecialFunctionProofAgent.Hermite
+import SpecialFunctionProofAgent.Erf

@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "erf",
+    "arg": {
+      "op": "neg",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "neg",
+    "arg": {
+      "op": "erf",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "erf_odd"
+  }
+}

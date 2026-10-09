@@ -1,15 +1,17 @@
 # Special Function Proof Agent
 
-特殊関数の入力を固定した命題へ変換し、制限された証明候補をLeanで検査・保存する独立ツールです。Codexからの依頼とターミナルの両方で利用できます。[Bessel Proof Agentの固定版](UPSTREAM.md)を基盤に、Gamma/Betaの実積分へ拡張しました。ライセンスは[MIT](LICENSE)です。
+特殊関数の入力を固定した命題へ変換し、制限された証明候補をLeanで検査・保存する独立ツールです。Codexからの依頼とターミナルの両方で利用できます。[Bessel Proof Agentの固定版](UPSTREAM.md)を基盤に、Gamma/Betaの実積分、Hermite多項式と誤差関数へ拡張しました。ライセンスは[MIT](LICENSE)です。
 
-## 初期版で使えるもの
+## 対応する関数と公式
 
 - **完全Lean証明**：正の引数で `Gamma(x+1)=x*Gamma(x)`、正の `a,b` でEulerのBeta積分、正の `a,r` でscaled Gamma積分。直接証明と、理由を添えた等式ステップ証明の両経路があります。
+- **Hermite**：物理学規約 `H_n` と確率論規約 `He_n` を区別し、自然数 `n>=1` で両規約の微分公式と `H` の3項漸化式をLean証明します。両規約の0・1次の値にも対応します。
+- **誤差関数**：Gaussian積分で定義した実 `erf` の微分、零点での値、奇関数性、任意の実端点間のGaussian積分をLean証明します。負の引数・逆向きの積分にも対応します。
 - **Bessel J**：引き継いだv1の符号・漸化式・微分・積分・有理数冪の閉じた証明レシピ。[詳しい対応式](docs/bessel-v1.md)。
 - **実Bessel J/Y・交差積**：正の引数で構造化入力、数値診断、既知の根条件に対する解析テンプレートと条件付き代数Lean。元のY命題は `unresolved`、`full_bessel_proof: false` と保存します。
 - **保存と再検査**：元式・変数型・束縛・全条件・関数規約・環境ハッシュ・証明を保持し、再利用前にLeanで再検査します。
 
-登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/Gamma.lean`、`Beta.lean` にあります。
+登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` の `Gamma.lean`、`Beta.lean`、`Hermite.lean`、`Erf.lean` にあります。
 
 ## 導入
 
@@ -37,7 +39,9 @@ python3 -m special_function_agent verify examples/gamma-recurrence.txt --route d
 python3 -m special_function_agent verify examples/gamma-recurrence.txt --route steps --output runs/gamma-steps
 python3 -m special_function_agent verify examples/beta-integral.txt --route direct --output runs/beta-direct
 python3 -m special_function_agent verify examples/scaled-gamma-integral.txt --route steps --output runs/scaled-steps
-python3 -m special_function_agent replay runs/gamma-direct
+python3 -m special_function_agent verify examples/hermite-h-derivative.txt --route direct --output runs/hermite-direct
+python3 -m special_function_agent verify examples/erf-derivative.txt --route steps --output runs/erf-steps
+python3 -m special_function_agent replay runs/erf-steps
 ```
 
 直接経路は登録された補題を元の命題へ適用します。ステップ経路は各 `before = after` を同じ全条件で検査し、終点をつないで元の等式を証明します。自然言語の理由は候補として保存し、判定は構造化等式とLeanの結果に基づきます。
@@ -62,6 +66,10 @@ python3 -m special_function_agent parse examples/beta-integral.txt --output runs
 
 > 正の実数 shape, rate に対する `int(0,infinity,t^(shape-1)*exp(-rate*t),t)=rate^(-shape)*Gamma(shape)` を構造化してください。元の全条件を保持してLean検証し、成功した証明を外部archiveへ保存してください。
 
+> 物理学規約の `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` を直接・ステップ両経路で検証してください。確率論規約 `He_n` との定義の関係と、次数の全条件を保持し、成功した証拠を保存してください。
+
+> 実数全域で `D_x(erf(x))=2*exp(-x^2)/sqrt(pi)` を積分定義から検証してください。自然言語ステップの各等式をLeanで検査し、負の引数を含む数値診断と保存証明のreplayも実行してください。
+
 既存のCodex CLIで新たな候補を生成する場合は、本人のCLI認証を利用します。モデルはCLI設定を引き継ぎ、推論量はUltraです。
 
 ```sh
@@ -73,11 +81,12 @@ python3 -m special_function_agent.generate examples/beta-integral.target.json --
 
 ## 入力範囲と判定
 
-v2は最大3個の自由実変数と整数次数 `n` に対応します。実変数名は予約語を除く `[A-Za-z][A-Za-z0-9_]{0,31}`、積分変数は別の束縛名として保持します。名前・型・自由変数と束縛変数の衝突を検査します。
+v2は最大3個の自由実変数に対応します。次数 `n` はBesselでは整数、Hermiteでは自然数として宣言します。同一入力内の次数型は固定し、異なる型の混在を拒否します。実変数名は予約語を除く `[A-Za-z][A-Za-z0-9_]{0,31}`、積分変数は別の束縛名として保持します。名前・型・自由変数と束縛変数の衝突を検査します。
 
 - 実数の正性・比較は正確な有理数との比較で指定します。例：`shape > 0`、`0 < lambda < 1`。
 - 関数値の零・非零は `X_01(z,lambda*z)=0`、`Gamma(shape)!=0` のように指定します。
-- `Gamma`、`exp`、実数冪、有限区間積分、正の半直線上の積分を構造化できます。初期の完全証明レシピは上の3公式と実数の環計算です。
+- `Gamma`、`H_n`、`He_n`、`erf`、`exp`、`sqrt`、`pi`、実数冪、有限区間積分、正の半直線上の積分を構造化できます。完全証明は登録された公式と実数の環計算に対応します。
+- `D_x(expr)` は明示した実変数で微分します。`D(expr)` は自由実変数が1個の場合に使用できます。Hermite次数は非負整数定数または自然数 `n` と小さい整数の加減算です。`H_{n-1}` には `n>=1` 等の明示条件が必要です。`n>0`、`n>=1/2` 等の自然数の離散性を使う条件もLeanで検査します。
 - `int(0,1,body,t)` と `int(0,infinity,body,t)`、対応するLaTeX記法を使用できます。詳細は[数理仕様](docs/mathematics.md)。
 - 仮定不足は `needs_conditions`、対応レシピ・証明が未完成なら `unresolved`。既存v1で否定命題のLean証明が得られたときは `refuted`。v2の数値不一致は反例候補として保存します。
 
@@ -110,4 +119,4 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 python3 scripts/replay_examples.py
 ```
 
-後続ロードマップは Hermite/erf → Legendre/Laguerre/Jacobi → hypergeometric/confluent/Airy → associated Legendre/spherical harmonics/elliptic の順です。一般複数根系、Yの微積分、複素枝、近似誤差と漸近剰余の保証も後続範囲です。現在は少数の関数族と閉じたレシピを登録し、必要な証明が完成したものから追加します。
+Hermite/erfの上記公式を実装済みです。後続ロードマップは Legendre/Laguerre/Jacobi → hypergeometric/confluent/Airy → associated Legendre/spherical harmonics/elliptic の順です。一般複数根系、Yの微積分、複素枝、近似誤差と漸近剰余の保証も後続範囲です。現在は少数の関数族と閉じたレシピを登録し、必要な証明が完成したものから追加します。

@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "variables": {},
+  "assumptions": [],
+  "lhs": {
+    "op": "erf",
+    "arg": {
+      "op": "int",
+      "value": 0
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 0
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "erf",
+          "arg": {
+            "op": "int",
+            "value": 0
+          }
+        },
+        "after": {
+          "op": "int",
+          "value": 0
+        },
+        "recipe": "erf_zero",
+        "reason": "誤差関数の定義で、端点がともに0の積分を評価する。",
+        "conditions": []
+      }
+    ]
+  }
+}

@@ -22,10 +22,12 @@
     "BesselProofAgent/RealCalculus.lean": "754a717ea5704e34751f15576e78e960e07a143a4866bb84c4655030cede14b8",
     "BesselProofAgent/Recurrence.lean": "ac74881ddb342a12218e0db00082dbac10f6922caae5a65b78a1bdaab319e94f",
     "BesselProofAgent/SingularIntegrals.lean": "f0e6708aeeeb85a1eb1c0951ff631ee09c0ce18ac4cd0f05a1cba0570a633101",
-    "SpecialFunctionProofAgent.lean": "8ca07acda9e18c4f420a999e5b15dd24b56b221da6dd5e1fb2e8c59f941d0e64",
-    "special_function_agent/registry.py": "0c477b9f4b0428a2f3edc31b2b36041eb1d161973caa273fb9f5fbf4712c34e6",
+    "SpecialFunctionProofAgent.lean": "97f0dc6d8b882b3add57fddc2e989110425afd4f98b085c4c9341253958f6e4a",
+    "special_function_agent/registry.py": "8fbdb7e121f7e257cea4d5ce28c11375ff00e22798bd1c01ad7fbe241d2f802b",
     "SpecialFunctionProofAgent/Beta.lean": "e963f30f49998b5d87edcf7d0498472e7045fc062c1bf1cc5424930fbb528198",
-    "SpecialFunctionProofAgent/Gamma.lean": "07a9421489235b82427e8f540c5d0bd934af347cb120cea17e7b9b609aceb374"
+    "SpecialFunctionProofAgent/Erf.lean": "58e013b3fe6b095899c530054cd09bdee2895c0d2bb9acc642dfc081fca190f4",
+    "SpecialFunctionProofAgent/Gamma.lean": "07a9421489235b82427e8f540c5d0bd934af347cb120cea17e7b9b609aceb374",
+    "SpecialFunctionProofAgent/Hermite.lean": "32e76f35cbf15bf708b659121a329ae7494b1cc0d8620beec4a17285f4097505"
   },
   "conventions": {
     "version": 1,

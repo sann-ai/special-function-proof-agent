@@ -1,0 +1,216 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "n",
+      "relation": "ge",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "hermite_h",
+    "order": {
+      "op": "add",
+      "args": [
+        {
+          "op": "var",
+          "name": "n"
+        },
+        {
+          "op": "int",
+          "value": 1
+        }
+      ]
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "rhs": {
+    "op": "sub",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "int",
+                "value": 2
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          },
+          {
+            "op": "hermite_h",
+            "order": {
+              "op": "var",
+              "name": "n"
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "int",
+                "value": 2
+              },
+              {
+                "op": "var",
+                "name": "n"
+              }
+            ]
+          },
+          {
+            "op": "hermite_h",
+            "order": {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "n"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "hermite_h",
+          "order": {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "n"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          },
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        },
+        "after": {
+          "op": "sub",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 2
+                    },
+                    {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  ]
+                },
+                {
+                  "op": "hermite_h",
+                  "order": {
+                    "op": "var",
+                    "name": "n"
+                  },
+                  "arg": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 2
+                    },
+                    {
+                      "op": "var",
+                      "name": "n"
+                    }
+                  ]
+                },
+                {
+                  "op": "hermite_h",
+                  "order": {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "n"
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "arg": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "recipe": "hermite_h_recurrence",
+        "reason": "物理学規約Hと確率論規約Heを結ぶ変換から導いた漸化式を適用する。",
+        "conditions": [
+          "n is nat",
+          "x is real",
+          "n >= 1"
+        ]
+      }
+    ]
+  }
+}
