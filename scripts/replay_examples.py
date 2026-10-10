@@ -53,7 +53,9 @@ for route in ("direct", "steps", "recurrence-direct", "recurrence-steps", "calcu
               "integer-y-cross-same-point-direct", "integer-y-cross-same-point-steps",
               "cross-product-root-direct", "cross-product-root-steps",
               "integer-y-derivative-ai-direct", "cross-product-root-ai-steps",
-              "research-gamma-direct", "research-gamma-steps", "research-gamma-four-direct"):
+              "research-gamma-direct", "research-gamma-steps", "research-gamma-four-direct",
+              "defined-gamma-direct", "defined-gamma-steps",
+              "defined-gamma-tail-direct", "defined-gamma-tail-steps"):
     path = ROOT / "demo" / route / "request.json"
     if not path.exists():
         raise SystemExit(f"Missing saved proof plan: {path}")

@@ -1,0 +1,73 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580",
+      "name": "ShiftedGamma",
+      "parameters": {
+        "u": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580"
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "x": "real"
+    },
+    "assumptions": [
+      {
+        "op": "compare",
+        "variable": "x",
+        "relation": "gt",
+        "value": {
+          "numerator": 0,
+          "denominator": 1
+        }
+      }
+    ],
+    "lhs": {
+      "arg": {
+        "args": [
+          {
+            "op": "var",
+            "name": "x"
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ],
+        "op": "add"
+      },
+      "op": "gamma"
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "var",
+          "name": "x"
+        },
+        {
+          "op": "gamma",
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      ]
+    }
+  },
+  "proof_analysis": {
+    "recipe": "gamma_recurrence",
+    "arguments": [
+      {
+        "op": "var",
+        "name": "x"
+      }
+    ],
+    "reverse": false
+  }
+}

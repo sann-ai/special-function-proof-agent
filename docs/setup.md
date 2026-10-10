@@ -98,7 +98,7 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 
 `runs/` は手動検証の一時出力先としてGit管理から除外しています。個人の蓄積記録の既定保存先はリポジトリ外の `~/SpecialFunctionProofAgentData/archive` です。共有・公開の対象は、記録を作成した利用者が選びます。アーカイブ操作はREADMEの対応節を参照してください。
 
-検証した等式を別の命題に使う場合は、[研究補題の登録と再利用](research-lemmas.md)に従って `research add` で外部研究フォルダへ登録します。追加の依存導入は不要です。新たなAI候補を生成する場合は、次節の本人のCodex CLI認証を使います。
+検証した等式を別の命題に使う場合は、[研究補題の登録と再利用](research-lemmas.md)に従って `research add` で外部研究フォルダへ登録します。既存関数の有限合成による新しい研究関数は、[明示定義の登録](research-functions.md)から始めます。追加の依存導入は不要です。新たなAI候補を生成する場合は、次節の本人のCodex CLI認証を使います。
 
 ## 新しいAI候補を生成する場合
 

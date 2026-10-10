@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "defined",
+    "function": "c439083182700d907034c4d4ae9d604640f9167f17d1763929cc179e19876d3a",
+    "arguments": {
+      "u": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "x"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "op": "var",
+            "name": "x"
+          }
+        ]
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "GammaTail",
+      "parameters": {
+        "u": "real"
+      },
+      "body": {
+        "op": "defined",
+        "function": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580",
+        "arguments": {
+          "u": {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "u"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "definitions": [
+        {
+          "schema_version": 1,
+          "name": "ShiftedGamma",
+          "parameters": {
+            "u": "real"
+          },
+          "body": {
+            "op": "gamma",
+            "arg": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "u"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "definitions": [],
+          "id": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580"
+        }
+      ],
+      "id": "c439083182700d907034c4d4ae9d604640f9167f17d1763929cc179e19876d3a"
+    }
+  ]
+}

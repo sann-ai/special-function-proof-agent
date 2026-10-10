@@ -444,6 +444,8 @@ def validate(data, require_proof=True):
 
 def display(node):
     op = node['op']
+    if op == 'defined':
+        return 'Function['+node['function']+']('+','.join(name+'='+display(value) for name, value in sorted(node['arguments'].items()))+')'
     if op == 'int': return str(node['value'])
     if op == 'var': return node['name']
     if op == 'rational': return str(Fraction(node['numerator'], node['denominator']))

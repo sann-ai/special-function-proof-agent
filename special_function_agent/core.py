@@ -315,6 +315,10 @@ def _expr(node: Any, sort: str, depth: int = 0, budget: list[int] | None = None,
 
 
 def validate_request(data: Any, require_proof: bool = True) -> dict[str, Any]:
+    from . import research_functions
+    if research_functions.contains(data):
+        research_functions.validate_target(data, require_proof)
+        return data
     from .real_bessel import is_extended, validate
     from .research_proof import is_research, validate_proof
     if is_research(data):
@@ -556,7 +560,7 @@ def lean_expr(node: dict[str, Any], sort: str = "complex") -> str:
 
 def display_expr(node: dict[str, Any]) -> str:
     op = node["op"]
-    if op in {"bessel_y", "bessel_cross", "gamma", "exp", "rpow", "hermite_h", "hermite_he", "legendre", "laguerre", "jacobi", "bessel_y_noninteger", "erf", "pi"} or (op in {"integral", "deriv"} and "var" in node):
+    if op in {"defined", "bessel_y", "bessel_cross", "gamma", "exp", "rpow", "hermite_h", "hermite_he", "legendre", "laguerre", "jacobi", "bessel_y_noninteger", "erf", "pi"} or (op in {"integral", "deriv"} and "var" in node):
         from .real_bessel import display
         return display(node)
     if op == "int":

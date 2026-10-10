@@ -91,7 +91,7 @@ def lean_natural(node, names):
     raise InputError('Use the supported natural Hermite degree.')
 
 
-def proof_lines(matched, names, expression):
+def proof_lines(matched, names, expression, *, definition_context=False):
     naturals = matched.get('natural_arguments', [])
     args = ' '.join(lean_natural(a, names) if i in naturals else expression(a) for i, a in enumerate(matched['arguments']))
     if 'positive_degree' in matched:
@@ -99,4 +99,9 @@ def proof_lines(matched, names, expression):
     fact = 'SpecialFunctionProofAgent.' + matched['theorem'] + (' ' + args if args else '')
     if matched['reverse']: fact = f'({fact}).symm'
     # normalize only notation and multiplication association, retaining the fixed target
-    return [f'convert ({fact}) using 1 <;> (simp only [neg_mul, Real.rpow_eq_pow] <;> ring)']
+    # New definition expansions may already have normalized notation. Keep the
+    # historical renderer stable for existing saved certificates.
+    simplify = 'simp only [neg_mul, Real.rpow_eq_pow]'
+    if definition_context:
+        simplify = '(try '+simplify+')'
+    return [f'convert ({fact}) using 1 <;> ({simplify} <;> ring)']

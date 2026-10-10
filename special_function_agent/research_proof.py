@@ -6,7 +6,6 @@ import re
 
 from .core import InputError, NeedsConditions, _keys, _sha, audit_axioms, environment
 from . import real_bessel, real_special
-from .registry import conventions
 
 FORMAL_SCOPE = 'composition of validated real research lemmas under the fixed target assumptions'
 MAX_PLAN_BYTES = 262144
@@ -44,13 +43,20 @@ def _target(data):
     if not isinstance(data, dict):
         raise InputError('A research target must be a structured object.')
     target = {key: value for key, value in data.items() if key != 'proof'}
-    real_bessel.validate(target, require_proof=False)
+    from . import research_functions
+    if research_functions.contains(target):
+        research_functions.validate_target(target, require_proof=False)
+    else:
+        real_bessel.validate(target, require_proof=False)
     if any(kind != 'real' for kind in target['variables'].values()):
         raise InputError('Research lemma application currently requires all free variables to be real.')
     return target
 
 
 def _expected_scope(data):
+    from . import research_functions, defined_proof
+    if research_functions.contains(data):
+        return defined_proof.FORMAL_SCOPE
     if is_research(data):
         return FORMAL_SCOPE
     if real_special.cross_complete.complete_target(data):
@@ -89,6 +95,7 @@ def _ordinary_body(source):
 
 def _package(package, context, depth):
     from .research_library import read_evidence_json, validate_package
+    from .defined_proof import conventions
     from .archive import target_hash
     validate_package(package)
     key = package['id']
@@ -106,6 +113,9 @@ def _package(package, context, depth):
     request = read_evidence_json(package, 'request.json')
     result = read_evidence_json(package, 'result.json')
     _target(request)
+    from . import research_functions, defined_proof
+    defined = research_functions.contains(request)
+    expanded = research_functions.expand_target(request) if defined else request
     if (result.get('status') != 'proved' or result.get('full_function_proof') is not True
             or result.get('certificate_kind') != 'proof'):
         raise InputError('Only full proved research lemma certificates may be applied.')
@@ -114,9 +124,9 @@ def _package(package, context, depth):
     scope = _expected_scope(request)
     if result.get('formal_scope') != scope:
         raise InputError('The research lemma formal scope differs from its fixed target.')
-    bessel_target = (real_special.cross_complete.complete_target(request)
-                     or real_special.bessel_y_integer.complete_target(request)
-                     or real_special.bessel_y_formal.contains(request))
+    bessel_target = (real_special.cross_complete.complete_target(expanded)
+                     or real_special.bessel_y_integer.complete_target(expanded)
+                     or real_special.bessel_y_formal.contains(expanded))
     if bessel_target and result.get('full_bessel_proof') is not True:
         raise InputError('A Bessel research lemma requires a full Bessel certificate.')
     if not bessel_target and 'full_bessel_proof' in result:
@@ -145,18 +155,29 @@ def _package(package, context, depth):
         body, dependencies = _prepare(request, context, depth)
         regenerated = _source(body, dependencies)
         metadata = [info['metadata'] for info in dependencies]
+        analysis = {'recipe': 'research', 'dependencies': metadata}
+        if defined:
+            analysis = defined_proof.analysis(request, analysis)
         if (result.get('research_dependencies') != metadata
-                or result.get('analysis') != {'recipe': 'research', 'dependencies': metadata}):
+                or result.get('analysis') != analysis):
             raise InputError('The derived research lemma dependency records differ from its fixed request.')
     else:
-        real_bessel.validate(request)
-        _domains(request, request['lhs'], request['rhs'])
-        if not real_special.has_special(request):
+        if defined:
+            research_functions.validate_target(request)
+        else:
+            real_bessel.validate(expanded)
+        _domains(expanded, expanded['lhs'], expanded['rhs'])
+        if not defined and not real_special.has_special(request):
             raise InputError('The source lemma needs a registered complete real-function renderer.')
         regenerated = real_special.render(request)
         body, dependencies = _ordinary_body(regenerated), []
-        if result.get('analysis') != real_special.match_identity(request['lhs'], request['rhs']):
+        analysis = real_special.match_identity(expanded['lhs'], expanded['rhs'])
+        if defined:
+            analysis = defined_proof.analysis(request, analysis)
+        if result.get('analysis') != analysis:
             raise InputError('The research lemma analysis differs from its fixed request.')
+    if defined and result.get('definition_dependencies') != research_functions.metadata(request['definitions']):
+        raise InputError('The research lemma function definition records changed.')
     evidence = package['evidence']
     if evidence.get('certificate.lean') != regenerated or result.get('certificate_sha256') != _sha(regenerated.encode()):
         raise InputError('The research lemma certificate differs from its regenerated fixed request.')
@@ -172,6 +193,8 @@ def _package(package, context, depth):
                          'target_sha256': target_hash(request),
                          'statement': result['statement'], 'conditions': result['conditions'],
                          'proof_mode': request['proof']['mode'], 'formal_scope': scope}}
+    if defined:
+        info['metadata']['definitions'] = research_functions.metadata(request['definitions'])
     context['active'].remove(key)
     context['cache'][key] = info
     return info
@@ -217,7 +240,9 @@ def _apply(uses, packages, names, types):
         args = [f'({real_special.lean_expr(use["arguments"][name], names, types)})'
                 for name in sorted(source['variables'])]
         args += ['(by nlinarith)'] * len(source['assumptions'])
-        fact = f'(ResearchLemma_{use["lemma"]}.target {" ".join(args)})'
+        from .research_functions import contains
+        theorem = 'expanded_target' if contains(source) else 'target'
+        fact = f'(ResearchLemma_{use["lemma"]}.{theorem} {" ".join(args)})'
         if use['reverse']:
             fact += '.symm'
         local = f'research_use_{i}'
@@ -230,6 +255,11 @@ def _apply(uses, packages, names, types):
 def _prepare(data, context, depth):
     _bounded(data)
     _target(data)
+    from . import research_functions, defined_proof
+    if research_functions.contains(data):
+        research_functions.validate_target(data)
+        body, dependencies = _prepare(research_functions.expand_target(data), context, depth)
+        return defined_proof.wrap_body(data, body), dependencies
     proof = data.get('proof')
     if not isinstance(proof, dict):
         raise InputError('A research proof must be an object.')

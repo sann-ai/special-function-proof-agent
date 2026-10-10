@@ -5,7 +5,6 @@ from copy import deepcopy
 from fractions import Fraction
 
 from .core import InputError, NeedsConditions, _keys, _run_lean, _save_json, _sha, environment
-from .registry import conventions
 from . import classical, orthogonal, bessel_y_formal, bessel_y_integer, cross_complete
 
 RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES + orthogonal.RECIPES + bessel_y_formal.RECIPES + bessel_y_integer.RECIPES + cross_complete.RECIPES
@@ -13,6 +12,9 @@ SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'l
 
 
 def has_special(data):
+    from .research_functions import contains
+    if contains(data):
+        return True
     from .real_bessel import _walk
     nodes = list(_walk([data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]))
     proof = data.get('proof')
@@ -107,6 +109,9 @@ def match_identity(lhs, rhs):
 
 
 def default_proof(data, route='direct'):
+    from . import research_functions, defined_proof
+    if research_functions.contains(data):
+        return defined_proof.default_proof(data, route)
     from .real_bessel import labels
     matched = match_identity(data['lhs'], data['rhs'])
     recipe = matched['recipe'] if matched else 'ring'
@@ -128,7 +133,14 @@ def default_proof(data, route='direct'):
 def lean_expr(node, names, types=None):
     types = types or {}
     op = node['op']
-    ev = lambda n: lean_expr(n, names, types)
+    def ev(n):
+        text = lean_expr(n, names, types)
+        # A bare rpow application needs grouping when passed as another
+        # function's argument. Preserve the established infix translations.
+        if n['op'] == 'rpow' and op in {'gamma', 'exp', 'sqrt', 'erf', 'hermite_h', 'hermite_he',
+                'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger', 'bessel_y', 'bessel_j', 'rpow'}:
+            return '('+text+')'
+        return text
     if op == 'int': return f'({node["value"]} : ℝ)'
     if op == 'var':
         value = names[node['name']]
@@ -192,7 +204,7 @@ def _condition(atom, names, types=None):
     return f'{lean_expr(atom["lhs"], names, types)} {relation} (0 : ℝ)'
 
 
-def _recipe(recipe, lhs, rhs, names, types=None):
+def _recipe(recipe, lhs, rhs, names, types=None, *, definition_context=False):
     types = types or {}
     if recipe == 'ring': return ['ring']
     match = match_identity(lhs, rhs)
@@ -207,7 +219,7 @@ def _recipe(recipe, lhs, rhs, names, types=None):
     if recipe in orthogonal.RECIPES:
         return orthogonal.proof_lines(match, names, lambda a: lean_expr(a, names, types))
     if recipe in classical.RECIPES:
-        return classical.proof_lines(match, names, lambda a: lean_expr(a, names, types))
+        return classical.proof_lines(match, names, lambda a: lean_expr(a, names, types), definition_context=definition_context)
     args = ' '.join(lean_expr(a, names, types) for a in match['arguments'])
     hypotheses = ' '.join('(by linarith)' for _ in match['arguments'])
     fact = f'SpecialFunctionProofAgent.{recipe} {args} {hypotheses}'
@@ -215,7 +227,10 @@ def _recipe(recipe, lhs, rhs, names, types=None):
     return [f'simpa only [neg_mul, Real.rpow_eq_pow] using ({fact})']
 
 
-def render(data):
+def render(data, *, definition_context=False):
+    from . import research_functions, defined_proof
+    if research_functions.contains(data):
+        return defined_proof.render(data)
     from .research_proof import is_research, render as render_research
     if is_research(data):
         return render_research(data)
@@ -245,11 +260,11 @@ def render(data):
                   '    exact_mod_cast hr']
     proof = data['proof']
     if proof['mode'] == 'direct':
-        lines += ['  '+line for line in _recipe(proof['recipe'], data['lhs'], data['rhs'], names, types)]
+        lines += ['  '+line for line in _recipe(proof['recipe'], data['lhs'], data['rhs'], names, types, definition_context=definition_context)]
     elif proof['mode'] == 'steps':
         for i,step in enumerate(proof['steps']):
             lines += [f'  have step_{i+1} : {lean_expr(step["before"], names, types)} = {lean_expr(step["after"], names, types)} := by']
-            lines += ['    '+line for line in _recipe(step['recipe'], step['before'], step['after'], names, types)]
+            lines += ['    '+line for line in _recipe(step['recipe'], step['before'], step['after'], names, types, definition_context=definition_context)]
         chain = 'step_1'
         for i in range(1,len(proof['steps'])): chain = f'({chain}).trans step_{i+1}'
         lines += [f'  exact {chain}']
@@ -262,40 +277,49 @@ def render(data):
 def verify(data, output_dir, timeout):
     from .real_bessel import display, labels, domains, _walk
     from .real_numeric import diagnose
-    from . import research_proof
+    from . import research_proof, research_functions, defined_proof
+    from .defined_proof import conventions
     research = research_proof.is_research(data)
-    numeric = diagnose({key: value for key, value in data.items() if key != 'proof'} if research else data)
-    analysis = match_identity(data['lhs'], data['rhs'])
+    defined = research_functions.contains(data)
+    expanded = research_functions.expand_target(data) if defined else data
+    numeric = diagnose({key: value for key, value in expanded.items() if key != 'proof'} if research or defined else expanded)
+    analysis = match_identity(expanded['lhs'], expanded['rhs'])
     dependencies = research_proof.inspect_dependencies(data) if research else None
     if research:
         analysis = {'recipe': 'research', 'dependencies': dependencies}
+    proof_analysis = analysis
+    if defined:
+        analysis = defined_proof.analysis(data, analysis)
     result = {'status':'unresolved', 'reason':'no_accepted_full_certificate',
               'statement':display(data['lhs'])+' = '+display(data['rhs']), 'conditions':labels(data),
               'environment':environment(), 'conventions':conventions(data), 'full_function_proof':False,
               'analysis':analysis, 'numerical':numeric, 'attempts':[],
               'request_sha256':_sha((output_dir/'request.json').read_bytes())}
-    bessel_scope = (cross_complete.FORMAL_SCOPE if cross_complete.complete_target(data) else
-                    bessel_y_integer.formal_scope(data) if bessel_y_integer.complete_target(data) else
-                    bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(data) else None)
+    bessel_scope = (cross_complete.FORMAL_SCOPE if cross_complete.complete_target(expanded) else
+                    bessel_y_integer.formal_scope(expanded) if bessel_y_integer.complete_target(expanded) else
+                    bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(expanded) else None)
     if bessel_scope:
         result['full_bessel_proof'] = False
         result['formal_scope'] = bessel_scope
     if research:
         result['formal_scope'] = research_proof.FORMAL_SCOPE
         result['research_dependencies'] = dependencies
-    bounds = domains(data)
+    if defined:
+        result['formal_scope'] = defined_proof.FORMAL_SCOPE
+        result['definition_dependencies'] = research_functions.metadata(data['definitions'])
+    bounds = domains(expanded)
     pending = []
-    if analysis and analysis['recipe'] in {'gamma_recurrence', 'beta_integral', 'gamma_scaled_integral'}:
-        for arg in analysis['arguments']:
+    if proof_analysis and proof_analysis['recipe'] in {'gamma_recurrence', 'beta_integral', 'gamma_scaled_integral'}:
+        for arg in proof_analysis['arguments']:
             lo = bounds[arg['name']][0]
             if not lo or not (lo[0] > 0 or lo == (0, True)): pending.append(arg['name']+' > 0')
     # Reject direct special-function singularities even when used in a ring identity.
     from .real_bessel import _positive, domain_obligations
     # This exact root recipe proves positivity/nonzero of both denominators
     # from the original scalar bounds and root condition in the Lean source.
-    derived = {'id': 'cross_product_root_fraction'} if cross_complete.complete_target(data) else None
-    pending += domain_obligations(data, derived)
-    for node in _walk([data['lhs'], data['rhs']]):
+    derived = {'id': 'cross_product_root_fraction'} if cross_complete.complete_target(expanded) else None
+    pending += domain_obligations(expanded, derived)
+    for node in _walk([expanded['lhs'], expanded['rhs']]):
         if node.get('op') == 'gamma' and not _positive(node['arg'], bounds):
             pending.append(display(node['arg'])+' > 0')
     if pending:
@@ -321,6 +345,12 @@ def verify(data, output_dir, timeout):
     _save_json(output_dir/'result.json', result)
     lines = ['# Special Function Proof Agent', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
              '完全Lean証明：'+result['status'], '数値診断：'+numeric['diagnostic']]
+    if defined:
+        lines[2] = defined_proof.display(data, data['lhs'])+' = '+defined_proof.display(data, data['rhs'])
+        lines += ['', '研究関数の明示定義：元の呼出しを含むtheorem targetと、定義を展開したexpanded_targetをLeanの定義等式で接続します。']
+        lines += defined_proof.definition_lines(data)
+        lines += ['展開後の式：'+display(expanded['lhs'])+' = '+display(expanded['rhs']),
+                  '定義・依存関係・元条件は request.json、analysis.json、certificate.lean に保存します。']
     if research:
         lines += ['', '研究補題の再利用：元の命題と全条件を固定し、各補題の仮定をこの命題の条件からLeanで確認します。']
         for dependency in dependencies:
@@ -347,35 +377,53 @@ def verify(data, output_dir, timeout):
     if data['proof']['mode'] == 'steps':
         lines += ['', '構造化ステップ（各等式を元の全条件で検査）：']
         for i,step in enumerate(data['proof']['steps'],1):
-            lines += [f'{i}. {display(step["before"])} = {display(step["after"])}', '   '+step['reason']]
+            step_display = (lambda node: defined_proof.display(data, node)) if defined else display
+            lines += [f'{i}. {step_display(step["before"])} = {step_display(step["after"])}', '   '+step['reason']]
     (output_dir/'report.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     return result
 
 
 def replay(data, result, output_dir, timeout):
-    from . import research_proof
+    from . import research_proof, research_functions, defined_proof
+    from .defined_proof import conventions
     research = research_proof.is_research(data)
+    defined = research_functions.contains(data)
+    expanded = research_functions.expand_target(data) if defined else data
+    from .real_bessel import display, labels
+    if (result.get('statement') != display(data['lhs'])+' = '+display(data['rhs'])
+            or result.get('conditions') != labels(data)):
+        raise InputError('Saved statement or conditions differ from the fixed target.')
     if result.get('status') != 'proved' or result.get('full_function_proof') is not True:
         raise InputError('This run has no full special-function certificate.')
     if result.get('certificate_kind') != 'proof':
         raise InputError('Certificate kind and full proof status disagree.')
-    bessel_scope = (cross_complete.FORMAL_SCOPE if cross_complete.complete_target(data) else
-                    bessel_y_integer.formal_scope(data) if bessel_y_integer.complete_target(data) else
-                    bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(data) else None)
+    bessel_scope = (cross_complete.FORMAL_SCOPE if cross_complete.complete_target(expanded) else
+                    bessel_y_integer.formal_scope(expanded) if bessel_y_integer.complete_target(expanded) else
+                    bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(expanded) else None)
     if bessel_scope and result.get('full_bessel_proof') is not True:
         raise InputError('The Bessel proof status disagrees with the full certificate.')
     if bessel_scope is None and 'full_bessel_proof' in result:
         raise InputError('The saved Bessel flag differs from the fixed proof scope.')
-    if not research and result.get('formal_scope') != bessel_scope:
+    if not research and not defined and result.get('formal_scope') != bessel_scope:
         raise InputError('The saved formal scope differs from the fixed target.')
     if research:
         dependencies = research_proof.inspect_dependencies(data)
         analysis = {'recipe': 'research', 'dependencies': dependencies}
         from .core import load_json
-        if (result.get('formal_scope') != research_proof.FORMAL_SCOPE or
+        expected_analysis = defined_proof.analysis(data, analysis) if defined else analysis
+        if (result.get('formal_scope') != (defined_proof.FORMAL_SCOPE if defined else research_proof.FORMAL_SCOPE) or
                 result.get('research_dependencies') != dependencies or
-                result.get('analysis') != analysis or load_json(output_dir/'analysis.json') != analysis):
+                result.get('analysis') != expected_analysis or load_json(output_dir/'analysis.json') != expected_analysis):
             raise InputError('Saved research dependencies or scope changed.')
+    if defined:
+        from .core import load_json
+        base_analysis = ({'recipe': 'research', 'dependencies': research_proof.inspect_dependencies(data)}
+                         if research else match_identity(expanded['lhs'], expanded['rhs']))
+        expected_analysis = defined_proof.analysis(data, base_analysis)
+        if (result.get('formal_scope') != defined_proof.FORMAL_SCOPE or
+                result.get('definition_dependencies') != research_functions.metadata(data['definitions']) or
+                result.get('analysis') != expected_analysis or load_json(output_dir/'analysis.json') != expected_analysis):
+            raise InputError('Saved function definitions or their target correspondence changed.')
     source = render(data)
     certificate = output_dir/'certificate.lean'
     if result.get('environment') != environment() or result.get('conventions') != conventions(data):

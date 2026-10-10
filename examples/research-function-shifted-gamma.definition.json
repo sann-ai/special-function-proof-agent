@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "ShiftedGamma",
+  "parameters": {
+    "u": "real"
+  },
+  "body": {
+    "op": "gamma",
+    "arg": {
+      "op": "add",
+      "args": [
+        {
+          "op": "var",
+          "name": "u"
+        },
+        {
+          "op": "int",
+          "value": 1
+        }
+      ]
+    }
+  },
+  "definitions": []
+}

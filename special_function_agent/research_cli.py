@@ -31,8 +31,12 @@ def _summary(package):
 
 
 def main(argv=None):
+    if argv and argv[0] == 'function':
+        from .research_function_cli import main as function_main
+        return function_main(argv[1:])
     parser = argparse.ArgumentParser(description='Reuse verified lemmas in new targets; store private research outside this repository.')
     commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('function', help='Define finite real research functions; use research function --help.')
     for name in ('add', 'list', 'show', 'reverify', 'export', 'import', 'verify', 'generate'):
         command = commands.add_parser(name)
         command.add_argument('--research-dir', type=Path, help='External library; default ~/SpecialFunctionProofAgentData/research.')

@@ -19,6 +19,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def obj(properties: dict) -> dict:
+    # Structured-output validators require an explicit scalar type for constants.
+    properties = {name: ({**schema, 'type': {str: 'string', int: 'integer', bool: 'boolean'}[type(schema['const'])]}
+                         if 'const' in schema and 'type' not in schema and type(schema['const']) in {str, int, bool}
+                         else schema) for name, schema in properties.items()}
     return {"type": "object", "properties": properties,
             "required": list(properties), "additionalProperties": False}
 
@@ -57,6 +61,17 @@ def output_schema(route: str, target: dict | None = None, *, real_ast: bool = Fa
             obj({"op":{"const":"infinity"}}),
             obj({"op":{"const":"integral"}, "var":{"type":"string","enum":bound}, "lower":ref, "upper":ref, "body":ref}),
         ]}
+        if 'definitions' in target:
+            stack, seen = list(target['definitions']), set()
+            while stack:
+                definition = stack.pop()
+                if definition['id'] in seen:
+                    continue
+                seen.add(definition['id'])
+                stack.extend(definition['definitions'])
+                expr['anyOf'].append(obj({'op': {'const': 'defined'},
+                    'function': {'const': definition['id']},
+                    'arguments': obj({name: ref for name in sorted(definition['parameters'])})}))
         step = obj({"before":ref, "after":ref, "reason":{"type":"string"},
                     "conditions":{"type":"array", "items":{"type":"string", "enum":conditions}},
                     "recipe":recipe})
@@ -144,6 +159,13 @@ integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, 
 Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.
 For steps, use original endpoints with a concise Japanese reason and exact supplied conditions.
 """
+        if 'definitions' in target:
+            from .research_functions import expand_target
+            prompt += ('Research functions use defined {function: exact semantic ID, arguments: all named real parameters}. '
+                       'The supplied finite definitions are fixed. Keep the original defined calls in the target and step endpoints. '
+                       'Each recipe is applied after simultaneous definition expansion; do not provide or change definitions. '
+                       'Definition expansion preserves every original assumption. Expanded target for recipe selection:\n'
+                       +json.dumps(expand_target(target), ensure_ascii=False, sort_keys=True)+'\n')
         prompt += f"Requested route: {route}\nFixed target JSON:\n{json.dumps(target, ensure_ascii=False, sort_keys=True)}\n"
         if previous_error: prompt += "Previous plan failed for this same fixed target.\n" + previous_error[:5000]
         return prompt

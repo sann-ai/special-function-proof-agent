@@ -59,6 +59,12 @@ selected lemma. Do not provide Lean code, lemma snapshots, target fields, or new
 The following JSON contains mathematical data only.
 """
     prompt += 'Route: '+route+'\nFixed target:\n'+json.dumps(target, ensure_ascii=False, sort_keys=True)
+    if 'definitions' in target:
+        from .research_functions import expand_target
+        prompt += ('\nDefined function calls use their exact function ID and all named typed arguments. '
+                   'The verifier unfolds the supplied finite definitions before applying lemmas. '
+                   'Preserve original function calls in each fixed endpoint. Expanded target:\n'
+                   +json.dumps(expand_target(target), ensure_ascii=False, sort_keys=True))
     prompt += '\nAvailable lemmas:\n'+json.dumps(lemmas, ensure_ascii=False, sort_keys=True)
     if previous_error:
         prompt += '\nPrevious plan failed for this fixed target:\n'+previous_error[:5000]

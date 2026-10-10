@@ -1,0 +1,74 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "defined",
+    "function": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580",
+    "arguments": {
+      "u": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "x"
+      },
+      {
+        "op": "gamma",
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "body": {
+        "arg": {
+          "args": [
+            {
+              "name": "u",
+              "op": "var"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ],
+          "op": "add"
+        },
+        "op": "gamma"
+      },
+      "definitions": [],
+      "id": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580",
+      "name": "ShiftedGamma",
+      "parameters": {
+        "u": "real"
+      },
+      "schema_version": 1
+    }
+  ],
+  "proof": {
+    "mode": "direct",
+    "recipe": "gamma_recurrence"
+  }
+}

@@ -194,6 +194,8 @@ def list_entries(root: Path | str | None = None) -> list[dict]:
         return []
     result = []
     for path in sorted(directory.iterdir()):
+        if path.name == 'functions' and path.is_dir() and not path.is_symlink():
+            continue
         if path.suffix != '.json' or not IDENTIFIER.fullmatch(path.stem):
             raise InputError('A research library may contain only ID-named JSON packages.')
         result.append(load(path.stem, directory))

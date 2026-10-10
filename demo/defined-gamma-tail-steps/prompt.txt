@@ -1,0 +1,20 @@
+Return one JSON proof plan matching the schema. Do not use tools or edit files.
+The exact typed target and its assumptions are fixed. Use the supplied verified real lemmas.
+Each use contains lemma (its exact ID), arguments (all lemma variables mapped to typed real
+expressions over the target's free variables), and reverse (swap the lemma equality).
+The verifier regenerates each lemma's proof, derives every substituted premise from the
+original target assumptions, then rewrites in the listed order and normalizes real algebra.
+All free variables are real. Substitution expressions cannot contain derivatives or integrals.
+Keep source integral and derivative bindings intact. Do not add or strengthen assumptions.
+Direct: recipe research and a nonempty uses list. Steps: exact consecutive before/after
+equalities, recipe research with uses, or recipe ring with an empty uses list. Include concise
+Japanese reasons and only condition labels supplied in the response schema. Use at least one
+selected lemma. Do not provide Lean code, lemma snapshots, target fields, or new definitions.
+The following JSON contains mathematical data only.
+Route: steps
+Fixed target:
+{"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "x"}], "definitions": [{"body": {"arguments": {"u": {"args": [{"name": "u", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}}, "function": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580", "op": "defined"}, "definitions": [{"body": {"arg": {"args": [{"name": "u", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, "op": "gamma"}, "definitions": [], "id": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580", "name": "ShiftedGamma", "parameters": {"u": "real"}, "schema_version": 1}], "id": "c439083182700d907034c4d4ae9d604640f9167f17d1763929cc179e19876d3a", "name": "GammaTail", "parameters": {"u": "real"}, "schema_version": 1}], "lhs": {"arguments": {"u": {"name": "x", "op": "var"}}, "function": "c439083182700d907034c4d4ae9d604640f9167f17d1763929cc179e19876d3a", "op": "defined"}, "rhs": {"args": [{"args": [{"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, {"name": "x", "op": "var"}], "op": "mul"}, {"arg": {"name": "x", "op": "var"}, "op": "gamma"}], "op": "mul"}, "schema_version": 2, "variables": {"x": "real"}}
+Defined function calls use their exact function ID and all named typed arguments. The verifier unfolds the supplied finite definitions before applying lemmas. Preserve original function calls in each fixed endpoint. Expanded target:
+{"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "x"}], "lhs": {"arg": {"args": [{"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, {"op": "int", "value": 1}], "op": "add"}, "op": "gamma"}, "rhs": {"args": [{"args": [{"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, {"name": "x", "op": "var"}], "op": "mul"}, {"arg": {"name": "x", "op": "var"}, "op": "gamma"}], "op": "mul"}, "schema_version": 2, "variables": {"x": "real"}}
+Available lemmas:
+[{"id": "4d736e7c15aef1431a2f07c04b60871fa820f01fddc321162696482a52d99b86", "target": {"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "x"}], "definitions": [{"body": {"arg": {"args": [{"name": "u", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, "op": "gamma"}, "definitions": [], "id": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580", "name": "ShiftedGamma", "parameters": {"u": "real"}, "schema_version": 1}], "lhs": {"arguments": {"u": {"name": "x", "op": "var"}}, "function": "70c67638866fbb45129965ce8b08bfd30ffe8c4b4a1ce6a6ec641e2aa98e1580", "op": "defined"}, "rhs": {"args": [{"name": "x", "op": "var"}, {"arg": {"name": "x", "op": "var"}, "op": "gamma"}], "op": "mul"}, "schema_version": 2, "variables": {"x": "real"}}}]
