@@ -1,0 +1,20 @@
+{
+  "recipe": "legendre_orthogonal",
+  "theorem": "legendreP_orthogonal",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "m"
+    },
+    {
+      "op": "var",
+      "name": "n"
+    }
+  ],
+  "natural_arguments": [
+    0,
+    1
+  ],
+  "distinct_degrees": true,
+  "reverse": false
+}

@@ -42,7 +42,11 @@ for route in ("direct", "steps", "recurrence-direct", "recurrence-steps", "calcu
               "legendre-recurrence-direct", "legendre-recurrence-steps",
               "legendre-adjacent-integral-direct", "legendre-adjacent-integral-steps",
               "laguerre-recurrence-direct", "laguerre-recurrence-steps",
-              "legendre-recurrence-ai-direct", "legendre-adjacent-integral-ai-steps"):
+              "legendre-recurrence-ai-direct", "legendre-adjacent-integral-ai-steps",
+              "legendre-orthogonal-direct", "legendre-orthogonal-steps",
+              "legendre-norm-direct", "legendre-norm-steps",
+              "integer-y-complete-direct", "integer-y-complete-steps",
+              "legendre-orthogonal-ai-steps", "integer-y-complete-ai-direct"):
     path = ROOT / "demo" / route / "request.json"
     if not path.exists():
         raise SystemExit(f"Missing saved proof plan: {path}")

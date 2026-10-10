@@ -42,7 +42,7 @@ python3 -m special_function_agent replay runs/yhalf-steps
 
 依頼例：「`examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` を直接・ステップ両経路で検証してください。明示名 `YNoninteger` の固定次数−1/2・1/2・3/2と正の実引数を保持し、Leanの完全証明と保存証明のreplayを確認してください。」
 
-`YNoninteger` は標準のJ接続式から定義した非整数Yへ接続します。整数Yは次数微分の定義と、次数方向の微分可能性を明示前提に持つ極限補題まで実装しています。[Yの形式化範囲](bessel-y-formalization.md)に各条件と残る義務を記載しています。
+`YNoninteger` は標準のJ接続式から定義した非整数Yへ接続します。整数Yは次数微分の定義に対して、次数方向の微分可能性と標準整数極限を証明しました。任意整数n、x>0の三項漸化式を完全証明できます。[Yの形式化範囲](bessel-y-formalization.md)に各条件と残る義務を記載しています。
 
 ## 引き継いだBesselの操作例
 
@@ -63,12 +63,12 @@ python3 -m special_function_agent replay runs/yhalf-steps
 5. 証拠と日本語レポートの保存場所、アーカイブ記録IDを示す。保存証拠の再検査が必要な場合は
    `archive replay RECORD_ID` を使う。
 
-従来の `Y_n`・`Y(order,x)`・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
+整数Yの登録漸化式以外の `Y_n`・`Y(order,x)`・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
 `python3 -m special_function_agent verify INPUT --output DIR --archive` で診断する。
 生成器へ渡した場合も診断へ進み、元の式と全条件を保持する。
 今回の交差積の例には `examples/cross-product-root.txt` を使う。
 報告では、元命題の `unresolved`、条件付き代数証明のLean検査、自然言語の解析、
-数値診断の結果をそれぞれ示す。残る整数次数でのJの次数微分可能性、次数と引数の微分交換、
+数値診断の結果をそれぞれ示す。残る次数と引数の微分交換、
 Wronskianの正規化、正エネルギー積分と分母非零性の形式化、および
 数値バックエンド未導入などの実行状況も保存された結果に沿って説明する。
 
@@ -83,3 +83,11 @@ Wronskianの正規化、正エネルギー積分と分母非零性の形式化�
 > 元の命題と条件を固定し、個人用アーカイブを検索してください。既存証拠を再検査して再利用するか、
 > AIで直接経路と段階経路を生成してLeanで検査し、すべての試行を保存してください。
 > 4状態の判定、条件、レポートと証明の保存場所、記録IDを教えてください。
+
+## 一般Legendre直交性・規格化と整数Y
+
+依頼例：「`examples/legendre-orthogonal.txt` と `examples/legendre-norm.txt` を両経路で検証してください。自然数m,nの型、m≠n、区間[-1,1]を保持し、証明を保存して同じ命題に再利用してください。」
+
+依頼例：「`examples/integer-y-complete.txt` を任意整数n、x>0で直接・自然言語ステップ両経路へ接続してください。標準整数Yの定義と極限、生成定理の全前提を確認し、完全証明をarchiveへ保存してください。」
+
+古い整数Yのdiagnostic記録は元ファイルを保持します。保存requestからproofを除いたtargetを `verify --route direct` または `--route steps` に渡し、新しい完全証明を記録します。具体的手順は[保存仕様](archive.md#条件付き整数y記録から完全証明へ)を参照してください。

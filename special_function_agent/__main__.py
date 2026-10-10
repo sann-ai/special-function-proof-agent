@@ -21,7 +21,7 @@ def main() -> int:
     check.add_argument("--conditions", help="For text input, for example: n integer, x > 0")
     from .real_special import RECIPES as SPECIAL_RECIPES, default_proof, has_special
     check.add_argument("--recipe", choices=tuple(RECIPES) + SPECIAL_RECIPES)
-    check.add_argument("--route", choices=("direct", "steps", "diagnostic"), help="Choose a local registered Gamma/Beta/Hermite/erf/polynomial (including recurrences/adjacent integral)/half-order Y proof plan; integer Y uses explicit conditional diagnostics.")
+    check.add_argument("--route", choices=("direct", "steps", "diagnostic"), help="Choose a local registered Gamma/Beta/Hermite/erf/polynomial (including orthogonality/norm)/half-order Y/integer-Y recurrence proof plan; diagnostic preserves conditional evidence.")
     translate = subparsers.add_parser("parse", help="Translate a supported text/LaTeX equation into a fixed target.")
     translate.add_argument("input", type=Path)
     translate.add_argument("--conditions")

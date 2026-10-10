@@ -4,7 +4,7 @@
 
 条件：lambda is real、z is real、lambda > 0、lambda < 1、z > 0、X_{0,1}(z,(lambda*z)) = 0
 
-状態：unresolved。Bessel Yの形式的定義と解析公式への接続が残っています。
+状態：unresolved。整数Yと交差積の解析公式への接続が残っています。
 
 数値診断：no_mismatch_found。有限標本の結果を numerical.json に保存しました。
 

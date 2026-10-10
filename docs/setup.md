@@ -2,7 +2,7 @@
 
 保存済み候補の検証には Python 3.12以上、Git、elan が管理する固定版の Lean / Lake を使います。Python追加パッケージは不要です。最初のツール・依存取得にはネット接続が必要で、Lean、mathlib、ビルドキャッシュは数GB規模になります。
 
-数値診断は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、対応する完全Lean証明、従来Y・交差積の条件付きLean検査、アーカイブ保存とreplayを続けます。Legendre/Laguerre/Jacobiと固定半整数 `YNoninteger` もこの手順を使います。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
+数値診断は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、対応する完全Lean証明、従来Y・交差積の条件付きLean検査、アーカイブ保存とreplayを続けます。Legendreの一般直交性・規格化、Laguerre/Jacobi、固定半整数 `YNoninteger` と整数Y漸化式 もこの手順を使います。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
 
 macOS・Linuxでは、[Lean公式のインストール案内](https://lean-lang.org/install/)に従って elan を導入し、`python3`、`git`、`elan` がターミナルから利用できる状態にしてください。以下はmacOS・Linux向けの手順です。Windows向けの初回手順は未検証です。
 
@@ -106,3 +106,14 @@ python3 -m special_function_agent.generate demo/target.json --route direct --out
 Lean証明はmathlibのBessel・正則化超幾何関数・Gamma・微積分の定義と補題をimportして組み立てています。依存ソースはLakeが `.lake/packages/` に取得し、各依存のライセンスと著作権表記を維持します。リポジトリとソースZIPにはこの依存ディレクトリを同梱しません。
 
 固定した依存のうち、mathlib、Batteries、Aesop、Qq、ProofWidgets、ImportGraph、LeanSearchClient、PlausibleはApache-2.0、Lean CLIライブラリ（`Cli`）はMITです。取得した各パッケージの `LICENSE` とソースの著作権表記を参照してください。Lean本体は[公式配布元のライセンス](https://github.com/leanprover/lean4/blob/v4.34.0/LICENSE)に従います。依存のファイルやコピー・改変したコードを再配布する場合は、元のライセンス、著作権表示、改変の表示、該当するNOTICEを含めてください。
+
+一般直交性・規格化と整数Y漸化式の追加確認：
+
+```sh
+python3 -m special_function_agent verify examples/legendre-orthogonal.txt --route steps --output runs/orthogonal-check
+python3 -m special_function_agent verify examples/legendre-norm.txt --route direct --output runs/norm-check
+python3 -m special_function_agent verify examples/integer-y-complete.txt --route steps --output runs/integer-y-check
+python3 -m special_function_agent replay runs/integer-y-check
+```
+
+条件は順に自然数m≠n、全自然数n、任意整数nかつx>0です。各出力先は未使用のディレクトリを指定します。

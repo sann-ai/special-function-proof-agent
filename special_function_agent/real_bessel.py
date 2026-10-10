@@ -1,7 +1,7 @@
 """Closed real J/Y/cross-product targets with explicitly scoped diagnostics.
 
-Version 2 never promotes numerical or conditional algebraic evidence to a proof
-of a theorem about Bessel Y. Version 1 keeps its existing Lean semantics.
+Numerical and conditional evidence stays scoped here. Complete registered
+Y identities use real_special; version 1 keeps its existing Lean semantics.
 """
 from __future__ import annotations
 
@@ -40,41 +40,42 @@ def _walk(node):
             yield from _walk(value)
 
 
-def _convert(node):
+def _convert(node, order_names=frozenset({"n"})):
+    convert = lambda arg: _convert(arg, order_names)
     from .parser import _order
     op = node['op']
     if op in {'int', 'var'}:
         return node
     if op in {'add', 'sub', 'mul', 'div'}:
-        return {'op': op, 'args': [_convert(a) for a in node['args']]}
+        return {'op': op, 'args': [convert(a) for a in node['args']]}
     if op == 'neg':
-        return {'op': op, 'arg': _convert(node['arg'])}
+        return {'op': op, 'arg': convert(node['arg'])}
     if op in {'gamma', 'exp', 'erf', 'sqrt'}:
-        return {'op': op, 'arg': _convert(node['arg'])}
+        return {'op': op, 'arg': convert(node['arg'])}
     if op in {'infinity', 'pi'}:
         return {'op': op}
     if op == 'deriv':
-        arg = _convert(node['arg'])
+        arg = convert(node['arg'])
         variable = node.get('variable')
         if variable is None:
-            names = _free_names(arg) - {'n'}
+            names = _free_names(arg) - order_names
             if len(names) != 1:
                 raise NeedsConditions('Specify the differentiation variable as D_x(expression).')
             variable = next(iter(names))
         return {'op': op, 'var': variable, 'arg': arg}
     if op == 'integral':
-        return {'op': op, 'var': node['variable'], 'lower': _convert(node['lower']),
-                'upper': _convert(node['upper']), 'body': _convert(node['arg'])}
+        return {'op': op, 'var': node['variable'], 'lower': convert(node['lower']),
+                'upper': convert(node['upper']), 'body': convert(node['arg'])}
     if op in {'bessel_j', 'bessel_y', 'bessel_y_noninteger'} | POLYNOMIAL_OPS:
-        return {'op': op, 'order': _order(node['order']), 'arg': _convert(node['arg']),
-                **{p: _convert(node[p]) for p in ('alpha', 'beta') if p in node}}
+        return {'op': op, 'order': _order(node['order'], polynomial=op in POLYNOMIAL_OPS), 'arg': convert(node['arg']),
+                **{p: convert(node[p]) for p in ('alpha', 'beta') if p in node}}
     if op == 'bessel_cross':
-        return {'op': op, 'orders': [_order(a) for a in node['orders']], 'args': [_convert(a) for a in node['args']]}
+        return {'op': op, 'orders': [_order(a) for a in node['orders']], 'args': [convert(a) for a in node['args']]}
     if op == 'power':
         exponent = node['exponent']
         if exponent['op'] == 'int' and 0 <= exponent['value'] <= 12:
-            return {'op': 'pow', 'base': _convert(node['base']), 'exponent': exponent['value']}
-        return {'op': 'rpow', 'base': _convert(node['base']), 'exponent': _convert(exponent)}
+            return {'op': 'pow', 'base': convert(node['base']), 'exponent': exponent['value']}
+        return {'op': 'rpow', 'base': convert(node['base']), 'exponent': convert(exponent)}
     raise InputError('Unsupported real expression; use arithmetic, Gamma, exp, real powers, integrals, or Bessel J/Y/X.')
 
 
@@ -124,32 +125,41 @@ def _parts(raw):
 
 def parse_target(text, conditions):
     from .parser import _Parser
-    lhs, rhs = _Parser(text, extended=True).equation()
-    lhs, rhs = _convert(lhs), _convert(rhs)
-    assumptions = []
-    order_type = None
-    real_stated = set()
-    parts = [] if (conditions is None or conditions == '') and not _free_names([lhs, rhs]) else _parts(conditions)
+    raw_lhs, raw_rhs = _Parser(text, extended=True).equation()
+    parts = [] if conditions is None or conditions == '' else _parts(conditions)
+    declared = {}
+    comparisons = []
     for part in parts:
         compact = re.sub(r'\s+', '', part)
-        declared_type = ('int' if compact in {'ninteger', 'ninZ', 'n:Z', 'nは整数', 'n整数'} else
-                         'nat' if compact in {'nnatural', 'ninN', 'n:N', 'nは自然数', 'n自然数'} else None)
-        if declared_type:
-            if order_type is not None and order_type != declared_type:
-                raise InputError('Declare n with one order type: integer or natural.')
-            order_type = declared_type
-            continue
+        order = re.fullmatch(r'([mn])(?:natural|inN|:N|は自然数|自然数)', compact)
+        integral = compact in {'ninteger', 'ninZ', 'n:Z', 'nは整数', 'n整数'}
         real = re.fullmatch(r'([A-Za-z][A-Za-z0-9_]{0,31}?)(?:real|inR|:R|は実数)', compact)
-        if real and is_variable_name(real[1]) and real[1] != 'n':
-            real_stated.add(real[1])
-            continue
+        name, kind = (order[1], 'nat') if order else ('n', 'int') if integral else (real[1], 'real') if real else (None, None)
+        if name is not None:
+            if not is_variable_name(name) or name == 'n' and kind == 'real':
+                raise InputError('Degree n has type integer or natural; real names must be safe and unreserved.')
+            if name in declared and declared[name] != kind:
+                raise InputError(f'Declare {name} with one consistent variable type.')
+            declared[name] = kind
+        else:
+            comparisons.append(part)
+    order_names = frozenset({'n'} | {name for name, kind in declared.items() if kind == 'nat'})
+    lhs, rhs = _convert(raw_lhs, order_names), _convert(raw_rhs, order_names)
+    if not parts and _free_names([lhs, rhs]):
+        _parts(conditions)
+    assumptions = []
+    for part in comparisons:
         tokens = re.split(r'(>=|<=|!=|>|<|=)', part)
         if len(tokens) not in {3, 5}:
             raise NeedsConditions('State scalar comparisons or an expression equal/non-equal to zero.')
         for i in range(0, len(tokens)-2, 2):
             left, relation, right = (p.strip() for p in tokens[i:i+3])
             operator = next(key for key, value in RELATIONS.items() if value == relation)
-            if is_variable_name(left) or is_variable_name(right):
+            if is_variable_name(left) and is_variable_name(right):
+                if declared.get(left) != 'nat' or declared.get(right) != 'nat':
+                    raise NeedsConditions('Variable comparisons require two declared natural degrees m, n.')
+                atom = {'op': 'degree_compare', 'lhs': left, 'relation': operator, 'rhs': right}
+            elif is_variable_name(left) or is_variable_name(right):
                 if is_variable_name(right):
                     left, right = right, left
                     operator = {'gt': 'lt', 'ge': 'le', 'lt': 'gt', 'le': 'ge', 'eq': 'eq', 'ne': 'ne'}[operator]
@@ -168,14 +178,15 @@ def parse_target(text, conditions):
                 expr = parser.expression()
                 if parser.peek() is not None:
                     raise InputError('Unexpected token in a function-value condition.')
-                atom = {'op': 'expr_compare', 'lhs': _convert(expr), 'relation': operator, 'rhs': {'op': 'int', 'value': 0}}
+                atom = {'op': 'expr_compare', 'lhs': _convert(expr, order_names), 'relation': operator, 'rhs': {'op': 'int', 'value': 0}}
             if atom not in assumptions:
                 assumptions.append(atom)
-    names = _free_names([lhs, rhs, assumptions]) | real_stated
+    names = _free_names([lhs, rhs, assumptions]) | {name for name, kind in declared.items() if kind == 'real' or name == 'm'}
     names |= {a['variable'] for a in assumptions if a['op'] == 'compare'}
-    if 'n' in names and order_type is None:
+    names |= {a[side] for a in assumptions if a['op'] == 'degree_compare' for side in ('lhs', 'rhs')}
+    if 'n' in names and 'n' not in declared:
         raise NeedsConditions('State n integer for Bessel orders or n natural for Polynomial orders.')
-    target = {'schema_version': 2, 'variables': {name: order_type if name == 'n' else 'real' for name in sorted(names)},
+    target = {'schema_version': 2, 'variables': {name: declared.get(name, 'real') for name in sorted(names)},
               'assumptions': assumptions, 'lhs': lhs, 'rhs': rhs}
     validate(target, require_proof=False)
     return target
@@ -184,7 +195,7 @@ def parse_target(text, conditions):
 def _polynomial_order(node, variables):
     """Validate the small natural-order grammar and return a required lower bound."""
     if not isinstance(node, dict):
-        raise InputError('Polynomial orders require a natural literal or n with a small offset.')
+        raise InputError('Polynomial orders require a natural literal or m/n with a small offset.')
     if node.get('op') == 'int':
         _keys(node, {'op', 'value'})
         if type(node['value']) is not int or not 0 <= node['value'] <= 1000:
@@ -192,14 +203,14 @@ def _polynomial_order(node, variables):
         return 0
     if node.get('op') == 'var':
         _keys(node, {'op', 'name'})
-        if node['name'] != 'n' or variables.get('n') != 'nat':
-            raise InputError('Polynomial order n requires the natural-number type.')
+        if node['name'] not in {'m', 'n'} or variables.get(node['name']) != 'nat':
+            raise InputError('Polynomial degrees m and n require the natural-number type.')
         return 0
     if node.get('op') in {'add', 'sub'}:
         _keys(node, {'op', 'args'})
         args = node['args']
-        if not isinstance(args, list) or len(args) != 2 or args[0] != {'op': 'var', 'name': 'n'}:
-            raise InputError('Shifted Polynomial orders have the form n+k or n-k.')
+        if not isinstance(args, list) or len(args) != 2 or not isinstance(args[0], dict) or args[0].get('op') != 'var' or args[0].get('name') not in {'m', 'n'}:
+            raise InputError('Shifted Polynomial orders have the form m+k, m-k, n+k, or n-k.')
         _polynomial_order(args[0], variables)
         if not isinstance(args[1], dict) or args[1].get('op') != 'int':
             raise InputError('A Polynomial order offset must be an integer from 0 to 12.')
@@ -207,7 +218,7 @@ def _polynomial_order(node, variables):
         if args[1]['value'] > 12:
             raise InputError('A Polynomial order offset must be an integer from 0 to 12.')
         return args[1]['value'] if node['op'] == 'sub' else 0
-    raise InputError('Polynomial orders support natural literals, n, n+k, or n-k.')
+    raise InputError('Polynomial orders support natural literals, m/n, and small offsets.')
 
 
 def validate_order_domains(nodes, bounds):
@@ -216,9 +227,10 @@ def validate_order_domains(nodes, bounds):
             order = node['order']
             if order.get('op') == 'sub':
                 required = order['args'][1]['value']
-                lower = bounds.get('n', [None, None, set()])[0]
+                name = order['args'][0]['name']
+                lower = bounds.get(name, [None, None, set()])[0]
                 if lower is None or lower[0] < required:
-                    raise NeedsConditions(f'The Polynomial order n-{required} requires an explicit domain implying n >= {required}.')
+                    raise NeedsConditions(f'The Polynomial order {name}-{required} requires an explicit domain implying {name} >= {required}.')
 
 
 def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=frozenset()):
@@ -348,13 +360,41 @@ def domains(data):
     return result
 
 
+def _validate_degree_relations(data, bounds):
+    """Check feasibility of the two natural degrees with exact scalar bounds."""
+    relations = [a for a in data['assumptions'] if a['op'] == 'degree_compare']
+    if not relations:
+        return
+    allowed = {'lt', 'eq', 'gt'}
+    for atom in relations:
+        choices = {'lt': {'lt'}, 'le': {'lt', 'eq'}, 'eq': {'eq'},
+                   'ne': {'lt', 'gt'}, 'ge': {'gt', 'eq'}, 'gt': {'gt'}}[atom['relation']]
+        if atom['lhs'] == atom['rhs']:
+            if 'eq' not in choices:
+                raise NeedsConditions('Contradictory natural-degree conditions.')
+        else:
+            if atom['lhs'] == 'n':
+                choices = {{'lt': 'gt', 'gt': 'lt', 'eq': 'eq'}[v] for v in choices}
+            allowed &= choices
+    if {'m', 'n'} <= bounds.keys() and all(data['variables'][v] == 'nat' for v in ('m', 'n')):
+        ml, mh, me = bounds['m']; nl, nh, ne = bounds['n']
+        if nh and ml[0] >= nh[0]: allowed.discard('lt')
+        if mh and nl[0] >= mh[0]: allowed.discard('gt')
+        lo = max(ml[0], nl[0])
+        hi = min(v[0] for v in (mh, nh) if v) if mh or nh else None
+        if hi is not None and (hi < lo or hi-lo+1 <= sum(lo <= q <= hi and q.denominator == 1 for q in me | ne)):
+            allowed.discard('eq')
+    if not allowed:
+        raise NeedsConditions('Contradictory natural-degree conditions.')
+
+
 def validate(data, require_proof=True):
     _keys(data, {'schema_version', 'variables', 'assumptions', 'lhs', 'rhs'} | ({'proof'} if require_proof else set()), set() if require_proof else {'proof'})
-    if not is_extended(data) or not isinstance(data['variables'], dict) or len(data['variables']) > 4:
-        raise InputError('Version 2 permits up to four typed free variables.')
+    if not is_extended(data) or not isinstance(data['variables'], dict) or len(data['variables']) > 5:
+        raise InputError('Version 2 permits three real variables and natural degrees m, n (or integer n).')
     variables = data['variables']
-    if any(not is_variable_name(name) or kind not in (('int', 'nat') if name == 'n' else ('real',)) for name, kind in variables.items()):
-        raise InputError('Use safe ASCII names of 1 to 32 characters for real variables; n has type int or nat. Function names are reserved.')
+    if any(not is_variable_name(name) or kind not in (('int', 'nat') if name == 'n' else ('real', 'nat') if name == 'm' else ('real',)) for name, kind in variables.items()):
+        raise InputError('Use safe ASCII names of 1 to 32 characters for real variables; n has type int or nat; m may also have type nat. Function names are reserved.')
     if sum(kind == 'real' for kind in variables.values()) > 3:
         raise InputError('At most three free real variables are supported.')
     for side in ['lhs', 'rhs']:
@@ -372,6 +412,10 @@ def validate(data, require_proof=True):
             p, q = atom['value']['numerator'], atom['value']['denominator']
             if type(p) is not int or type(q) is not int or abs(p) > 1000 or not 1 <= q <= 1000 or Fraction(p, q).denominator != q:
                 raise InputError('Condition constants must be reduced exact rationals bounded by 1000.')
+        elif isinstance(atom, dict) and atom.get('op') == 'degree_compare':
+            _keys(atom, {'op', 'lhs', 'relation', 'rhs'})
+            if any(not isinstance(atom[side], str) or variables.get(atom[side]) != 'nat' for side in ('lhs', 'rhs')) or not isinstance(atom['relation'], str) or atom['relation'] not in RELATIONS:
+                raise InputError('A degree comparison requires two declared natural degrees and a supported relation.')
         else:
             _keys(atom, {'op', 'lhs', 'relation', 'rhs'})
             if atom['op'] != 'expr_compare' or atom['relation'] not in ['eq', 'ne'] or atom['rhs'] != {'op': 'int', 'value': 0}:
@@ -387,6 +431,7 @@ def validate(data, require_proof=True):
         if atom['op'] == 'expr_compare' and {**atom, 'relation': 'ne' if atom['relation'] == 'eq' else 'eq'} in assumptions:
             raise NeedsConditions('A function expression cannot be both zero and nonzero.')
     bounds = domains(data)
+    _validate_degree_relations(data, bounds)
     validate_order_domains([data['lhs'], data['rhs'], assumptions], bounds)
     if 'proof' in data:
         from .real_special import has_special, validate_proof
@@ -434,9 +479,22 @@ def labels(data):
     for a in data['assumptions']:
         if a['op'] == 'compare':
             result.append(f'{a["variable"]} {RELATIONS[a["relation"]]} {Fraction(a["value"]["numerator"], a["value"]["denominator"])}')
+        elif a['op'] == 'degree_compare':
+            result.append(f'{a["lhs"]} {RELATIONS[a["relation"]]} {a["rhs"]}')
         else:
             result.append(f'{display(a["lhs"])} {RELATIONS[a["relation"]]} 0')
     return result
+
+
+def _nonnegative(node, bounds):
+    value = _constant(node)
+    if value is not None: return value >= 0
+    if node['op'] == 'var':
+        lo = bounds.get(node['name'], [None, None, set()])[0]
+        return lo is not None and lo[0] >= 0
+    if node['op'] in {'add', 'mul'}:
+        return all(_nonnegative(arg, bounds) for arg in node['args'])
+    return _positive(node, bounds)
 
 
 def _positive(node, bounds):
@@ -449,7 +507,10 @@ def _positive(node, bounds):
     if node['op'] == 'exp': return True
     if node['op'] == 'gamma': return _positive(node['arg'], bounds)
     if node['op'] == 'sqrt': return _positive(node['arg'], bounds)
-    if node['op'] in {'add', 'mul', 'div'}: return all(_positive(n, bounds) for n in node['args'])
+    if node['op'] == 'add':
+        a, b = node['args']
+        return (_positive(a, bounds) and _nonnegative(b, bounds)) or (_nonnegative(a, bounds) and _positive(b, bounds))
+    if node['op'] in {'mul', 'div'}: return all(_positive(n, bounds) for n in node['args'])
     if node['op'] == 'pow': return node['exponent'] == 0 or _positive(node['base'], bounds)
     return False
 

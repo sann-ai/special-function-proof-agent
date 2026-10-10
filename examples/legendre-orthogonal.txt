@@ -1,0 +1,1 @@
+int(-1,1,P_m(t)*P_n(t),t)=0; m natural,n natural,m!=n

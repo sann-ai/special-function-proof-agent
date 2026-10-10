@@ -1,0 +1,62 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "m": "nat",
+    "n": "nat"
+  },
+  "assumptions": [
+    {
+      "op": "degree_compare",
+      "lhs": "m",
+      "relation": "ne",
+      "rhs": "n"
+    }
+  ],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": -1
+    },
+    "upper": {
+      "op": "int",
+      "value": 1
+    },
+    "body": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "m"
+          },
+          "arg": {
+            "op": "var",
+            "name": "t"
+          }
+        },
+        {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "var",
+            "name": "t"
+          }
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 0
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "legendre_orthogonal"
+  }
+}

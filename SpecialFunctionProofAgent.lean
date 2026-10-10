@@ -9,3 +9,5 @@ import SpecialFunctionProofAgent.LaguerreRecurrence
 import SpecialFunctionProofAgent.Jacobi
 import SpecialFunctionProofAgent.BesselY
 import SpecialFunctionProofAgent.BesselYInteger
+import SpecialFunctionProofAgent.BesselYAnalytic
+import SpecialFunctionProofAgent.LegendreOrthogonality

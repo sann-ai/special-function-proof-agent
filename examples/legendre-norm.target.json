@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": -1
+    },
+    "upper": {
+      "op": "int",
+      "value": 1
+    },
+    "body": {
+      "op": "pow",
+      "base": {
+        "op": "legendre",
+        "order": {
+          "op": "var",
+          "name": "n"
+        },
+        "arg": {
+          "op": "var",
+          "name": "t"
+        }
+      },
+      "exponent": 2
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "int",
+                "value": 2
+              },
+              {
+                "op": "var",
+                "name": "n"
+              }
+            ]
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  }
+}

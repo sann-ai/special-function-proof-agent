@@ -45,6 +45,7 @@ def output_schema(route: str, target: dict | None = None) -> dict:
             obj({"op":{"type":"string", "enum":["hermite_h","hermite_he","legendre"]}, "order":ref, "arg":ref}),
             obj({"op":{"const":"laguerre"}, "order":ref, "alpha":ref, "arg":ref}),
             obj({"op":{"const":"bessel_y_noninteger"}, "order":ref, "arg":ref}),
+            obj({"op":{"const":"bessel_y"}, "order":ref, "arg":ref}),
             obj({"op":{"const":"rational"}, "numerator":{"type":"integer"}, "denominator":{"type":"integer","minimum":1}}),
             obj({"op":{"const":"jacobi"}, "order":ref, "alpha":ref, "beta":ref, "arg":ref}),
             obj({"op":{"const":"deriv"}, "var":{"type":"string","enum":derivative_names}, "arg":ref}),
@@ -119,7 +120,10 @@ Keep the exact integration variable, finite endpoints, and all real parameters.
 YNoninteger uses bessel_y_noninteger {order,arg}; order is an exact rational object and must be
 -1/2,1/2,3/2. Positive x is required. Recipes bessel_y_half_recurrence and bessel_y_half_derivative
 apply Y(-1/2,x)+Y(3/2,x)=Y(1/2,x)/x and D_x Y(1/2,x)=(Y(-1/2,x)-Y(3/2,x))/2.
-Integer Y and cross products retain their diagnostic route; do not substitute an integer in YNoninteger.
+integer_y_recurrence proves Y_(n-1)(x)+Y_(n+1)(x)=2*n/x*Y_n(x), with integer n and x>0.
+Use the existing bessel_y {order,arg} AST for this exact integer recurrence. The full theorem uses
+the standard integer Y definition, with order differentiability proved from its convergent J series.
+Other integer Y identities and cross products retain their diagnostic route. Keep integer Y distinct from YNoninteger.
 Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
 integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
 Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.

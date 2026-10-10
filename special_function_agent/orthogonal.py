@@ -2,7 +2,7 @@
 from .classical import integer, binary, neg, predecessor, lean_natural
 
 RECIPES = ('legendre_values', 'legendre_parity', 'legendre_endpoints',
-           'legendre_recurrence', 'legendre_adjacent_integral',
+           'legendre_recurrence', 'legendre_adjacent_integral', 'legendre_orthogonal', 'legendre_norm',
            'laguerre_values', 'laguerre_recurrence', 'laguerre_derivative', 'jacobi_values',
            'jacobi_derivative', 'jacobi_legendre')
 REASONS = {
@@ -11,6 +11,8 @@ REASONS = {
     'legendre_endpoints': '標準Legendreの有限和と鏡映公式から指定された端点の値を評価する。',
     'legendre_recurrence': '標準Legendreの有限和の係数比較から証明した三項漸化式を、元の自然数次数条件で適用する。',
     'legendre_adjacent_integral': '隣接次数のLegendre積は奇関数であり、連続性と対称区間の積分から積分値0を得る。',
+    'legendre_orthogonal': '標準Legendreの自己共役微分方程式と端点で消える重みから、異なる自然数次数間の積分を0と評価する。',
+    'legendre_norm': '標準Legendreの直交性と三項漸化式から、区間[-1,1]上の二乗積分2/(2n+1)を評価する。',
     'laguerre_recurrence': '一般化Laguerreの有限和の係数比較から証明した三項漸化式を、自然数次数と実パラメータを保持して適用する。',
     'laguerre_values': '一般化Laguerreの標準有限和から低次数を評価する。',
     'laguerre_derivative': '一般化Laguerreの有限和を微分し、次数を1下げてパラメータを1上げる公式を適用する。',
@@ -66,6 +68,18 @@ def match(lhs, rhs):
                     if second == polynomial('legendre', shift(n, 1), t) and right == integer(0):
                         found = {'recipe': 'legendre_adjacent_integral', 'theorem': 'legendreP_adjacent_integral',
                                  'arguments': [n], 'natural_arguments': [0]}
+                    elif second.get('op') == 'legendre' and second['arg'] == t and right == integer(0) and n != second['order']:
+                        found = {'recipe': 'legendre_orthogonal', 'theorem': 'legendreP_orthogonal',
+                                 'arguments': [n, second['order']], 'natural_arguments': [0, 1], 'distinct_degrees': True}
+            square = body.get('base') if body.get('op') == 'pow' and body['exponent'] == 2 else None
+            if body.get('op') == 'mul' and body['args'][0] == body['args'][1]:
+                square = body['args'][0]
+            if square and square.get('op') == 'legendre' and square['arg'] == t:
+                n = square['order']
+                expected = binary('div', integer(2), binary('add', binary('mul', integer(2), n), integer(1)))
+                if right == expected:
+                    found = {'recipe': 'legendre_norm', 'theorem': 'legendreP_norm',
+                             'arguments': [n], 'natural_arguments': [0]}
         if op == 'legendre':
             n, x = left['order'], left['arg']
             common = {'arguments': [n, x], 'natural_arguments': [0]}
@@ -132,7 +146,7 @@ def match(lhs, rhs):
 def proof_lines(matched, names, expression):
     args = ' '.join(lean_natural(a, names) if i in matched.get('natural_arguments', []) else expression(a)
                     for i, a in enumerate(matched['arguments']))
-    if 'positive_degree' in matched:
+    if 'positive_degree' in matched or matched.get('distinct_degrees'):
         args += ' (by omega)'
     fact = 'SpecialFunctionProofAgent.' + matched['theorem'] + (' '+args if args else '')
     if matched['reverse']: fact = f'({fact}).symm'

@@ -1,0 +1,14 @@
+{
+  "recipe": "legendre_norm",
+  "theorem": "legendreP_norm",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "reverse": false
+}

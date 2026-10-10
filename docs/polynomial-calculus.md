@@ -1,6 +1,6 @@
-# Legendre の隣接直交と多項式の三項漸化式
+# Legendre の直交性・規格化と多項式の三項漸化式
 
-自然数次数の標準 Legendre と、全実パラメータの一般化 Laguerre に対して、三項漸化式を利用できます。Legendre には区間 `[-1,1]` 上の隣接次数の直交積分もあります。いずれも [既存の標準規約と有限和](orthogonal-polynomials.md) から Lean で証明した公式です。
+自然数次数の標準 Legendre と、全実パラメータの一般化 Laguerre に対して、三項漸化式を利用できます。Legendre には区間 `[-1,1]` 上の異なる自然数次数間の直交性と、二乗積分の規格化もあります。いずれも [既存の標準規約と有限和](orthogonal-polynomials.md) から Lean で証明した公式です。
 
 ## Legendre の三項漸化式
 
@@ -28,6 +28,41 @@
 (n+1)*P_{n+1}(x)=(2*n+1)*x*P_n(x)-n*P_{n-1}(x); n natural,n>=1,x real
 ```
 
+## Legendre の一般直交性と規格化
+
+`m,n : ℕ`、`m ≠ n` に対して
+
+\[
+\int_{-1}^{1}P_m(t)P_n(t)\,dt=0
+\]
+
+が成立します。公開定理は `SpecialFunctionProofAgent.legendreP_orthogonal (m n : ℕ) (h : m ≠ n)` です。規格化は全自然数 `n` に対して
+
+\[
+\int_{-1}^{1}P_n(t)^2\,dt=\frac{2}{2n+1}
+\]
+
+であり、公開定理は `SpecialFunctionProofAgent.legendreP_norm (n : ℕ)` です。`n=0,1,2` の二乗積分はそれぞれ `2`、`2/3`、`2/5` です。次数の非負性から分母 `2n+1` の正性が従います。
+
+証明では、既存の shifted Legendre の実係数多項式を `qₙ(t)` とし、その有限和の係数から自己随伴形の微分方程式
+
+\[
+\bigl(t(1-t)q_n'(t)\bigr)'=-n(n+1)q_n(t)
+\]
+
+を導きます。2つの次数の式を組み合わせると、積 `qₘqₙ` の積分は Wronskian の端点差に帰着します。端点 `0,1` で重み `t(1-t)` が零になり、`m≠n` なら固有値 `m(m+1)` と `n(n+1)` が異なるため、直交性が得られます。変数変換 `t=(1-x)/2` により標準の `legendreP` と区間 `[-1,1]` へ接続します。
+
+規格化の証明では `Iₙ=∫₋₁¹Pₙ(t)²dt` とおきます。隣り合う2本の三項漸化式を積分し、一般直交性で交差項を消去すると、`(2n+3)Iₙ₊₁=(2n+1)Iₙ` が得られます。`P₀=1` による `I₀=2` を初期値として帰納法を適用します。
+
+入力例は [legendre-orthogonal.txt](../examples/legendre-orthogonal.txt) と [legendre-norm.txt](../examples/legendre-norm.txt) にあります。
+
+```text
+int(-1,1,P_m(t)*P_n(t),t)=0; m natural,n natural,m!=n
+int(-1,1,P_n(t)^2,t)=2/(2*n+1); n natural
+```
+
+自然数次数 `m,n` はそれぞれ独立に量化され、`m!=n` は保存される元命題の明示条件です。直交性のレシピは、その条件または既存条件から導ける次数の不一致を使用します。規格化のレシピは `P_n(t)^2` と同じ関数の積 `P_n(t)*P_n(t)` に対応します。
+
 ## Legendre の隣接次数の直交積分
 
 全自然数 `n` に対して
@@ -40,7 +75,7 @@
 
 既存の鏡映公式 `Pₙ(-t)=(-1)ⁿPₙ(t)` により、隣接次数の積は奇関数です。区間積分の変数反転と符号反転から積分値を求めます。`n=0` では `P₀(t)P₁(t)=t` に対応します。
 
-この公開レシピは次数 `n` と `n+1`、区間 `[-1,1]`、積分変数を共通に持つ積を扱います。任意の異なる2次数の直交性と、規格化積分 `∫₋₁¹Pₙ(t)²dt=2/(2n+1)` は、後続の定理として整備する範囲です。
+この公開レシピは次数 `n` と `n+1`、区間 `[-1,1]`、積分変数を共通に持つ積を扱います。一般直交性の特殊な場合としても利用できます。
 
 入力例：
 
@@ -81,29 +116,29 @@ int(-1,1,P_0(t)*P_1(t),t)=0
 
 ## 検証経路と次数条件
 
-登録レシピは `legendre_recurrence`、`legendre_adjacent_integral`、`laguerre_recurrence` です。`direct` と `steps` の両経路に対応し、命題の左右反転にも対応します。漸化式の `n-1` には自然数次数の下限が必要です。`n>=1` と `n>0` は同じ正の自然数次数を指定します。隣接直交の次数は `n=0` を含みます。
+登録レシピは `legendre_recurrence`、`legendre_adjacent_integral`、`legendre_orthogonal`、`legendre_norm`、`laguerre_recurrence` です。`direct` と `steps` の両経路に対応し、命題の左右反転にも対応します。漸化式の `n-1` には自然数次数の下限が必要です。`n>=1` と `n>0` は同じ正の自然数次数を指定します。一般直交性は零次数を含む異なる2次数に対応し、隣接直交と規格化の次数は `n=0` を含みます。
 
 次の例は、同じ固定命題を両経路で検査し、保存した証拠を再検査します。
 
 ```sh
-mkdir -p runs
-cat > runs/adjacent-input.txt <<'EOF'
-int(-1,1,P_n(t)*P_{n+1}(t),t)=0; n natural
-EOF
-python3 -m special_function_agent verify runs/adjacent-input.txt --route direct --output runs/adjacent-direct
-python3 -m special_function_agent verify runs/adjacent-input.txt --route steps --output runs/adjacent-steps
-python3 -m special_function_agent replay runs/adjacent-steps
+python3 -m special_function_agent verify examples/legendre-orthogonal.txt --route direct --output runs/orthogonal-direct
+python3 -m special_function_agent verify examples/legendre-orthogonal.txt --route steps --output runs/orthogonal-steps
+python3 -m special_function_agent replay runs/orthogonal-steps
+python3 -m special_function_agent verify examples/legendre-norm.txt --route direct --output runs/norm-direct
+python3 -m special_function_agent verify examples/legendre-norm.txt --route steps --output runs/norm-steps
+python3 -m special_function_agent replay runs/norm-steps
 ```
 
 出力先には新しいディレクトリを指定します。数値診断には既存 mpmath を利用します。mpmath がない環境では `backend_unavailable` を記録し、Lean による証明検査と replay を実行します。
 
-数学実装は [LegendreCalculus.lean](../SpecialFunctionProofAgent/LegendreCalculus.lean) と [LaguerreRecurrence.lean](../SpecialFunctionProofAgent/LaguerreRecurrence.lean) にあります。Lean 4.34.0・固定 mathlib で、上記の公開4定理の依存公理 `propext`・`Classical.choice`・`Quot.sound` を検査しています。
+数学実装は [LegendreCalculus.lean](../SpecialFunctionProofAgent/LegendreCalculus.lean)、[LegendreOrthogonality.lean](../SpecialFunctionProofAgent/LegendreOrthogonality.lean)、[LaguerreRecurrence.lean](../SpecialFunctionProofAgent/LaguerreRecurrence.lean) にあります。Lean 4.34.0・固定 mathlib で、上記の公開6定理の依存公理 `propext`・`Classical.choice`・`Quot.sound` を検査しています。
 
 ```sh
 lake build
 python3 scripts/audit_special_functions.py
 python3 -m unittest discover -s tests -p 'test_polynomial_calculus.py' -v
 SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_polynomial_calculus.py' -v
+SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_legendre_orthogonality.py' -v
 ```
 
-受入検査には3公式の両経路と replay、負の Laguerre パラメータ、次数条件、束縛変数と自由変数、係数・添字・区間端点を変更した候補を含みます。
+受入検査には各公式の両経路と replay、異なる自然数次数の条件、負の Laguerre パラメータ、次数条件、束縛変数と自由変数、係数・添字・区間端点を変更した候補を含みます。

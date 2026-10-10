@@ -133,7 +133,7 @@ class IntegerYConditionalBoundaryTests(unittest.TestCase):
     def test_natural_degree_or_candidate_premise_injection_is_rejected(self):
         with self.assertRaises(InputError):
             parse_identity(TEXT.replace('n integer', 'n natural'))
-        candidates = [dict(mode='direct', recipe='integer_y_recurrence'),
+        candidates = [dict(mode='direct', recipe='integer_y_recurrence', assumptions=PREMISES),
                       dict(mode='steps', steps=[]),
                       dict(mode='diagnostic', assumptions=PREMISES),
                       dict(mode='diagnostic', h0=True, h1=True)]
@@ -271,10 +271,10 @@ class IntegerYConditionalBoundaryTests(unittest.TestCase):
         self.assertFalse(result['conditional_lean']['accepted'])
         self.assertFalse((output/'certificate.lean').exists())
 
-    def test_generator_routes_keep_diagnostic_request_and_skip_ai(self):
+    def test_unresolved_cross_generator_routes_keep_diagnostics_and_skip_ai(self):
         for route in ('direct', 'steps'):
             with self.subTest(route=route), patch('special_function_agent.generate.subprocess.Popen') as process:
-                result = generate(parse_identity(TEXT), route, self.base/f'generated-{route}')
+                result = generate(parse_identity((ROOT/'examples/cross-product-root.txt').read_text()), route, self.base/f'generated-{route}')
                 process.assert_not_called()
                 self.assert_conditional(result)
                 self.assertFalse(result['generation']['ai_called'])
@@ -326,7 +326,7 @@ class IntegerYConditionalLeanTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)/'run'
             commands = ([sys.executable, '-m', 'special_function_agent', 'verify',
-                         str(ROOT/'examples/integer-y-recurrence.txt'), '--output', str(output), '--timeout', '120'],
+                         str(ROOT/'examples/integer-y-recurrence.txt'), '--route', 'diagnostic', '--output', str(output), '--timeout', '120'],
                         [sys.executable, '-m', 'special_function_agent', 'replay', str(output), '--timeout', '120'])
             for index, command in enumerate(commands):
                 result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=150)

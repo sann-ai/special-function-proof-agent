@@ -183,6 +183,10 @@ def diagnose(data):
                     residuals=[]
                     accepted=True
                     for condition in data['assumptions']:
+                        if condition['op'] == 'degree_compare':
+                            a, b = exact[condition['lhs']], exact[condition['rhs']]
+                            accepted &= {'gt': a>b, 'ge': a>=b, 'lt': a<b, 'le': a<=b, 'eq': a==b, 'ne': a!=b}[condition['relation']]
+                            continue
                         if condition['op']!='expr_compare': continue
                         value=ev(condition['lhs'],at)
                         if not mp.isfinite(value): raise ValueError('A condition evaluated to a nonfinite value.')

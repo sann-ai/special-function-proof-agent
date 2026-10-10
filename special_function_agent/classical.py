@@ -84,8 +84,8 @@ def match(lhs, rhs):
 def lean_natural(node, names):
     if node['op'] == 'int' and node['value'] >= 0:
         return f'({node["value"]} : ℕ)'
-    if node['op'] == 'var' and node['name'] == 'n':
-        return names['n']
+    if node['op'] == 'var' and node['name'] in {'m', 'n'}:
+        return names[node['name']]
     if node['op'] in {'add', 'sub'}:
         return '(' + lean_natural(node['args'][0], names) + (' + ' if node['op'] == 'add' else ' - ') + lean_natural(node['args'][1], names) + ')'
     raise InputError('Use the supported natural Hermite degree.')

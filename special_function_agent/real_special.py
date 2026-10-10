@@ -6,15 +6,20 @@ from fractions import Fraction
 
 from .core import InputError, NeedsConditions, _keys, _run_lean, _save_json, _sha, environment
 from .registry import conventions
-from . import classical, orthogonal, bessel_y_formal
+from . import classical, orthogonal, bessel_y_formal, bessel_y_integer
 
-RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES + orthogonal.RECIPES + bessel_y_formal.RECIPES
+RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES + orthogonal.RECIPES + bessel_y_formal.RECIPES + bessel_y_integer.RECIPES
 SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger', 'erf', 'pi', 'sqrt', 'deriv'}
 
 
 def has_special(data):
     from .real_bessel import _walk
     nodes = list(_walk([data.get('lhs'), data.get('rhs'), data.get('assumptions', [])]))
+    proof = data.get('proof')
+    if (data.get('schema_version') == 2 and bessel_y_integer.complete_target(data)
+            and not (isinstance(proof, dict) and proof.get('mode') == 'diagnostic')
+            and not any(n.get('op') == 'bessel_cross' for n in nodes)):
+        return True
     return (data.get('schema_version') == 2 and any(n.get('op') in SPECIAL_OPS for n in nodes)
             and not any(n.get('op') in {'bessel_y', 'bessel_cross'} for n in nodes))
 
@@ -99,7 +104,7 @@ def match_identity(lhs, rhs):
                 else: continue
                 if r.get('op') == 'var' and right == _bin('mul', _rpow(r, _neg(a)), _gamma(a)):
                     return {'recipe': 'gamma_scaled_integral', 'arguments': [a, r], 'reverse': reverse}
-    return classical.match(lhs, rhs) or orthogonal.match(lhs, rhs) or bessel_y_formal.match(lhs, rhs)
+    return classical.match(lhs, rhs) or orthogonal.match(lhs, rhs) or bessel_y_formal.match(lhs, rhs) or bessel_y_integer.match_identity(lhs, rhs)
 
 
 def default_proof(data, route='direct'):
@@ -115,6 +120,7 @@ def default_proof(data, route='direct'):
     reasons.update(classical.REASONS)
     reasons.update(orthogonal.REASONS)
     reasons.update(bessel_y_formal.REASONS)
+    reasons.update(bessel_y_integer.REASONS)
     return {'mode': 'steps', 'steps': [{'before': deepcopy(data['lhs']), 'after': deepcopy(data['rhs']),
              'recipe': recipe, 'reason': reasons[recipe], 'conditions': labels(data)}]}
 
@@ -126,7 +132,7 @@ def lean_expr(node, names, types=None):
     if op == 'int': return f'({node["value"]} : ℝ)'
     if op == 'var':
         value = names[node['name']]
-        return f'({value} : ℝ)' if types.get(node['name']) == 'nat' else value
+        return f'({value} : ℝ)' if types.get(node['name']) in {'nat', 'int'} else value
     if op == 'rational': return f'({node["numerator"]} / {node["denominator"]} : ℝ)'
     if op == 'pi': return 'Real.pi'
     if op == 'sqrt': return f'(Real.sqrt {ev(node["arg"])})'
@@ -141,6 +147,8 @@ def lean_expr(node, names, types=None):
         return f'(SpecialFunctionProofAgent.{fn} {args})'
     if op == 'bessel_y_noninteger':
         return f'(SpecialFunctionProofAgent.besselYNoninteger {ev(node["order"])} {ev(node["arg"])})'
+    if op == 'bessel_y':
+        return f'(SpecialFunctionProofAgent.besselYInt {bessel_y_integer.lean_integer(node["order"], names)} {ev(node["arg"])})'
     if op == 'deriv':
         index = len(names)
         while f'd{index}' in names.values():
@@ -167,6 +175,8 @@ def _condition(atom, names, types=None):
     types = types or {}
     from .real_bessel import RELATIONS
     relation = RELATIONS[atom['relation']].replace('!=', '≠').replace('>=', '≥').replace('<=', '≤')
+    if atom['op'] == 'degree_compare':
+        return f'{names[atom["lhs"]]} {relation} {names[atom["rhs"]]}'
     if atom['op'] == 'compare':
         p, q = atom['value']['numerator'], atom['value']['denominator']
         value = lean_expr({'op':'var','name':atom['variable']}, names, types)
@@ -182,6 +192,8 @@ def _recipe(recipe, lhs, rhs, names, types=None):
         raise InputError('This recipe does not match the exact equality endpoints.')
     if recipe in bessel_y_formal.RECIPES:
         return bessel_y_formal.proof_lines(match, names, lambda a: lean_expr(a, names, types))
+    if recipe in bessel_y_integer.RECIPES:
+        return bessel_y_integer.proof_lines(match, names, lambda a: lean_expr(a, names, types))
     if recipe in orthogonal.RECIPES:
         return orthogonal.proof_lines(match, names, lambda a: lean_expr(a, names, types))
     if recipe in classical.RECIPES:
@@ -197,9 +209,10 @@ def render(data):
     validate_proof(data)
     names = {name: f'v{i}' for i, name in enumerate(sorted(data['variables']))}
     types = data['variables']
-    if any(kind not in {'real', 'nat'} for kind in types.values()):
-        raise InputError('The formal real recipes use real parameters and natural Hermite degrees.')
-    binders = ' '.join(f'({names[n]} : {"ℕ" if types[n] == "nat" else "ℝ"})' for n in sorted(names))
+    allowed_types = {'real', 'nat', 'int'} if bessel_y_integer.complete_target(data) else {'real', 'nat'}
+    if any(kind not in allowed_types for kind in types.values()):
+        raise InputError('Integer degree is supported only for the exact integer-Y recurrence; polynomial degrees remain natural.')
+    binders = ' '.join(f'({names[n]} : {dict(real="ℝ", nat="ℕ", int="ℤ")[types[n]]})' for n in sorted(names))
     conditions = ' '.join(f'(h{i} : {_condition(a, names, types)})' for i,a in enumerate(data['assumptions']))
     proposition = f'{lean_expr(data["lhs"], names, types)} = {lean_expr(data["rhs"], names, types)}'
     lines = ['import SpecialFunctionProofAgent', '', 'open scoped Real', 'open MeasureTheory', '',
@@ -243,9 +256,11 @@ def verify(data, output_dir, timeout):
               'environment':environment(), 'conventions':conventions(data), 'full_function_proof':False,
               'analysis':analysis, 'numerical':numeric, 'attempts':[],
               'request_sha256':_sha((output_dir/'request.json').read_bytes())}
-    if bessel_y_formal.contains(data):
+    bessel_scope = (bessel_y_integer.FORMAL_SCOPE if bessel_y_integer.complete_target(data) else
+                    bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(data) else None)
+    if bessel_scope:
         result['full_bessel_proof'] = False
-        result['formal_scope'] = bessel_y_formal.FORMAL_SCOPE
+        result['formal_scope'] = bessel_scope
     bounds = domains(data)
     pending = []
     if analysis and analysis['recipe'] in {'gamma_recurrence', 'beta_integral', 'gamma_scaled_integral'}:
@@ -274,7 +289,7 @@ def verify(data, output_dir, timeout):
                 (output_dir/'certificate.lean').write_text(source, encoding='utf-8')
                 result.update(status='proved', reason='full_lean_certificate', full_function_proof=True,
                               certificate_kind='proof', certificate_sha256=_sha(source.encode()))
-    if bessel_y_formal.contains(data):
+    if bessel_scope:
         result['full_bessel_proof'] = result['full_function_proof']
     _save_json(output_dir/'analysis.json', analysis or {'status':'no_matching_template'})
     _save_json(output_dir/'numerical.json', numeric)
@@ -284,6 +299,8 @@ def verify(data, output_dir, timeout):
     from .real_bessel import _walk
     if any(node.get('op') in {'hermite_h', 'hermite_he'} for node in _walk([data['lhs'], data['rhs']])):
         lines += ['', 'Hermite規約：Hは物理学規約、Heは確率論規約。次数は自然数です。']
+    if bessel_y_integer.complete_target(data):
+        lines += ['', '整数Y規約：正実軸の標準次数微分式besselYIntを用います。J級数の局所一様収束から次数微分可能性と非整数Yの整数次数極限を証明しています。']
     if data['proof']['mode'] == 'steps':
         lines += ['', '構造化ステップ（各等式を元の全条件で検査）：']
         for i,step in enumerate(data['proof']['steps'],1):
@@ -297,9 +314,11 @@ def replay(data, result, output_dir, timeout):
         raise InputError('This run has no full special-function certificate.')
     if result.get('certificate_kind') != 'proof':
         raise InputError('Certificate kind and full proof status disagree.')
-    if bessel_y_formal.contains(data) and (result.get('full_bessel_proof') is not True or
-                                        result.get('formal_scope') != bessel_y_formal.FORMAL_SCOPE):
-        raise InputError('The noninteger Bessel proof status disagrees with the full certificate.')
+    bessel_scope = (bessel_y_integer.FORMAL_SCOPE if bessel_y_integer.complete_target(data) else
+                    bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(data) else None)
+    if bessel_scope and (result.get('full_bessel_proof') is not True or
+                         result.get('formal_scope') != bessel_scope):
+        raise InputError('The Bessel proof status disagrees with the full certificate.')
     source = render(data)
     certificate = output_dir/'certificate.lean'
     if result.get('environment') != environment() or result.get('conventions') != conventions(data):
@@ -309,4 +328,4 @@ def replay(data, result, output_dir, timeout):
     if result.get('request_sha256') != _sha((output_dir/'request.json').read_bytes()):
         raise InputError('The saved request changed.')
     checked = _run_lean(certificate, timeout)
-    return {'status':'proved' if checked['accepted'] else 'unresolved', 'replayed':checked['accepted'], 'verification':checked, **({'full_bessel_proof': checked['accepted']} if bessel_y_formal.contains(data) else {})}
+    return {'status':'proved' if checked['accepted'] else 'unresolved', 'replayed':checked['accepted'], 'verification':checked, **({'full_bessel_proof': checked['accepted']} if bessel_scope else {})}

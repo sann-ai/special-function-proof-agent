@@ -1,6 +1,6 @@
 # 共通v2の数理仕様
 
-v2は実数型の自由変数（最大3個）、次数変数nの型、構造化した全仮定、左辺・右辺を保存します。Besselのnは整数、Hermite・Legendre・Laguerre・Jacobiのnは自然数として宣言します。識別子は安全ASCII名、積分は `var` フィールドで束縛し、自由変数との同名衝突を拒否します。微分は実変数名を明示して保存し、他の自由実変数を固定します。Leanへの変換は入れ子の微分と積分に別々の束縛名を割り当てます。固定したmathlibの意味とプロジェクトの追加定義を、関数別登録表と環境ハッシュに含めます。
+v2は実数型の自由変数（最大3個）、次数変数m,nの型、構造化した全仮定、左辺・右辺を保存します。Besselのnは整数、Hermite・Legendre・Laguerre・Jacobiのnは自然数として宣言します。識別子は安全ASCII名、積分は `var` フィールドで束縛し、自由変数との同名衝突を拒否します。微分は実変数名を明示して保存し、他の自由実変数を固定します。Leanへの変換は入れ子の微分と積分に別々の束縛名を割り当てます。固定したmathlibの意味とプロジェクトの追加定義を、関数別登録表と環境ハッシュに含めます。
 
 - `gamma {arg}`：`Real.Gamma`。
 - `exp {arg}`：`Real.exp`。
@@ -14,7 +14,7 @@ v2は実数型の自由変数（最大3個）、次数変数nの型、構造化�
 - `integral {var, lower, upper, body}`：有限上端は向き付き実区間積分。`upper: {"op":"infinity"}` は `Set.Ioi lower` 上のルベーグ積分。`infinity`は積分上端だけで許可します。
 - 算術はint、var、neg、add/sub/mul/div、非負整数指数pow。比較仮定は有理数とのcompareと、式を0と比較するexpr_compareです。
 
-plain入力は `int(0,1,t^(a-1)*(1-t)^(b-1),t)`、`D_x(H_n(x))`、`erf(-x)` などです。LaTeXの `\Gamma`、`\exp`、`\int_0^1 ... dt`、`\infty`、`\sqrt{\pi}`、`\operatorname{erf}` にも対応します。全実数を対象とする式には `x real`、自然数次数には `n natural` を使います。正性などの追加条件が必要な式では、その条件を保存して検査し、不足時は `needs_conditions` を返します。
+plain入力は `int(0,1,t^(a-1)*(1-t)^(b-1),t)`、`D_x(H_n(x))`、`erf(-x)` などです。LaTeXの `\Gamma`、`\exp`、`\int_0^1 ... dt`、`\infty`、`\sqrt{\pi}`、`\operatorname{erf}` にも対応します。2つの自然数次数には `m natural,n natural` を使い、`degree_compare {lhs,relation,rhs}` でm,n間の比較を保存します。自然数mの宣言は同名の自由実変数や積分束縛と両立しません。既存の1次数入力のASTは維持します。全実数を対象とする式には `x real`、自然数次数には `n natural` を使います。正性などの追加条件が必要な式では、その条件を保存して検査し、不足時は `needs_conditions` を返します。
 
 ## GammaとBeta
 
@@ -65,7 +65,7 @@ H_{n+1}(x)=2xH_n(x)-2nH_{n-1}(x),\qquad n\ge1.
 
 補題名は `hermiteHe_zero`、`hermiteHe_one`、`hermiteH_zero`、`hermiteH_one`、`hermiteH_recurrence` です。全自然数nに対する後続次数形は `hermiteHe_succ_succ`、`hermiteH_succ_succ` にあります。Lean補題を組み合わせると `H_2(x)=4x²−2` も導出できます。CLIの値レシピは0・1次に対応します。
 
-CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です。次数の入力範囲は0〜1000の自然数リテラル、n、n+k、n−kで、kは0〜12です。n−kを含む入力はn≥kを導く元条件を確認します。Leanでは次数を `ℕ`、係数中のnを実数へのキャストとして扱い、減算の下限と微分公式の正次数条件をそれぞれ検査します。
+CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です。次数の入力範囲は0〜1000の自然数リテラル、自然数m/nとその±kで、kは0〜12です。n−kを含む入力はn≥kを導く元条件を確認します。Leanでは次数を `ℕ`、係数中のnを実数へのキャストとして扱い、減算の下限と微分公式の正次数条件をそれぞれ検査します。
 
 ## 実誤差関数とGaussian有限区間積分
 
@@ -98,7 +98,7 @@ CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です
 
 ## Legendre・Laguerre・Jacobi
 
-自然数次数nと実数の引数xを使います。一般化Laguerreのα、Jacobiのα,βは有限多項式の定義で全実数を扱い、通常のLaguerreはα=0です。微分公式はn≥1の条件で次数を1下げ、Laguerreはα、Jacobiはα,βをそれぞれ1増やします。微分変数以外のパラメータを固定して適用します。定義・正規化・正確な補題は[専用仕様](orthogonal-polynomials.md)、Legendreの隣接直交積分とLegendre/Laguerreの三項漸化式は[追加仕様](polynomial-calculus.md)に記載しています。
+自然数次数nと実数の引数xを使います。一般化Laguerreのα、Jacobiのα,βは有限多項式の定義で全実数を扱い、通常のLaguerreはα=0です。微分公式はn≥1の条件で次数を1下げ、Laguerreはα、Jacobiはα,βをそれぞれ1増やします。微分変数以外のパラメータを固定して適用します。定義・正規化・正確な補題は[専用仕様](orthogonal-polynomials.md)、Legendreの一般直交積分・規格化とLegendre/Laguerreの三項漸化式は[追加仕様](polynomial-calculus.md)に記載しています。
 
 両経路で検証する公開入力は、次の `.txt` と同名の `.target.json` です。
 
@@ -106,11 +106,11 @@ CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です
 - Laguerre：`laguerre-zero`、`laguerre-one`、`laguerre-two`、`ordinary-laguerre-one`、`ordinary-laguerre-two`、`laguerre-derivative`。全実パラメータの低次数値、通常規約の値とn≥1の微分です。
 - Jacobi：`jacobi-zero`、`jacobi-one`、`jacobi-two`、`jacobi-derivative`、`jacobi-legendre`。全実パラメータの低次数値、n≥1の微分、全自然数でのα=β=0からLegendreへの特殊化です。
 
-追加例 `legendre-recurrence` と `laguerre-recurrence` はn≥1の三項漸化式、`legendre-adjacent-integral` は全自然数nの隣接次数積の区間[-1,1]上の零積分です。各例は同じ固定入力をdirect/steps両経路で検査します。
+追加例 `legendre-recurrence` と `laguerre-recurrence` はn≥1の三項漸化式、`legendre-adjacent-integral` は全自然数nの隣接次数積の区間[-1,1]上の零積分です。`legendre-orthogonal` は自然数m≠nの一般直交積分、`legendre-norm` は全自然数の二乗積分2/(2n+1)です。各例は同じ固定入力をdirect/steps両経路で検査します。
 
 ## 正実軸の非整数Bessel Y
 
-`SpecialFunctionProofAgent/BesselY.lean` は既存の `Complex.besselJ` を正実軸で実数値へ接続し、標準のJによる接続式から `besselYNoninteger` を定義します。x>0、sin(πa)≠0の条件で、次数反転・漸化式・微分・Bessel微分方程式を証明します。[標準定義、条件付き整数極限、残る接続](bessel-y-formalization.md)を参照してください。
+`SpecialFunctionProofAgent/BesselY.lean` は既存の `Complex.besselJ` を正実軸で実数値へ接続し、標準のJによる接続式から `besselYNoninteger` を定義します。x>0、sin(πa)≠0の条件で、次数反転・漸化式・微分・Bessel微分方程式を証明します。[標準定義、整数極限、残る接続](bessel-y-formalization.md)を参照してください。
 
 CLIは `YNoninteger(order,x)` の明示名を使い、固定次数−1/2・1/2・3/2とx>0で次の2式をdirect/stepsの両経路へ接続します。
 
@@ -129,7 +129,7 @@ D_x(YNoninteger(1/2,x))=(YNoninteger(-1/2,x)-YNoninteger(3/2,x))/2; x>0
 
 v2の完全証明経路は上記の登録公式と実数環の整理を対象とします。Hermiteは自然数次数・実引数、erfは実引数の微分・初期値・奇関数性・Gaussian有限区間積分を扱います。複素erf、erfc、誤差関数の近似式・近似誤差の評価、Gaussianの一般変形や無限区間公式は追加の定義・補題・レシピを要する範囲です。数値診断は既存mpmathによる有限標本、条件の残差、差の候補、計算できなかった理由を記録します。Hermiteの数値計算は次数0〜40・引数の絶対値60以下を対象とし、範囲外では理由を保存します。近似誤差の厳密な区間評価は今後の対象です。
 
-従来の `Y_n`・`Y(order,x)` と交差積Xは正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、元の全命題の状態は `unresolved`、`full_bessel_proof: false` です。整数Yは標準次数微分式で定義し、Jの次数0・1の微分可能性を明示前提とする全整数への伝播・漸化式・整数極限を公開しています。`examples/integer-y-recurrence.txt` の条件付き検査はこの2前提を保存します。交換前提からのY₀・Y₁微分とscaled Wronskianの微分ゼロも数学モジュールで証明済みです。残る義務はこの次数微分可能性、次数と引数の微分交換、正規化したWronskian、正エネルギー積分と分母非零性の証明です。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
+整数Yは標準次数微分式で定義します。次数0・1の近傍でJ級数を一様に評価し、次数方向の微分可能性、全整数への伝播、標準非整数Yからの整数極限、三項漸化式をx>0から証明しました。`examples/integer-y-complete.txt` は `n integer,x>0` で `Y_{n-1}+Y_{n+1}=2*n/x*Y_n` を完全証明します。明示diagnostic経路や保存済みの条件付き整数Y証拠は、元の2つの次数微分可能性前提を保持します。その他のY・交差積入力は正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、必要な全定理が揃うまで `unresolved`、`full_bessel_proof: false` です。交換前提からのY₀・Y₁微分とscaled Wronskianの微分ゼロも数学モジュールで証明済みです。残る義務は次数と引数の微分交換、正規化したWronskian、正エネルギー積分と分母非零性の証明です。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
 
 ## 引き継いだBessel v1の基盤
 

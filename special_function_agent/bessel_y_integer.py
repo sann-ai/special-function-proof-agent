@@ -1,5 +1,64 @@
-"""Explicit conditional certificates for the standard integer-Y construction."""
+"""Complete integer-Y recurrence and replay-compatible conditional certificates."""
 from .classical import binary, integer
+
+RECIPES = ('integer_y_recurrence',)
+FORMAL_SCOPE = 'standard positive-axis integer Y recurrence from order analyticity'
+REASONS = {'integer_y_recurrence':
+           '正の実引数と整数次数に対し、標準Yの次数微分定義と級数の局所一様収束から証明した漸化式を適用する。'}
+
+
+def match_identity(lhs, rhs):
+    """Recognize the closed recurrence; the caller checks the fixed variable types."""
+    n = {'op': 'var', 'name': 'n'}
+    for left, right, reverse in ((lhs, rhs, False), (rhs, lhs, True)):
+        if not isinstance(left, dict) or left.get('op') != 'add':
+            continue
+        args = left.get('args')
+        if not isinstance(args, list) or len(args) != 2 or any(not isinstance(a, dict) for a in args):
+            continue
+        first, second = args
+        if first.get('op') != 'bessel_y' or second.get('op') != 'bessel_y':
+            continue
+        x = first.get('arg')
+        if not isinstance(x, dict) or x.get('op') != 'var':
+            continue
+        y = lambda order: {'op': 'bessel_y', 'order': order, 'arg': x}
+        expected = binary('mul', binary('div', binary('mul', integer(2), n), x), y(n))
+        if (first == y(binary('sub', n, integer(1))) and
+                second == y(binary('add', n, integer(1))) and right == expected):
+            return {'recipe': RECIPES[0], 'theorem': 'besselYInt_recurrence',
+                    'arguments': [n, x], 'reverse': reverse}
+    return None
+
+
+def complete_target(data):
+    if not isinstance(data.get('variables'), dict) or data['variables'].get('n') != 'int':
+        return False
+    matched = match_identity(data.get('lhs'), data.get('rhs'))
+    return bool(matched and
+                data['variables'].get(matched['arguments'][1]['name']) == 'real')
+
+
+def lean_integer(node, names):
+    op = node['op']
+    if op == 'int':
+        return f'({node["value"]} : ℤ)'
+    if op == 'var':
+        return names[node['name']]
+    if op == 'neg':
+        return f'(-{lean_integer(node["arg"], names)})'
+    if op in {'add', 'sub'}:
+        return '(' + lean_integer(node['args'][0], names) + (' + ' if op == 'add' else ' - ') + lean_integer(node['args'][1], names) + ')'
+    from .core import InputError
+    raise InputError('Integer Y requires an integer order expression.')
+
+
+def proof_lines(matched, names, expression):
+    n, x = matched['arguments']
+    fact = f'SpecialFunctionProofAgent.besselYInt_recurrence {lean_integer(n, names)} {expression(x)} (by linarith)'
+    if matched['reverse']:
+        fact = f'({fact}).symm'
+    return [f'convert ({fact}) using 1 <;> norm_num <;> ring']
 
 
 def match(data):

@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "int",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "add",
+    "args": [
+      {
+        "op": "bessel_y",
+        "order": {
+          "op": "sub",
+          "args": [
+            {
+              "op": "var",
+              "name": "n"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      {
+        "op": "bessel_y",
+        "order": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "n"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "div",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "int",
+                "value": 2
+              },
+              {
+                "op": "var",
+                "name": "n"
+              }
+            ]
+          },
+          {
+            "op": "var",
+            "name": "x"
+          }
+        ]
+      },
+      {
+        "op": "bessel_y",
+        "order": {
+          "op": "var",
+          "name": "n"
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "add",
+          "args": [
+            {
+              "op": "bessel_y",
+              "order": {
+                "op": "sub",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "n"
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            },
+            {
+              "op": "bessel_y",
+              "order": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "n"
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 2
+                    },
+                    {
+                      "op": "var",
+                      "name": "n"
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ]
+            },
+            {
+              "op": "bessel_y",
+              "order": {
+                "op": "var",
+                "name": "n"
+              },
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        "recipe": "integer_y_recurrence",
+        "reason": "正の実引数と整数次数に対し、標準Yの次数微分定義と級数の局所一様収束から証明した漸化式を適用する。",
+        "conditions": [
+          "n is int",
+          "x is real",
+          "x > 0"
+        ]
+      }
+    ]
+  }
+}

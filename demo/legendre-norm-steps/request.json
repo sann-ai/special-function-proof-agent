@@ -1,0 +1,135 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": -1
+    },
+    "upper": {
+      "op": "int",
+      "value": 1
+    },
+    "body": {
+      "op": "pow",
+      "base": {
+        "op": "legendre",
+        "order": {
+          "op": "var",
+          "name": "n"
+        },
+        "arg": {
+          "op": "var",
+          "name": "t"
+        }
+      },
+      "exponent": 2
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "int",
+                "value": 2
+              },
+              {
+                "op": "var",
+                "name": "n"
+              }
+            ]
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "integral",
+          "var": "t",
+          "lower": {
+            "op": "int",
+            "value": -1
+          },
+          "upper": {
+            "op": "int",
+            "value": 1
+          },
+          "body": {
+            "op": "pow",
+            "base": {
+              "op": "legendre",
+              "order": {
+                "op": "var",
+                "name": "n"
+              },
+              "arg": {
+                "op": "var",
+                "name": "t"
+              }
+            },
+            "exponent": 2
+          }
+        },
+        "after": {
+          "op": "div",
+          "args": [
+            {
+              "op": "int",
+              "value": 2
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 2
+                    },
+                    {
+                      "op": "var",
+                      "name": "n"
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            }
+          ]
+        },
+        "recipe": "legendre_norm",
+        "reason": "標準Legendreの直交性と三項漸化式から、区間[-1,1]上の二乗積分2/(2n+1)を評価する。",
+        "conditions": [
+          "n is nat"
+        ]
+      }
+    ]
+  }
+}

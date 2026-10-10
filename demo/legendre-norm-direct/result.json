@@ -1,0 +1,203 @@
+{
+  "status": "proved",
+  "reason": "full_lean_certificate",
+  "statement": "int(-1,1,(P_{n}(t)^2),t) = (2/((2*n)+1))",
+  "conditions": [
+    "n is nat"
+  ],
+  "environment": {
+    "lean-toolchain": "8733782dc070a99b312039cda424f601b80f3be6f6f512627da5ba25adc27632",
+    "lake-manifest.json": "25648cabc3e1ce08668b7d4ae91d14facb6599d78c79263a7a8bedf29fdf55d0",
+    "lakefile.toml": "b6d0555f00c8a712ee224c75a90f9a32f6c1d69ee85635d05cf8df0189a7207a",
+    "BesselProofAgent.lean": "b5cdb5a09a1526bdfed0f77a0663b39b148c0801905199a1d49713fcf85bf576",
+    "BesselProofAgent/Basic.lean": "d58249366aeb1248ea498d7418dc11a6afc9b18f4fcd2a3cce903a01a4d8da6f",
+    "BesselProofAgent/Calculus.lean": "62ba7a53d97fbc32059bb9a63c4ccea6f8a84d3d116f4463224a4b5e67042a75",
+    "BesselProofAgent/Derivative.lean": "12749753b9805d04d4dd8317eb2a9a8e17e2a07343a68b223ddf69ff24101948",
+    "BesselProofAgent/Examples.lean": "78ed25b22701aec27969045ea94f164ae05ed599fe6e9f2398c521183cbe851a",
+    "BesselProofAgent/NonintegerCalculus.lean": "15b4b6709900baf6ddd84984c42205373e9310666f2b21252632f22a494965fc",
+    "BesselProofAgent/OriginSingularBessel.lean": "c0cd353a5a5a4e8ca04a309a9896dc0aa7de579214bb5a607dbfb25173d52cab",
+    "BesselProofAgent/RealCalculus.lean": "754a717ea5704e34751f15576e78e960e07a143a4866bb84c4655030cede14b8",
+    "BesselProofAgent/Recurrence.lean": "ac74881ddb342a12218e0db00082dbac10f6922caae5a65b78a1bdaab319e94f",
+    "BesselProofAgent/SingularIntegrals.lean": "f0e6708aeeeb85a1eb1c0951ff631ee09c0ce18ac4cd0f05a1cba0570a633101",
+    "SpecialFunctionProofAgent.lean": "949e4c6b9bb13f80e40782abd803e2cd52bdd7fce54292c1af4c85556d6cbb5d",
+    "special_function_agent/registry.py": "923258bac60e94934280ba17aed110cf7ad796eae2f2e6d62497c1a51adb9988",
+    "SpecialFunctionProofAgent/BesselY.lean": "7e82f1becebc64ed25fc3e95c25b45ea2cba1548fbe9aeb7cb1efc7014325e7f",
+    "SpecialFunctionProofAgent/BesselYAnalytic.lean": "3494b90e83ce23ce882c863fe3155da109f6292643e80d9e56d371a867f4ecac",
+    "SpecialFunctionProofAgent/BesselYInteger.lean": "68b8777a93ba8d3ccb1960f0bfc553ab203a593c41d1de476dfa511cd692856b",
+    "SpecialFunctionProofAgent/Beta.lean": "e963f30f49998b5d87edcf7d0498472e7045fc062c1bf1cc5424930fbb528198",
+    "SpecialFunctionProofAgent/Erf.lean": "58e013b3fe6b095899c530054cd09bdee2895c0d2bb9acc642dfc081fca190f4",
+    "SpecialFunctionProofAgent/Gamma.lean": "07a9421489235b82427e8f540c5d0bd934af347cb120cea17e7b9b609aceb374",
+    "SpecialFunctionProofAgent/Hermite.lean": "32e76f35cbf15bf708b659121a329ae7494b1cc0d8620beec4a17285f4097505",
+    "SpecialFunctionProofAgent/Jacobi.lean": "16b7dd4ce0c374addbfb9d9cd5d997c703e9d0985cdacd384b1b781529af62f9",
+    "SpecialFunctionProofAgent/Laguerre.lean": "d6781eecfac744c3ff793fef7a17ceab71f5ba3a4b54b2d88fa961f60369bf03",
+    "SpecialFunctionProofAgent/LaguerreRecurrence.lean": "35d479cf23326dc9b9a51cae078f5ff78527106bc84f26ba022a72ce9803a748",
+    "SpecialFunctionProofAgent/Legendre.lean": "2a27247d7ad94f5ef73cf92b62aeb2241f3cf62af4bb4dc8284aec2ef66735a0",
+    "SpecialFunctionProofAgent/LegendreCalculus.lean": "1fdd2b3833f1640b7c1b2d8cf7d21702e69fd4b00496c20d3d4e79072d58fbc5",
+    "SpecialFunctionProofAgent/LegendreOrthogonality.lean": "392f6c8d61aaa3c2dfdbbfdcf62786d1e66424e4e560a551633b9e8238062135",
+    "SpecialFunctionProofAgent/PolynomialSeries.lean": "53adf38c7beb5071858505f86c7bf78beaf591ee8817d8f01c774877140a55ed"
+  },
+  "conventions": {
+    "version": 3,
+    "families": {
+      "bessel_j": {
+        "module": "BesselProofAgent",
+        "definition": "Complex.besselJ; v2 positive real J diagnostics",
+        "formal_scope": "v1 fixed recipes"
+      },
+      "bessel_y": {
+        "module": null,
+        "definition": "standard real Bessel Y on positive arguments",
+        "formal_scope": "pending"
+      },
+      "bessel_cross": {
+        "module": null,
+        "definition": "X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t)",
+        "formal_scope": "conditional algebra"
+      },
+      "gamma": {
+        "module": "SpecialFunctionProofAgent.Gamma",
+        "definition": "Real.Gamma",
+        "formal_scope": "positive recurrence and scaled integral"
+      },
+      "beta": {
+        "module": "SpecialFunctionProofAgent.Beta",
+        "definition": "integral 0..1 of t^(a-1)*(1-t)^(b-1), a,b>0",
+        "formal_scope": "real Euler beta integral"
+      },
+      "hermite_h": {
+        "module": "SpecialFunctionProofAgent.Hermite",
+        "definition": "physicists H_n, natural degree; H_n(x)=sqrt(2)^n*He_n(sqrt(2)*x)",
+        "formal_scope": "derivative, recurrence and initial values"
+      },
+      "hermite_he": {
+        "module": "SpecialFunctionProofAgent.Hermite",
+        "definition": "probabilists He_n, Polynomial.hermite evaluated over Real, natural degree",
+        "formal_scope": "derivative and initial values"
+      },
+      "erf": {
+        "module": "SpecialFunctionProofAgent.Erf",
+        "definition": "erf(x)=2/sqrt(pi)*integral 0..x exp(-t^2), x real",
+        "formal_scope": "derivative, zero, oddness and Gaussian finite integral"
+      },
+      "bessel_y_noninteger": {
+        "module": "SpecialFunctionProofAgent.BesselY",
+        "definition": "DLMF 10.2.3 real positive-axis Y from Complex.besselJ; fixed orders -1/2,1/2,3/2",
+        "formal_scope": "half-order recurrence and symmetric derivative; x>0"
+      },
+      "legendre": {
+        "module": "SpecialFunctionProofAgent.Legendre",
+        "definition": "standard P_n(x)=shiftedLegendre_n((1-x)/2), natural degree",
+        "formal_scope": "parity, endpoints and degrees zero through two"
+      },
+      "laguerre": {
+        "module": "SpecialFunctionProofAgent.Laguerre",
+        "definition": "DLMF 18.5.12 generalized L_n^(alpha), finite polynomial sum for real alpha; L_n means alpha=0",
+        "formal_scope": "derivative lowering degree and raising alpha; initial values"
+      },
+      "jacobi": {
+        "module": "SpecialFunctionProofAgent.Jacobi",
+        "definition": "DLMF 18.5.7 P_n^(alpha,beta), finite polynomial sum for real alpha,beta",
+        "formal_scope": "derivative lowering degree and raising both parameters; initial values; Legendre specialization"
+      }
+    },
+    "scalars": "Lean Real",
+    "rpow": "Real.rpow",
+    "exp": "Real.exp",
+    "finite_integral": "oriented intervalIntegral, volume",
+    "infinite_integral": "MeasureTheory integral on Set.Ioi lower, volume",
+    "polynomial_degree": "natural number; subtraction requires the stated lower bound",
+    "polynomial_parameters": "real finite polynomial extension; Laguerre alpha=0 is the ordinary convention",
+    "derivative": "real derivative in the explicitly named variable, at its current value"
+  },
+  "full_function_proof": true,
+  "analysis": {
+    "recipe": "legendre_norm",
+    "theorem": "legendreP_norm",
+    "arguments": [
+      {
+        "op": "var",
+        "name": "n"
+      }
+    ],
+    "natural_arguments": [
+      0
+    ],
+    "reverse": false
+  },
+  "numerical": {
+    "status": "unresolved",
+    "diagnostic": "no_mismatch_found",
+    "backend": "mpmath",
+    "full_bessel_proof": false,
+    "full_function_proof": false,
+    "precision_digits": 60,
+    "checked_samples": 3,
+    "samples": [
+      {
+        "values": {
+          "n": "0.0"
+        },
+        "lhs": "2.0",
+        "rhs": "2.0",
+        "absolute_difference": "0.0",
+        "comparison_tolerance": "2.0e-30",
+        "condition_residuals": []
+      },
+      {
+        "values": {
+          "n": "1.0"
+        },
+        "lhs": "0.666666666666666666666666666666666666666666666667",
+        "rhs": "0.666666666666666666666666666666666666666666666667",
+        "absolute_difference": "0.0",
+        "comparison_tolerance": "1.0e-30",
+        "condition_residuals": []
+      },
+      {
+        "values": {
+          "n": "2.0"
+        },
+        "lhs": "0.4",
+        "rhs": "0.4",
+        "absolute_difference": "0.0",
+        "comparison_tolerance": "1.0e-30",
+        "condition_residuals": []
+      }
+    ],
+    "candidates": [],
+    "skipped_reasons": [],
+    "excluded_by_conditions": 0,
+    "root_search": {
+      "method": "bounded_sign_changes_then_secant",
+      "interval_cap": 60,
+      "grid_step": "0.5",
+      "roots_per_parameter_sample": 3,
+      "exhaustive": false,
+      "variable": null
+    },
+    "max_samples": 27,
+    "rigorous_interval_enclosures": false,
+    "max_root_grid_points": 720,
+    "time_limit_seconds": 30,
+    "comparison_relative_tolerance": "1e-30",
+    "root_residual_tolerance": "1e-35",
+    "explanation": "明示条件内の有限標本を計算します。根は符号変化から精密化し、根条件と全追加条件を再確認します。数値一致と差の候補を保存し、元命題の形式的な証明状態はLean検査の欄で確認します。",
+    "backend_version": "1.3.0"
+  },
+  "attempts": [
+    {
+      "accepted": true,
+      "stdout": "proof_attempt.lean:9:68: warning: Unused tactic linter: `((try simp only [neg_mul, Real.rpow_eq_pow, Real.rpow_natCast, Nat.cast_add, Nat.cast_one]) <;>\n    ring)` does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nproof_attempt.lean:9:68: warning: this tactic is never executed\n\nNote: This linter can be disabled with `set_option linter.unreachableTactic false`\nBESSEL_AUDIT_BEGIN\n'BesselAgentCandidate.target' depends on axioms: [propext, Classical.choice, Quot.sound]\nBESSEL_AUDIT_END\n",
+      "stderr": "",
+      "exit_code": 0,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  ],
+  "request_sha256": "8b67136e54290337f596a800bbe0df58c47bf1165d6df49ad27da002c94a11fd",
+  "certificate_kind": "proof",
+  "certificate_sha256": "573d68e1f44c20133c153fe645bcae61f24d5ca07b2572cccb62058313a8f6f8"
+}

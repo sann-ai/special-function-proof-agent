@@ -166,7 +166,7 @@ def _contains_var(node: Any, name: str) -> bool:
     return isinstance(node, list) and any(_contains_var(value, name) for value in node)
 
 
-def _order(node: dict) -> dict:
+def _order(node: dict, *, polynomial=False) -> dict:
     rational = _fraction(node)
     if rational is not None:
         if rational.denominator == 1:
@@ -174,14 +174,14 @@ def _order(node: dict) -> dict:
         return {"op": "rational", "numerator": rational.numerator,
                 "denominator": rational.denominator}
     op = node["op"]
-    if op == "var" and node["name"] == "n":
+    if op == "var" and node["name"] in ({"m", "n"} if polynomial else {"n"}):
         return node
     if op == "neg":
-        arg = _order(node["arg"])
+        arg = _order(node["arg"], polynomial=polynomial)
         if arg["op"] != "rational":
             return {"op": "neg", "arg": arg}
     if op in {"add", "sub", "mul"}:
-        args = [_order(arg) for arg in node["args"]]
+        args = [_order(arg, polynomial=polynomial) for arg in node["args"]]
         if all(arg["op"] != "rational" for arg in args):
             return {"op": op, "args": args}
     raise NeedsConditions("Orders support integer expressions in n and fixed rational numbers; specify a supported order.")

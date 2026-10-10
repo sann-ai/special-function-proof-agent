@@ -1,0 +1,15 @@
+{
+  "recipe": "integer_y_recurrence",
+  "theorem": "besselYInt_recurrence",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

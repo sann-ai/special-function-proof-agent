@@ -61,6 +61,16 @@ PUBLIC_DECLARATIONS = {
         "legendreP_adjacent_integral",
         "legendreP_recurrence",
     ),
+    "LegendreOrthogonality": ("legendreP_orthogonal", "legendreP_norm"),
+    "BesselYAnalytic": (
+        "norm_gamma_inv_order_shift",
+        "differentiableOn_hg_order_zero_one",
+        "differentiableOn_besselJ_order_zero_one",
+        "differentiableAt_realBesselJ_order_zero_one",
+        "differentiableAt_realBesselJ_int_order",
+        "besselYInt_recurrence",
+        "tendsto_besselYNoninteger_int",
+    ),
     "LaguerreRecurrence": ("laguerreL_recurrence",),
     "Laguerre": (
         "laguerreL",
