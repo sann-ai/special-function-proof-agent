@@ -121,6 +121,11 @@ def _details(record: dict, result: dict) -> str:
         lines += ["登録前に保存コピーをLeanで再検証しました。再利用時にも archive replay で検査します。", ""]
     else:
         lines += ["記録理由：" + _markdown_text(str(result.get("detail", result.get("reason", "検証が未完了です。")))), ""]
+    if result.get("conditional_lean", {}).get("accepted"):
+        conditional = result["conditional_lean"]
+        lines += ["条件付きLeanの範囲：" + _markdown_text(conditional["scope"]), "",
+                  "条件付き定理の前提：" + _markdown_text("、".join(conditional["assumptions"])), "",
+                  "残る形式化：" + _markdown_text("、".join(result["analysis"]["formal_obligations"])), ""]
     lines += ["候補・結果・証明・元入力は、この記録のJSONとverificationディレクトリに保存しています。", ""]
     return "\n".join(lines)
 
@@ -281,6 +286,10 @@ def _register(*, directory: Path | None, result: dict | None, archive_root: Path
             checked = replay(verification, timeout)
             if not checked.get("replayed") or checked.get("status") != result["status"]:
                 raise InputError("The certificate did not pass replay before archive registration.")
+        elif result.get("conditional_lean", {}).get("accepted"):
+            checked = replay(verification, timeout)
+            if not checked.get("conditional_replayed") or checked.get("full_bessel_proof") is not False:
+                raise InputError("The conditional certificate did not pass replay before archive registration.")
         canonical = _target_or_none(request)
         if request is not None:
             _write_json(pending / "request.json", request)

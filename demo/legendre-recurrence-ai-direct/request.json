@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "n",
+      "relation": "ge",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "var",
+            "name": "n"
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "op": "legendre",
+        "order": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "n"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "sub",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 2
+                      },
+                      {
+                        "op": "var",
+                        "name": "n"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          },
+          {
+            "op": "legendre",
+            "order": {
+              "op": "var",
+              "name": "n"
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "var",
+            "name": "n"
+          },
+          {
+            "op": "legendre",
+            "order": {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "n"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "legendre_recurrence"
+  }
+}

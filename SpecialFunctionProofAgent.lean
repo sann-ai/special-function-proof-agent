@@ -3,6 +3,9 @@ import SpecialFunctionProofAgent.Beta
 import SpecialFunctionProofAgent.Hermite
 import SpecialFunctionProofAgent.Erf
 import SpecialFunctionProofAgent.Legendre
+import SpecialFunctionProofAgent.LegendreCalculus
 import SpecialFunctionProofAgent.Laguerre
+import SpecialFunctionProofAgent.LaguerreRecurrence
 import SpecialFunctionProofAgent.Jacobi
 import SpecialFunctionProofAgent.BesselY
+import SpecialFunctionProofAgent.BesselYInteger

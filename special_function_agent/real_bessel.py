@@ -11,7 +11,7 @@ import json
 import re
 from typing import Any
 
-from .core import InputError, NeedsConditions, _keys, _expr, _constant, _run_lean, _save_json, _sha, environment
+from .core import InputError, NeedsConditions, _keys, _expr, _constant, _run_lean, _save_json, _sha, environment, load_json
 
 VARIABLES = {'n', 'x', 'z', 'lambda', 's', 'w', 't'}
 POLYNOMIAL_OPS = {'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi'}
@@ -484,14 +484,15 @@ def template_match(data):
                                   '分母を lam*A*(B-lam*A) に因数分解し、非零性を用いて約分する。'],
                         'sources': ['https://dlmf.nist.gov/10.6.E1', 'https://dlmf.nist.gov/10.6.E10', 'https://dlmf.nist.gov/10.5.E2', 'https://dlmf.nist.gov/10.2.E1'],
                         'formal_obligations': ['Bessel Y and X definitions', 'root recurrence', 'Wronskian scaling', 'positive energy integral']}
-    return None
+    from .bessel_y_integer import match
+    return match(data)
 
 
 def domain_obligations(data, template):
     bounds = domains(data)
     explicit = [a['lhs'] for a in data['assumptions'] if a['op'] == 'expr_compare' and a['relation'] == 'ne']
     pending = []
-    derived_denominators = [n['args'][1] for n in _walk([data['lhs'], data['rhs']]) if n.get('op') == 'div'] if template else []
+    derived_denominators = [n['args'][1] for n in _walk([data['lhs'], data['rhs']]) if n.get('op') == 'div'] if template and template['id'] == 'cross_product_root_fraction' else []
     def nonzero(n):
         value = _constant(n)
         if value is not None: return value != 0
@@ -512,7 +513,10 @@ def domain_obligations(data, template):
     return sorted(set(pending))
 
 
-def conditional_source():
+def conditional_source(template=None):
+    if template and template['id'] == 'integer_y_recurrence':
+        from .bessel_y_integer import conditional_source as integer_y_source
+        return integer_y_source(template)
     return TEMPLATE.read_text(encoding='utf-8')
 
 
@@ -523,10 +527,10 @@ def verify_diagnostic(data, output_dir, timeout):
     numeric = diagnose(data)
     conditional = {'accepted': False, 'reason': 'no_matching_analytic_template'}
     if template:
-        source = conditional_source()
+        source = conditional_source(template)
         path = output_dir / 'conditional_certificate.lean'
         path.write_text(source, encoding='utf-8')
-        conditional = {**_run_lean(path, timeout), 'scope': 'algebra_under_explicit_bessel_hypotheses',
+        conditional = {**_run_lean(path, timeout), 'scope': template.get('scope', 'algebra_under_explicit_bessel_hypotheses'),
                        'assumptions': template['assumptions'], 'sha256': _sha(source.encode())}
     result = {'status': 'needs_conditions' if pending else 'unresolved',
               'reason': 'domain_conditions_required' if pending else 'bessel_y_formalization_pending',
@@ -538,12 +542,15 @@ def verify_diagnostic(data, output_dir, timeout):
     _save_json(output_dir/'analysis.json', template or {'status': 'no_matching_template'})
     _save_json(output_dir/'numerical.json', numeric)
     _save_json(output_dir/'result.json', result)
+    remaining = ('Jの次数0と1での次数微分可能性の証明が残っています。'
+                 if template and template['id'] == 'integer_y_recurrence' else
+                 '整数Yと交差積の解析公式への接続が残っています。')
     lines = ['# 正実数のBessel診断', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
-             '状態：'+result['status']+'。Bessel Yの形式的定義と解析公式への接続が残っています。', '',
+             '状態：'+result['status']+'。'+remaining, '',
              '数値診断：'+numeric['diagnostic']+'。有限標本の結果を numerical.json に保存しました。']
     if template:
         lines += ['', '## 解析テンプレート', *template['steps'], '', '## 条件付きLean',
-                  '代数検査：'+str(conditional['accepted'])+'。仮定：'+'、'.join(template['assumptions']),
+                  '明示前提の下での検査：'+str(conditional['accepted'])+'。仮定：'+'、'.join(template['assumptions']),
                   '残る形式化：'+'、'.join(template['formal_obligations'])]
     if pending:
         lines += ['', '確認する定義域条件：'+'、'.join(pending)]
@@ -559,10 +566,16 @@ def replay_diagnostic(data, result, output_dir, timeout):
     template = template_match(data)
     if not template or result.get('analysis') != template:
         raise InputError('This target has no matching conditional certificate.')
-    source = conditional_source()
+    if load_json(output_dir/'analysis.json') != template:
+        raise InputError('The saved conditional analysis changed.')
+    source = conditional_source(template)
     path = output_dir/'conditional_certificate.lean'
     if path.read_text(encoding='utf-8') != source or result.get('conditional_lean', {}).get('sha256') != _sha(source.encode()):
         raise InputError('The conditional certificate differs from the fixed template.')
+    conditional = result.get('conditional_lean', {})
+    if (conditional.get('scope') != template.get('scope', 'algebra_under_explicit_bessel_hypotheses') or
+            conditional.get('assumptions') != template['assumptions']):
+        raise InputError('The saved conditional scope or assumptions changed.')
     checked = _run_lean(path, timeout)
     return {'status': result['status'], 'replayed': False, 'conditional_replayed': checked['accepted'],
             'full_bessel_proof': False, 'verification': checked}

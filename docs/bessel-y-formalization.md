@@ -70,13 +70,58 @@ DifferentiableAt ℝ (fun a : ℝ => realBesselJ a x) (-n : ℝ)
 
 ここで微分する変数は次数aです。この条件付き補題は、既存Jの負整数次数の対称性と、分子・分母の微分から得る差商の極限を使います。n=0では同じ点の微分可能性が両方の前提を満たします。
 
+## 整数Yの追加接続と明示前提
+
+`SpecialFunctionProofAgent/BesselYInteger.lean` は上のJ・Yの定義をそのままimportします。正の実引数xを固定し、次の2つを前提として整数次数全体への接続を証明します。
+
+```lean
+h0 : DifferentiableAt ℝ (fun a : ℝ => realBesselJ a x) 0
+h1 : DifferentiableAt ℝ (fun a : ℝ => realBesselJ a x) 1
+```
+
+`differentiableAt_realBesselJ_int_order_of_zero_one` は、Jの三項漸化式で隣接次数の微分可能性を正負両方向へ伝播させ、任意整数nでの次数微分可能性を導きます。これにより、整数Yの三項漸化式と整数極限の前提をこの2点へ集約します。
+
+- `besselYInt_recurrence_of_order_differentiable_zero_one`：任意整数n、x>0、h0、h1の下で `Y(n-1,x)+Y(n+1,x)=(2*n/x)*Y(n,x)`。
+- `tendsto_besselYNoninteger_int_of_order_differentiable_zero_one`：同じ前提から、非整数Yのnへの極限が `besselYInt n x` に一致すること。
+- `besselYInt_recurrence_of_differentiable_order`：次数n−1,n,n+1,−n−1,−n,−n+1の微分可能性を個別に指定する形。次数方向に微分したJの漸化式と整数反転公式から導きます。
+
+h0とh1の無条件の証明には、次数に依存する級数の微分を正当化する収束評価が残っています。`differentiable_hgCoeff_order` と `differentiable_besselJ_series_term_order` は、逆Gammaの全平面での微分可能性を使い、各係数と各J級数項が次数について複素微分可能であることを証明します。`hasSum_besselJ_order_series` は、それらの項の和を既存の `Complex.besselJ` に接続します。次の工程は、次数0と1の近傍で級数または導関数級数を一様に制御することです。
+
+Y₀・Y₁の引数微分には、h0、h1に加えて次の混合微分の前提を使います。cは次数0、1、−1のいずれかです。
+
+```lean
+HasDerivAt
+  (fun t : ℝ => deriv (fun a : ℝ => realBesselJ a t) c)
+  (deriv (fun a : ℝ => deriv (realBesselJ a) x) c) x
+```
+
+この前提は、次数微分をxで微分でき、その値が逆順の微分と一致することを表します。
+
+- `hasDerivAt_besselYInt_zero_of_order_derivative_exchange` はc=0の前提から `Y₀'(x)=−Y₁(x)` を導きます。
+- `hasDerivAt_besselYInt_one_of_order_derivative_exchange` はc=1,−1の前提から `Y₁'(x)=Y₀(x)−Y₁(x)/x` を導きます。
+- `besselYInt_wronskian_zero_of_order_derivative_exchange` はc=0の前提から、`J₀Y₀'−J₀'Y₀=J₁Y₀−J₀Y₁` を導きます。
+- `hasDerivAt_besselYInt_scaled_wronskian_of_order_derivative_exchange` はc=0,1,−1の前提から、`x*(J₁(x)*Y₀(x)−J₀(x)*Y₁(x))` のx微分が0であることを導きます。標準の定数2/πの評価は次の接続事項です。
+
+これらの前提付き定理を保存証拠へ使うときは、h0・h1および必要な混合微分の条件を元命題と分けて明示します。元入力からその前提を導く証明が揃うまで、整数Y・交差積の元命題は `unresolved`、`full_bessel_proof: false` を保持します。
+
+CLIの整数Y漸化式の例は `examples/integer-y-recurrence.txt` です。
+
+```sh
+python3 -m special_function_agent verify examples/integer-y-recurrence.txt --output runs/integer-y --archive
+python3 -m special_function_agent replay runs/integer-y
+```
+
+この入力は `n integer,x>0` を元条件とし、h0・h1を条件付き定理の追加前提として `analysis.json`、`conditional_certificate.lean`、結果JSON、レポート、archiveの詳細へ保存します。両コマンドの終了コードは `1`、元命題の状態は `unresolved` です。条件付き証拠の再検査が通ると `conditional_replayed: true`、`replayed: false`、`full_bessel_proof: false` を返します。
+
+条件付き定理の前提とLeanソースは標準名 `x` を使い、解析テンプレートの `substitutions` で元入力の実変数名へ対応させます。例えば引数名 `radius` の入力は `{"n":"n","x":"radius"}` を保存します。元入力の変数名・型・全条件を保持したまま、追加前提の意味を確認できます。
+
 ## 残る解析的な接続
 
 整数Yと交差積の完全証明には、次の内容をLeanで証明し、接続する必要があります。
 
-1. **次数方向の微分可能性**：正のxを固定した `a ↦ realBesselJ a x` が、対象の±整数次数で微分可能であること。固定mathlibの正則化超幾何関数が持つ引数方向の解析性に加え、パラメータ方向の級数微分を正当化する収束評価が必要です。
-2. **整数次数の引数微分**：次数微分と引数微分の交換、または整数極限と引数微分の交換を正当化し、整数Yの漸化式・微分公式へ接続すること。
-3. **Wronskianの正規化**：同じJ・Yの定義から `J_n(x)*Y_n'(x)-J_n'(x)*Y_n(x)=2/(pi*x)` を証明すること。微分方程式から得られる比例形に、標準定義による定数の評価を加えます。
+1. **次数方向の微分可能性**：正のxを固定した `a ↦ realBesselJ a x` が、次数0と1で微分可能であること。上記の伝播補題で任意整数へ移せます。固定mathlibの正則化超幾何関数が持つ引数方向の解析性に加え、パラメータ方向の級数微分を正当化する収束評価が必要です。
+2. **整数次数の引数微分**：次数微分と引数微分の交換、または整数極限と引数微分の交換を正当化すること。Y₀・Y₁の公式は上記の交換前提から導出済みです。
+3. **Wronskianの正規化**：同じJ・Yの定義から `J_n(x)*Y_n'(x)-J_n'(x)*Y_n(x)=2/(pi*x)` を証明すること。次数0では交換前提から得る微分ゼロの関係に、標準定義による定数2/πの評価を加えます。
 4. **交差積への接続**：`X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t)` の定義、対象の根条件からの漸化式、正エネルギー積分の可積分性と厳密な正値性を証明すること。
 5. **除算の条件**：上の解析的な結果から、元の交差積等式に現れる各分母の非零性を導くこと。
 
@@ -86,8 +131,12 @@ DifferentiableAt ℝ (fun a : ℝ => realBesselJ a x) (-n : ℝ)
 
 ```sh
 lake build SpecialFunctionProofAgent.BesselY
+lake build SpecialFunctionProofAgent.BesselYInteger
 python3 -m unittest discover -s tests -p 'test_bessel_y_formal.py' -v
 SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_bessel_y_formal.py' -v
+SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_integer_y_conditional.py' -v
 ```
 
 数学モジュールは定義3個と公開定理22個を `#print axioms` で監査します。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。受入テストでは固定半整数の両公式・両経路・replay、次数と係数の誤り、条件不足、候補からの命題や仮定の注入、保存証拠の改変、数値backend欠落時の保存継続、従来Y・交差積の状態保持を検査します。
+
+追加した `BesselYInteger.lean` も全公開定理をコンパイルし、同じ標準公理の許可集合で監査します。次数微分可能性と微分交換は、各定理の明示前提に残ります。

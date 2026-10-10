@@ -1,0 +1,1 @@
+(n+1)*Laguerre(n+1,a,x)=(2*n+a+1-x)*Laguerre(n,a,x)-(n+a)*Laguerre(n-1,a,x); n natural,n>=1,a real,x real

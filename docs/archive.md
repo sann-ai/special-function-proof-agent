@@ -10,7 +10,7 @@ python3 -m special_function_agent archive import-bessel /path/to/bessel/verifica
 
 v2の同一性には自由変数名・型・積分の束縛名、全仮定、両辺、関数規約の版を含みます。仮定の順序だけは正規化し、式の変形や変数名の付け替えは別の命題として保存します。環境はLean/toolchain/lockfile/全数学モジュール/関数登録表のハッシュで確認します。
 
-完全Leanの proved/refuted 記録は登録前と再利用前に再検査します。固定半整数 `YNoninteger` の完全証明は `full_bessel_proof:true`、従来Y・交差積の条件付き記録のreplayは `conditional_replayed` と `full_bessel_proof:false` を返します。後者の元命題は未解決状態を保持します。数値診断は独立の `numerical.json` に保存します。
+完全Leanの proved/refuted 記録は登録前と再利用前に再検査します。成功した条件付きLean証拠も登録前に再検査し、元request・環境・再生成テンプレート・analysis.json・定理本文・scope・全前提の一致を確認します。各記録のdetail.mdにも、条件付き定理の前提と残る形式化義務を表示します。固定半整数 `YNoninteger` の完全証明は `full_bessel_proof:true`、従来Y・交差積の条件付き記録のreplayは `conditional_replayed` と `full_bessel_proof:false` を返します。後者の元命題は未解決状態を保持します。数値診断は独立の `numerical.json` に保存します。
 
 ## 記録操作の詳細
 
@@ -123,6 +123,6 @@ python3 -m special_function_agent verify /path/to/verification/request.json --ou
 python3 -m special_function_agent archive replay NEW_RECORD_ID
 ```
 
-その後、同じtargetと同じrouteで生成器を実行すると、新環境の証拠を再検査して再利用できます。結果の `reuse.ai_called: false` と元記録IDで再利用を確認します。公開済みGamma/BetaとHermite/erfの保存証拠を一時archiveへ複製し、環境差の検出、同じrequestの明示再検証、新証拠のreplay、AIを呼ばない再利用、旧記録のバイト列保持を確認しています。
+その後、同じtargetと同じrouteで生成器を実行すると、新環境の証拠を再検査して再利用できます。結果の `reuse.ai_called: false` と元記録IDで再利用を確認します。公開済みGamma/Beta、Hermite/erf、Legendreと半整数Yの保存証拠を一時archiveへ複製し、環境差の検出、同じrequestの明示再検証、新証拠のreplay、AIを呼ばない再利用、旧記録のバイト列保持を確認しています。
 
 対象の型・全条件・関数規約は毎回一致を確認します。多項式の自然数次数とBesselの整数次数、物理学規約Hと確率論規約He、一般化Laguerre/Jacobiのパラメータ、明示した `YNoninteger` と従来Yは、それぞれのASTと規約を保存します。新しい多項式族と非整数Yは規約version 3、Hermite/erfはversion 2、従来Gamma/Betaはversion 1を使います。

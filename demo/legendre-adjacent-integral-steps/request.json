@@ -1,0 +1,123 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": -1
+    },
+    "upper": {
+      "op": "int",
+      "value": 1
+    },
+    "body": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "var",
+            "name": "t"
+          }
+        },
+        {
+          "op": "legendre",
+          "order": {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "n"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          },
+          "arg": {
+            "op": "var",
+            "name": "t"
+          }
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 0
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "integral",
+          "var": "t",
+          "lower": {
+            "op": "int",
+            "value": -1
+          },
+          "upper": {
+            "op": "int",
+            "value": 1
+          },
+          "body": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "legendre",
+                "order": {
+                  "op": "var",
+                  "name": "n"
+                },
+                "arg": {
+                  "op": "var",
+                  "name": "t"
+                }
+              },
+              {
+                "op": "legendre",
+                "order": {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "n"
+                    },
+                    {
+                      "op": "int",
+                      "value": 1
+                    }
+                  ]
+                },
+                "arg": {
+                  "op": "var",
+                  "name": "t"
+                }
+              }
+            ]
+          }
+        },
+        "after": {
+          "op": "int",
+          "value": 0
+        },
+        "recipe": "legendre_adjacent_integral",
+        "reason": "隣接次数のLegendre積は奇関数であり、連続性と対称区間の積分から積分値0を得る。",
+        "conditions": [
+          "n is nat"
+        ]
+      }
+    ]
+  }
+}

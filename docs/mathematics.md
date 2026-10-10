@@ -98,13 +98,15 @@ CLIの代表入力は `D_x(H_n(x))=2*n*H_{n-1}(x); n natural,n>=1,x real` です
 
 ## Legendre・Laguerre・Jacobi
 
-自然数次数nと実数の引数xを使います。一般化Laguerreのα、Jacobiのα,βは有限多項式の定義で全実数を扱い、通常のLaguerreはα=0です。微分公式はn≥1の条件で次数を1下げ、Laguerreはα、Jacobiはα,βをそれぞれ1増やします。微分変数以外のパラメータを固定して適用します。定義・正規化・正確な補題と直交性へ進む際の条件は[専用仕様](orthogonal-polynomials.md)に記載しています。
+自然数次数nと実数の引数xを使います。一般化Laguerreのα、Jacobiのα,βは有限多項式の定義で全実数を扱い、通常のLaguerreはα=0です。微分公式はn≥1の条件で次数を1下げ、Laguerreはα、Jacobiはα,βをそれぞれ1増やします。微分変数以外のパラメータを固定して適用します。定義・正規化・正確な補題は[専用仕様](orthogonal-polynomials.md)、Legendreの隣接直交積分とLegendre/Laguerreの三項漸化式は[追加仕様](polynomial-calculus.md)に記載しています。
 
 両経路で検証する公開入力は、次の `.txt` と同名の `.target.json` です。
 
 - Legendre：`legendre-parity`、`legendre-zero`、`legendre-one`、`legendre-two`、`legendre-right`、`legendre-left`。全自然数での偶奇性・両端値と0〜2次の値です。
 - Laguerre：`laguerre-zero`、`laguerre-one`、`laguerre-two`、`ordinary-laguerre-one`、`ordinary-laguerre-two`、`laguerre-derivative`。全実パラメータの低次数値、通常規約の値とn≥1の微分です。
 - Jacobi：`jacobi-zero`、`jacobi-one`、`jacobi-two`、`jacobi-derivative`、`jacobi-legendre`。全実パラメータの低次数値、n≥1の微分、全自然数でのα=β=0からLegendreへの特殊化です。
+
+追加例 `legendre-recurrence` と `laguerre-recurrence` はn≥1の三項漸化式、`legendre-adjacent-integral` は全自然数nの隣接次数積の区間[-1,1]上の零積分です。各例は同じ固定入力をdirect/steps両経路で検査します。
 
 ## 正実軸の非整数Bessel Y
 
@@ -127,7 +129,7 @@ D_x(YNoninteger(1/2,x))=(YNoninteger(-1/2,x)-YNoninteger(3/2,x))/2; x>0
 
 v2の完全証明経路は上記の登録公式と実数環の整理を対象とします。Hermiteは自然数次数・実引数、erfは実引数の微分・初期値・奇関数性・Gaussian有限区間積分を扱います。複素erf、erfc、誤差関数の近似式・近似誤差の評価、Gaussianの一般変形や無限区間公式は追加の定義・補題・レシピを要する範囲です。数値診断は既存mpmathによる有限標本、条件の残差、差の候補、計算できなかった理由を記録します。Hermiteの数値計算は次数0〜40・引数の絶対値60以下を対象とし、範囲外では理由を保存します。近似誤差の厳密な区間評価は今後の対象です。
 
-従来の `Y_n`・`Y(order,x)` と交差積Xは正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、元の全命題の状態は `unresolved`、`full_bessel_proof: false` です。整数Yの標準次数微分による定義と、±整数次数でのJの微分可能性を前提とする極限補題を公開しています。残る義務はこの次数微分可能性、次数と引数の微分交換、正規化したWronskian、正エネルギー積分と分母非零性の証明です。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
+従来の `Y_n`・`Y(order,x)` と交差積Xは正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、元の全命題の状態は `unresolved`、`full_bessel_proof: false` です。整数Yは標準次数微分式で定義し、Jの次数0・1の微分可能性を明示前提とする全整数への伝播・漸化式・整数極限を公開しています。`examples/integer-y-recurrence.txt` の条件付き検査はこの2前提を保存します。交換前提からのY₀・Y₁微分とscaled Wronskianの微分ゼロも数学モジュールで証明済みです。残る義務はこの次数微分可能性、次数と引数の微分交換、正規化したWronskian、正エネルギー積分と分母非零性の証明です。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
 
 ## 引き継いだBessel v1の基盤
 

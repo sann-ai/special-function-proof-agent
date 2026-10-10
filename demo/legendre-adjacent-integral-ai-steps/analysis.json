@@ -1,0 +1,14 @@
+{
+  "recipe": "legendre_adjacent_integral",
+  "theorem": "legendreP_adjacent_integral",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "reverse": false
+}

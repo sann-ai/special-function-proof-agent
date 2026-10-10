@@ -119,7 +119,7 @@ class SpecialArchiveTests(unittest.TestCase):
             self.assertTrue(result['conditional_lean']['accepted'])
             self.assertFalse(replayed['replayed'])
             self.assertTrue(replayed['conditional_replayed'])
-            self.assertEqual(lean.call_count, 2)
+            self.assertEqual(lean.call_count, 3)  # verify, registration replay, explicit replay
             evidence = Path(record['verification_dir'])
             self.assertEqual((evidence/'conditional_certificate.lean').read_bytes(), (base/'run'/'conditional_certificate.lean').read_bytes())
             self.assertEqual(archive.find_exact(target, base/'archive')[0]['id'], record['id'])
@@ -153,7 +153,8 @@ class SpecialArchiveTests(unittest.TestCase):
         # Recreate the original archive's v2 identity, before this project's conventions field.
         with tempfile.TemporaryDirectory() as folder:
             base = Path(folder)
-            old = archive.register_verification(ROOT/'demo/cross-product', base/'old')
+            with patch('special_function_agent.real_bessel._run_lean', return_value=ACCEPTED):
+                old = archive.register_verification(ROOT/'demo/cross-product', base/'old')
             entry = Path(old['record_dir'])
             legacy = archive.canonical_target(old['request'])
             legacy.pop('conventions')

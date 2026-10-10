@@ -7,10 +7,10 @@
 - **完全Lean証明**：正の引数で `Gamma(x+1)=x*Gamma(x)`、正の `a,b` でEulerのBeta積分、正の `a,r` でscaled Gamma積分。直接証明と、理由を添えた等式ステップ証明の両経路があります。
 - **Hermite**：物理学規約 `H_n` と確率論規約 `He_n` を区別し、自然数 `n>=1` で両規約の微分公式と `H` の3項漸化式をLean証明します。両規約の0・1次の値にも対応します。
 - **誤差関数**：Gaussian積分で定義した実 `erf` の微分、零点での値、奇関数性、任意の実端点間のGaussian積分をLean証明します。負の引数・逆向きの積分にも対応します。
-- **Legendre・Laguerre・Jacobi**：自然数次数、実数の引数・パラメータで0〜2次の値をLean証明します。Legendreの偶奇性と両端値、正次数Laguerre/Jacobiの微分、JacobiからLegendreへの特殊化にも対応します。パラメータは有限多項式の定義で全実数を扱います。[定義・公式・条件](docs/orthogonal-polynomials.md)。
+- **Legendre・Laguerre・Jacobi**：自然数次数、実数の引数・パラメータで0〜2次の値をLean証明します。Legendreの偶奇性と両端値、正次数Laguerre/Jacobiの微分、JacobiからLegendreへの特殊化にも対応します。Legendre・一般化Laguerreの三項漸化式（n≥1）と、全自然数nでのLegendre隣接次数の直交積分にも対応します。[漸化式と隣接直交](docs/polynomial-calculus.md)。パラメータは有限多項式の定義で全実数を扱います。[定義・公式・条件](docs/orthogonal-polynomials.md)。
 - **Bessel J**：引き継いだv1の符号・漸化式・微分・積分・有理数冪の閉じた証明レシピ。[詳しい対応式](docs/bessel-v1.md)。
 - **非整数Bessel Y**：明示名 `YNoninteger`、固定次数−1/2・1/2・3/2、正の実引数で、3項漸化式と1/2次の対称微分公式を直接・ステップ両経路でLean証明します。[標準定義との接続と形式化範囲](docs/bessel-y-formalization.md)。
-- **従来の実Bessel J/Y・交差積**：正の引数で構造化入力、数値診断、既知の根条件に対する解析テンプレートと条件付き代数Lean。従来の `Y_n`・`Y(order,x)`・交差積の元命題は `unresolved`、`full_bessel_proof: false` と保存します。
+- **従来の実Bessel J/Y・交差積**：正の引数で構造化入力、数値診断、既知の根条件に対する解析テンプレートと条件付き代数Lean。整数Yの三項漸化式は、Jの次数0・1における次数微分可能性を2つの明示前提とするLean証拠も保存します。従来の `Y_n`・`Y(order,x)`・交差積の元命題は `unresolved`、`full_bessel_proof: false` と保存します。
 - **保存と再検査**：元式・変数型・束縛・全条件・関数規約・環境ハッシュ・証明を保持し、再利用前にLeanで再検査します。
 
 登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` にあります。
@@ -46,6 +46,9 @@ python3 -m special_function_agent verify examples/erf-derivative.txt --route ste
 python3 -m special_function_agent replay runs/erf-steps
 python3 -m special_function_agent verify examples/jacobi-derivative.txt --route direct --output runs/jacobi-direct
 python3 -m special_function_agent verify examples/yhalf-recurrence.txt --route steps --output runs/yhalf-steps
+python3 -m special_function_agent verify examples/legendre-recurrence.txt --route direct --output runs/legendre-recurrence
+python3 -m special_function_agent verify examples/legendre-adjacent-integral.txt --route steps --output runs/adjacent-integral
+python3 -m special_function_agent verify examples/laguerre-recurrence.txt --route steps --output runs/laguerre-recurrence
 ```
 
 直接経路は登録された補題を元の命題へ適用します。ステップ経路は各 `before = after` を同じ全条件で検査し、終点をつないで元の等式を証明します。自然言語の理由は候補として保存し、判定は構造化等式とLeanの結果に基づきます。
@@ -78,6 +81,10 @@ python3 -m special_function_agent parse examples/beta-integral.txt --output runs
 
 > `examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` の `YNoninteger` を正実軸で検証してください。各式の直接・ステップ両経路をLeanで検査し、保存証明をreplayしてください。
 
+> `examples/legendre-adjacent-integral.txt` と `examples/laguerre-recurrence.txt` を直接・自然言語ステップ両経路で検査してください。隣接次数と積分区間、自然数次数の下限、Laguerreの実パラメータを保持し、成功した証明をarchiveへ保存して再利用してください。
+
+> `examples/integer-y-recurrence.txt` を検査し、元命題の状態、条件付きLean定理の次数微分可能性の2前提、残る形式化義務を分けて保存してください。
+
 既存のCodex CLIで新たな候補を生成する場合は、本人のCLI認証を利用します。モデルはCLI設定を引き継ぎ、推論量はUltraです。
 
 ```sh
@@ -104,7 +111,16 @@ Yの交差積は `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)`。整数Yから交差積�
 python3 -m special_function_agent verify examples/cross-product-root.txt --output runs/cross-product
 ```
 
-この例では左分母の末尾は `X_02`、右分子は微分を含まない `X_00` です。解析テンプレートは根条件・係数・次数・両辺の一致を検査して選択します。整数Yは標準の次数微分式で定義し、次数方向の微分可能性を前提とする極限補題まで形式化しています。残る工程はその微分可能性、次数と引数の微分交換、Wronskianの正規化、正エネルギー積分と分母非零性の証明です。[各検査義務](docs/bessel-y-formalization.md#残る解析的な接続)。
+この例では左分母の末尾は `X_02`、右分子は微分を含まない `X_00` です。解析テンプレートは根条件・係数・次数・両辺の一致を検査して選択します。整数Yは標準の次数微分式で定義し、Jの次数0・1での微分可能性から、全整数次数への伝播・漸化式・整数極限を証明しています。さらに、明示した微分交換の前提からY₀・Y₁の引数微分とscaled Wronskianの微分ゼロを証明しました。残る工程は次数0・1での微分可能性、微分交換、Wronskian定数2/πの評価、正エネルギー積分と分母非零性の証明です。[各検査義務](docs/bessel-y-formalization.md#残る解析的な接続)。
+
+整数Yの条件付き証拠を作る例：
+
+```sh
+python3 -m special_function_agent verify examples/integer-y-recurrence.txt --output runs/integer-y --archive
+python3 -m special_function_agent replay runs/integer-y
+```
+
+元命題は `unresolved` のため、この2コマンドの終了コードは `1` です。条件付き検査の成功は `conditional_lean.accepted: true`、再検査は `conditional_replayed: true` で確認します。`analysis.json`、Lean定理、報告、archive詳細に2前提と残る義務を保存します。
 
 ## 外部archive
 
@@ -128,6 +144,6 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 python3 scripts/replay_examples.py
 ```
 
-Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
+Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
 
-後続範囲は、多項式の直交性・重み・一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、整数Yの解析的接続、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。
+後続範囲は、多項式の一般の異なる次数間の直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、整数Yの解析的接続、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。

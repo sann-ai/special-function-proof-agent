@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "n": "nat"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "integral",
+    "var": "t",
+    "lower": {
+      "op": "int",
+      "value": -1
+    },
+    "upper": {
+      "op": "int",
+      "value": 1
+    },
+    "body": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "legendre",
+          "order": {
+            "op": "var",
+            "name": "n"
+          },
+          "arg": {
+            "op": "var",
+            "name": "t"
+          }
+        },
+        {
+          "op": "legendre",
+          "order": {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "n"
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ]
+          },
+          "arg": {
+            "op": "var",
+            "name": "t"
+          }
+        }
+      ]
+    }
+  },
+  "rhs": {
+    "op": "int",
+    "value": 0
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "legendre_adjacent_integral"
+  }
+}

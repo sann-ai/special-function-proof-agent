@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "direct"
+      ]
+    },
+    "recipe": {
+      "type": "string",
+      "enum": [
+        "gamma_recurrence",
+        "beta_integral",
+        "gamma_scaled_integral",
+        "ring",
+        "hermite_h_derivative",
+        "hermite_he_derivative",
+        "hermite_h_values",
+        "hermite_he_values",
+        "hermite_h_recurrence",
+        "erf_derivative",
+        "erf_zero",
+        "erf_odd",
+        "gaussian_integral",
+        "legendre_values",
+        "legendre_parity",
+        "legendre_endpoints",
+        "legendre_recurrence",
+        "legendre_adjacent_integral",
+        "laguerre_values",
+        "laguerre_recurrence",
+        "laguerre_derivative",
+        "jacobi_values",
+        "jacobi_derivative",
+        "jacobi_legendre",
+        "bessel_y_half_recurrence",
+        "bessel_y_half_derivative"
+      ]
+    }
+  },
+  "required": [
+    "mode",
+    "recipe"
+  ],
+  "additionalProperties": false
+}

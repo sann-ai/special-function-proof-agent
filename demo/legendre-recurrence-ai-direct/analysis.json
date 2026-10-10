@@ -1,0 +1,22 @@
+{
+  "recipe": "legendre_recurrence",
+  "theorem": "legendreP_recurrence",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "natural_arguments": [
+    0
+  ],
+  "positive_degree": {
+    "op": "var",
+    "name": "n"
+  },
+  "reverse": false
+}

@@ -2,12 +2,16 @@
 from .classical import integer, binary, neg, predecessor, lean_natural
 
 RECIPES = ('legendre_values', 'legendre_parity', 'legendre_endpoints',
-           'laguerre_values', 'laguerre_derivative', 'jacobi_values',
+           'legendre_recurrence', 'legendre_adjacent_integral',
+           'laguerre_values', 'laguerre_recurrence', 'laguerre_derivative', 'jacobi_values',
            'jacobi_derivative', 'jacobi_legendre')
 REASONS = {
     'legendre_values': 'shifted Legendreとの変換と有限和から標準Legendreの低次数を評価する。',
     'legendre_parity': '標準Legendreとshifted Legendreの変換から、自然数次数の鏡映公式を適用する。',
     'legendre_endpoints': '標準Legendreの有限和と鏡映公式から指定された端点の値を評価する。',
+    'legendre_recurrence': '標準Legendreの有限和の係数比較から証明した三項漸化式を、元の自然数次数条件で適用する。',
+    'legendre_adjacent_integral': '隣接次数のLegendre積は奇関数であり、連続性と対称区間の積分から積分値0を得る。',
+    'laguerre_recurrence': '一般化Laguerreの有限和の係数比較から証明した三項漸化式を、自然数次数と実パラメータを保持して適用する。',
     'laguerre_values': '一般化Laguerreの標準有限和から低次数を評価する。',
     'laguerre_derivative': '一般化Laguerreの有限和を微分し、次数を1下げてパラメータを1上げる公式を適用する。',
     'jacobi_values': 'Jacobiの標準有限和から、元の実パラメータを保持して低次数を評価する。',
@@ -33,6 +37,35 @@ def match(lhs, rhs):
     for left, right, reverse in ((lhs, rhs, False), (rhs, lhs, True)):
         found = None
         op = left.get('op')
+        if op == 'mul':
+            coefficient, fn = left['args']
+            if fn.get('op') == 'legendre':
+                n, x = predecessor(fn['order']), fn['arg']
+                expected = binary('sub', binary('mul', binary('mul',
+                    binary('add', binary('mul', integer(2), n), integer(1)), x),
+                    polynomial('legendre', n, x)),
+                    binary('mul', n, polynomial('legendre', predecessor(n), x)))
+                if coefficient == binary('add', n, integer(1)) and right == expected:
+                    found = {'recipe': 'legendre_recurrence', 'theorem': 'legendreP_recurrence',
+                             'arguments': [n, x], 'natural_arguments': [0], 'positive_degree': n}
+            if fn.get('op') == 'laguerre':
+                n, x, a = predecessor(fn['order']), fn['arg'], fn['alpha']
+                expected = binary('sub', binary('mul', binary('sub', binary('add',
+                    binary('add', binary('mul', integer(2), n), a), integer(1)), x),
+                    polynomial('laguerre', n, x, a)),
+                    binary('mul', binary('add', n, a), polynomial('laguerre', predecessor(n), x, a)))
+                if coefficient == binary('add', n, integer(1)) and right == expected:
+                    found = {'recipe': 'laguerre_recurrence', 'theorem': 'laguerreL_recurrence',
+                             'arguments': [n, a, x], 'natural_arguments': [0], 'positive_degree': n}
+        if op == 'integral' and left['lower'] == integer(-1) and left['upper'] == integer(1):
+            body, t = left['body'], {'op': 'var', 'name': left['var']}
+            if body.get('op') == 'mul':
+                first, second = body['args']
+                if first.get('op') == 'legendre' and first['arg'] == t:
+                    n = first['order']
+                    if second == polynomial('legendre', shift(n, 1), t) and right == integer(0):
+                        found = {'recipe': 'legendre_adjacent_integral', 'theorem': 'legendreP_adjacent_integral',
+                                 'arguments': [n], 'natural_arguments': [0]}
         if op == 'legendre':
             n, x = left['order'], left['arg']
             common = {'arguments': [n, x], 'natural_arguments': [0]}

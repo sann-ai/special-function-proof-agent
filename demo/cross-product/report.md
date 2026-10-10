@@ -15,5 +15,5 @@ u(t)=X_00(z,t) のBessel方程式を積分すると Q^2-lam^2*A^2=(2/z^2)*integr
 分母を lam*A*(B-lam*A) に因数分解し、非零性を用いて約分する。
 
 ## 条件付きLean
-代数検査：True。仮定：0 < lam、Q != 0、C = -A、lam*A*B = Q^2、0 < Q^2-lam^2*A^2
+明示前提の下での検査：True。仮定：0 < lam、Q != 0、C = -A、lam*A*B = Q^2、0 < Q^2-lam^2*A^2
 残る形式化：Bessel Y and X definitions、root recurrence、Wronskian scaling、positive energy integral

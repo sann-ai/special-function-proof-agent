@@ -1,0 +1,1 @@
+Y_{n-1}(x)+Y_{n+1}(x)=2*n/x*Y_n(x); n integer,x>0

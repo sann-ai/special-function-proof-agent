@@ -51,16 +51,18 @@ python3 -m special_function_agent replay demo/direct
 
 `proved` と、再検査時の `replayed: true` を確認します。これらの操作はCodex CLI、AIへの接続、APIキーを使いません。固定環境の取得とビルドが完了した端末ではローカルで実行できます。
 
-今回追加した関数を確認する場合：
+多項式の漸化式・隣接直交と半整数Yを確認する場合：
 
 ```sh
-python3 -m special_function_agent verify examples/jacobi-derivative.txt --route direct --output runs/first-jacobi
-python3 -m special_function_agent replay runs/first-jacobi
+python3 -m special_function_agent verify examples/legendre-recurrence.txt --route direct --output runs/first-legendre
+python3 -m special_function_agent replay runs/first-legendre
+python3 -m special_function_agent verify examples/legendre-adjacent-integral.txt --route steps --output runs/first-adjacent
+python3 -m special_function_agent replay runs/first-adjacent
 python3 -m special_function_agent verify examples/yhalf-derivative.txt --route steps --output runs/first-yhalf
 python3 -m special_function_agent replay runs/first-yhalf
 ```
 
-Jacobiの例は自然数n≥1と実数a,b,x、Yの例は固定半整数次数とx>0を明示しています。[多項式の規約](orthogonal-polynomials.md)と[Yの対応範囲](bessel-y-formalization.md)を参照してください。
+Legendre漸化式は自然数n≥1と実数x、隣接直交積分は全自然数nと区間[-1,1]、Yの例は固定半整数次数とx>0を明示しています。[多項式の規約](orthogonal-polynomials.md)と[Yの対応範囲](bessel-y-formalization.md)を参照してください。
 
 全保存例とテストを実行する場合:
 

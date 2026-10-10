@@ -1,0 +1,168 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "n": "nat",
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "n",
+      "relation": "ge",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "var",
+            "name": "n"
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "op": "laguerre",
+        "order": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "n"
+            },
+            {
+              "op": "int",
+              "value": 1
+            }
+          ]
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        },
+        "alpha": {
+          "op": "var",
+          "name": "a"
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "sub",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 2
+                          },
+                          {
+                            "op": "var",
+                            "name": "n"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "var",
+                        "name": "a"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "int",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          },
+          {
+            "op": "laguerre",
+            "order": {
+              "op": "var",
+              "name": "n"
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            },
+            "alpha": {
+              "op": "var",
+              "name": "a"
+            }
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "n"
+              },
+              {
+                "op": "var",
+                "name": "a"
+              }
+            ]
+          },
+          {
+            "op": "laguerre",
+            "order": {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "n"
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ]
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            },
+            "alpha": {
+              "op": "var",
+              "name": "a"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

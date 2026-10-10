@@ -38,7 +38,11 @@ for route in ("direct", "steps", "recurrence-direct", "recurrence-steps", "calcu
               "jacobi-legendre-direct", "jacobi-legendre-steps",
               "yhalf-recurrence-direct", "yhalf-recurrence-steps",
               "yhalf-derivative-direct", "yhalf-derivative-steps",
-              "laguerre-ai-direct", "yhalf-ai-steps"):
+              "laguerre-ai-direct", "yhalf-ai-steps",
+              "legendre-recurrence-direct", "legendre-recurrence-steps",
+              "legendre-adjacent-integral-direct", "legendre-adjacent-integral-steps",
+              "laguerre-recurrence-direct", "laguerre-recurrence-steps",
+              "legendre-recurrence-ai-direct", "legendre-adjacent-integral-ai-steps"):
     path = ROOT / "demo" / route / "request.json"
     if not path.exists():
         raise SystemExit(f"Missing saved proof plan: {path}")
@@ -51,3 +55,8 @@ conditional = replay(ROOT / "demo/cross-product", timeout=120)
 print("Cross-product conditional algebra:", conditional['conditional_replayed'])
 if not conditional.get('conditional_replayed') or conditional.get('full_bessel_proof') is not False:
     raise SystemExit(json.dumps(conditional, ensure_ascii=False))
+
+integer_y = replay(ROOT / "demo/integer-y-recurrence", timeout=120)
+print("Integer-Y recurrence under explicit order differentiability:", integer_y['conditional_replayed'])
+if not integer_y.get('conditional_replayed') or integer_y.get('full_bessel_proof') is not False:
+    raise SystemExit(json.dumps(integer_y, ensure_ascii=False))

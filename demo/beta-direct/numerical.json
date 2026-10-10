@@ -1,6 +1,6 @@
 {
   "status": "unresolved",
-  "diagnostic": "no_mismatch_found",
+  "diagnostic": "counterexample_candidates",
   "backend": "mpmath",
   "full_bessel_proof": false,
   "full_function_proof": false,
@@ -78,9 +78,9 @@
         "a": "2.0",
         "b": "0.5"
       },
-      "lhs": "1.33333333333333333333333333333332178864753942352",
+      "lhs": "1.33333333333333325931846502498956397175788879395",
       "rhs": "1.33333333333333333333333333333333333333333333333",
-      "absolute_difference": "1.15446857939098095408267648293881554033685102135e-32",
+      "absolute_difference": "7.40148683083437693615754445393880208333333332815e-17",
       "comparison_tolerance": "1.33333333333333333333333333333333333333333333333e-30",
       "condition_residuals": []
     },
@@ -107,7 +107,19 @@
       "condition_residuals": []
     }
   ],
-  "candidates": [],
+  "candidates": [
+    {
+      "values": {
+        "a": "2.0",
+        "b": "0.5"
+      },
+      "lhs": "1.33333333333333325931846502498956397175788879395",
+      "rhs": "1.33333333333333333333333333333333333333333333333",
+      "absolute_difference": "7.40148683083437693615754445393880208333333332815e-17",
+      "comparison_tolerance": "1.33333333333333333333333333333333333333333333333e-30",
+      "condition_residuals": []
+    }
+  ],
   "skipped_reasons": [],
   "excluded_by_conditions": 0,
   "root_search": {

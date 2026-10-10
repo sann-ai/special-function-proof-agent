@@ -1,0 +1,1 @@
+int(-1,1,P_n(t)*P_{n+1}(t),t)=0; n natural

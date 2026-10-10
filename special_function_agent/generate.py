@@ -112,6 +112,10 @@ legendre_endpoints (P_n(1)=1, P_n(-1)=(-1)^n), laguerre_values and jacobi_values
 laguerre_derivative (D_x L_n^alpha=-L_(n-1)^(alpha+1)),
 jacobi_derivative (D_x P_n^(alpha,beta)=(n+alpha+beta+1)/2*P_(n-1)^(alpha+1,beta+1)),
 jacobi_legendre (Jacobi(n,0,0,x)=Legendre(n,x)). Derivative lowering requires n>=1 from the fixed input.
+legendre_recurrence proves (n+1)*P_(n+1)(x)=(2*n+1)*x*P_n(x)-n*P_(n-1)(x), n>=1.
+laguerre_recurrence proves (n+1)*L_(n+1)^a(x)=(2*n+a+1-x)*L_n^a(x)-(n+a)*L_(n-1)^a(x), n>=1.
+legendre_adjacent_integral proves int(-1,1,P_n(t)*P_(n+1)(t),t)=0 for all natural n.
+Keep the exact integration variable, finite endpoints, and all real parameters.
 YNoninteger uses bessel_y_noninteger {order,arg}; order is an exact rational object and must be
 -1/2,1/2,3/2. Positive x is required. Recipes bessel_y_half_recurrence and bessel_y_half_derivative
 apply Y(-1/2,x)+Y(3/2,x)=Y(1/2,x)/x and D_x Y(1/2,x)=(Y(-1/2,x)-Y(3/2,x))/2.
