@@ -292,7 +292,7 @@ def verify(data, output_dir, timeout):
         analysis = defined_proof.analysis(data, analysis)
     result = {'status':'unresolved', 'reason':'no_accepted_full_certificate',
               'statement':display(data['lhs'])+' = '+display(data['rhs']), 'conditions':labels(data),
-              'environment':environment(), 'conventions':conventions(data), 'full_function_proof':False,
+              'environment':research_functions.environment(data, environment()), 'conventions':conventions(data), 'full_function_proof':False,
               'analysis':analysis, 'numerical':numeric, 'attempts':[],
               'request_sha256':_sha((output_dir/'request.json').read_bytes())}
     bessel_scope = (cross_complete.FORMAL_SCOPE if cross_complete.complete_target(expanded) else
@@ -305,7 +305,7 @@ def verify(data, output_dir, timeout):
         result['formal_scope'] = research_proof.FORMAL_SCOPE
         result['research_dependencies'] = dependencies
     if defined:
-        result['formal_scope'] = defined_proof.FORMAL_SCOPE
+        result['formal_scope'] = defined_proof.formal_scope(data)
         result['definition_dependencies'] = research_functions.metadata(data['definitions'])
     bounds = domains(expanded)
     pending = []
@@ -347,7 +347,8 @@ def verify(data, output_dir, timeout):
              '完全Lean証明：'+result['status'], '数値診断：'+numeric['diagnostic']]
     if defined:
         lines[2] = defined_proof.display(data, data['lhs'])+' = '+defined_proof.display(data, data['rhs'])
-        lines += ['', '研究関数の明示定義：元の呼出しを含むtheorem targetと、定義を展開したexpanded_targetをLeanの定義等式で接続します。']
+        bridge = '検証済みの解析的橋渡し定理' if research_functions.uses_analytic(data['definitions']) else 'Leanの定義等式'
+        lines += ['', '研究関数の明示定義：元の呼出しを含むtheorem targetと、定義を展開したexpanded_targetを'+bridge+'で接続します。']
         lines += defined_proof.definition_lines(data)
         lines += ['展開後の式：'+display(expanded['lhs'])+' = '+display(expanded['rhs']),
                   '定義・依存関係・元条件は request.json、analysis.json、certificate.lean に保存します。']
@@ -411,7 +412,7 @@ def replay(data, result, output_dir, timeout):
         analysis = {'recipe': 'research', 'dependencies': dependencies}
         from .core import load_json
         expected_analysis = defined_proof.analysis(data, analysis) if defined else analysis
-        if (result.get('formal_scope') != (defined_proof.FORMAL_SCOPE if defined else research_proof.FORMAL_SCOPE) or
+        if (result.get('formal_scope') != (defined_proof.formal_scope(data) if defined else research_proof.FORMAL_SCOPE) or
                 result.get('research_dependencies') != dependencies or
                 result.get('analysis') != expected_analysis or load_json(output_dir/'analysis.json') != expected_analysis):
             raise InputError('Saved research dependencies or scope changed.')
@@ -420,13 +421,13 @@ def replay(data, result, output_dir, timeout):
         base_analysis = ({'recipe': 'research', 'dependencies': research_proof.inspect_dependencies(data)}
                          if research else match_identity(expanded['lhs'], expanded['rhs']))
         expected_analysis = defined_proof.analysis(data, base_analysis)
-        if (result.get('formal_scope') != defined_proof.FORMAL_SCOPE or
+        if (result.get('formal_scope') != defined_proof.formal_scope(data) or
                 result.get('definition_dependencies') != research_functions.metadata(data['definitions']) or
                 result.get('analysis') != expected_analysis or load_json(output_dir/'analysis.json') != expected_analysis):
             raise InputError('Saved function definitions or their target correspondence changed.')
     source = render(data)
     certificate = output_dir/'certificate.lean'
-    if result.get('environment') != environment() or result.get('conventions') != conventions(data):
+    if result.get('environment') != research_functions.environment(data, environment()) or result.get('conventions') != conventions(data):
         raise InputError('The mathematical environment or conventions changed.')
     if certificate.read_text(encoding='utf-8') != source or result.get('certificate_sha256') != _sha(source.encode()):
         raise InputError('Saved certificate differs from the fixed target and recipe.')

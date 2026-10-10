@@ -1,0 +1,109 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+    "arguments": {
+      "u": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "div",
+        "args": [
+          {
+            "op": "sqrt",
+            "arg": {
+              "op": "pi"
+            }
+          },
+          {
+            "op": "int",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "op": "erf",
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "body": {
+        "arg": {
+          "name": "u",
+          "op": "var"
+        },
+        "op": "gaussian_primitive"
+      },
+      "definitions": [],
+      "id": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+      "name": "GaussianArea",
+      "parameters": {
+        "u": "real"
+      },
+      "schema_version": 1
+    }
+  ],
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "defined",
+          "function": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+          "arguments": {
+            "u": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "sqrt",
+                  "arg": {
+                    "op": "pi"
+                  }
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "op": "erf",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        "reason": "定義を同時展開すると両辺が同一式となる。",
+        "conditions": [],
+        "recipe": "ring"
+      }
+    ]
+  }
+}

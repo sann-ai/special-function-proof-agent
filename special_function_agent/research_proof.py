@@ -56,7 +56,7 @@ def _target(data):
 def _expected_scope(data):
     from . import research_functions, defined_proof
     if research_functions.contains(data):
-        return defined_proof.FORMAL_SCOPE
+        return defined_proof.formal_scope(data)
     if is_research(data):
         return FORMAL_SCOPE
     if real_special.cross_complete.complete_target(data):
@@ -82,11 +82,21 @@ def _source(body, dependencies):
     declarations = [f'namespace ResearchLemma_{info["id"]}\n\n{info["body"]}\n'
                     f'end ResearchLemma_{info["id"]}' for info in dependencies]
     declarations.append(f'namespace BesselAgentCandidate\n\n{body}\nend BesselAgentCandidate')
-    return _PREAMBLE + '\n\n'.join(declarations) + '\n' + _AUDIT
+    content = '\n\n'.join(declarations)
+    # All declarations are verifier-generated from closed structured input.
+    from .research_analytic import rewrite_lemmas
+    preamble = _PREAMBLE
+    if any(name in content for name in rewrite_lemmas()):
+        preamble = preamble.replace('import SpecialFunctionProofAgent\n',
+                                    'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AnalyticDefinitions\n', 1)
+    return preamble + content + '\n' + _AUDIT
 
 
 def _ordinary_body(source):
     prefix = _PREAMBLE + 'namespace BesselAgentCandidate\n\n'
+    if source.startswith('import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AnalyticDefinitions\n'):
+        prefix = prefix.replace('import SpecialFunctionProofAgent\n',
+                                'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AnalyticDefinitions\n', 1)
     suffix = '\nend BesselAgentCandidate\n' + _AUDIT
     if not source.startswith(prefix) or not source.endswith(suffix):
         raise InputError('The registered renderer has an unsupported certificate layout.')
@@ -119,7 +129,7 @@ def _package(package, context, depth):
     if (result.get('status') != 'proved' or result.get('full_function_proof') is not True
             or result.get('certificate_kind') != 'proof'):
         raise InputError('Only full proved research lemma certificates may be applied.')
-    if result.get('environment') != context['environment'] or result.get('conventions') != conventions(request):
+    if result.get('environment') != research_functions.environment(request, context['environment']) or result.get('conventions') != conventions(request):
         raise InputError('The research lemma mathematical environment or conventions changed.')
     scope = _expected_scope(request)
     if result.get('formal_scope') != scope:

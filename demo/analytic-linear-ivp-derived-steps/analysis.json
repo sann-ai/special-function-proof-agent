@@ -1,0 +1,219 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+      "name": "LinearFlow",
+      "parameters": {
+        "a": "real",
+        "c": "real",
+        "u": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+      "analytic_contracts": [
+        {
+          "op": "linear_ivp",
+          "kind": "unique_global_ivp_solution",
+          "domain": {
+            "rate": "real",
+            "initial": "real",
+            "arg": "real"
+          },
+          "arguments": {
+            "rate": {
+              "op": "var",
+              "name": "a"
+            },
+            "initial": {
+              "op": "var",
+              "name": "c"
+            },
+            "arg": {
+              "op": "var",
+              "name": "u"
+            }
+          },
+          "semantics": {
+            "time_domain": "real",
+            "equation": "y'(t) = rate*y(t)",
+            "fixed_parameters": [
+              "rate",
+              "initial"
+            ],
+            "initial_condition": {
+              "time": 0,
+              "value": "initial"
+            },
+            "evaluation_argument": "arg",
+            "solution_class": "real functions differentiable at every real time"
+          },
+          "definition": "SpecialFunctionProofAgent.homogeneousIVPSolution",
+          "bridge": "SpecialFunctionProofAgent.homogeneousIVPSolution_eq_exp",
+          "theorems": [
+            "SpecialFunctionProofAgent.hasDerivAt_homogeneousIVPSolution",
+            "SpecialFunctionProofAgent.homogeneousIVPSolution_zero",
+            "SpecialFunctionProofAgent.homogeneousIVPSolution_unique",
+            "SpecialFunctionProofAgent.existsUnique_homogeneousIVPSolution"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "a": "real",
+      "c": "real",
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "c"
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "c"
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "proof_analysis": {
+    "recipe": "research",
+    "dependencies": [
+      {
+        "id": "7efdc31b4b5674f4bba661d90ae2fdb0392f371b938331c88fec503789132b2b",
+        "name": "linear-ivp-identity",
+        "source": null,
+        "target_sha256": "a06c32da4dfcfbf261bcbfc6815fae81f4dc2b99ef25a1a47cbf017bd677431b",
+        "statement": "Function[66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0](a=a,c=c,u=x) = (c*exp((a*x)))",
+        "conditions": [
+          "a is real",
+          "c is real",
+          "x is real"
+        ],
+        "proof_mode": "direct",
+        "formal_scope": "proof of the original real target under verified analytic research definitions",
+        "definitions": [
+          {
+            "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+            "name": "LinearFlow",
+            "parameters": {
+              "a": "real",
+              "c": "real",
+              "u": "real"
+            },
+            "dependencies": [],
+            "lean_name": "ResearchFunction_66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+            "analytic_contracts": [
+              {
+                "op": "linear_ivp",
+                "kind": "unique_global_ivp_solution",
+                "domain": {
+                  "rate": "real",
+                  "initial": "real",
+                  "arg": "real"
+                },
+                "arguments": {
+                  "rate": {
+                    "name": "a",
+                    "op": "var"
+                  },
+                  "initial": {
+                    "name": "c",
+                    "op": "var"
+                  },
+                  "arg": {
+                    "name": "u",
+                    "op": "var"
+                  }
+                },
+                "semantics": {
+                  "time_domain": "real",
+                  "equation": "y'(t) = rate*y(t)",
+                  "fixed_parameters": [
+                    "rate",
+                    "initial"
+                  ],
+                  "initial_condition": {
+                    "time": 0,
+                    "value": "initial"
+                  },
+                  "evaluation_argument": "arg",
+                  "solution_class": "real functions differentiable at every real time"
+                },
+                "definition": "SpecialFunctionProofAgent.homogeneousIVPSolution",
+                "bridge": "SpecialFunctionProofAgent.homogeneousIVPSolution_eq_exp",
+                "theorems": [
+                  "SpecialFunctionProofAgent.hasDerivAt_homogeneousIVPSolution",
+                  "SpecialFunctionProofAgent.homogeneousIVPSolution_zero",
+                  "SpecialFunctionProofAgent.homogeneousIVPSolution_unique",
+                  "SpecialFunctionProofAgent.existsUnique_homogeneousIVPSolution"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

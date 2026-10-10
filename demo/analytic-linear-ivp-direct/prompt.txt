@@ -1,0 +1,51 @@
+Return one JSON proof plan matching the response schema. Do not use tools or edit files.
+The exact schema_version 2 target fixes every variable type, binding, assumption and equality.
+Use Real.Gamma, Real.rpow, Real.exp, real interval integrals and integrals on Set.Ioi.
+Hermite H means physicists, He means probabilists; degree n is natural, while Bessel uses integer degree.
+H_n(x)=sqrt(2)^n*He_n(sqrt(2)*x). erf uses its Gaussian integral definition on all real inputs.
+Do not add x>0 for Hermite or erf. For H/He derivatives and n-1 degrees, retain the input n>=1 condition.
+Additional recipes: hermite_h_derivative, hermite_he_derivative, hermite_h_values (H0=1,H1=2x),
+hermite_he_values (He0=1,He1=x), hermite_h_recurrence (H(n+1)=2xHn-2nH(n-1)),
+erf_derivative (D_x erf(x)=2exp(-x^2)/sqrt(pi)), erf_zero, erf_odd, gaussian_integral
+(integral a..b exp(-t^2)=sqrt(pi)/2*(erf(b)-erf(a)), with arbitrary real endpoints.
+Use deriv {var,arg}, hermite_h/hermite_he {order,arg}, erf/sqrt {arg}, pi {op:"pi"}.
+Orthogonal families use natural degree and real parameters: legendre {order,arg},
+laguerre {order,alpha,arg}, jacobi {order,alpha,beta,arg}. P is standard Legendre,
+ordinary L is alpha=0. Jacobi/Laguerre are finite polynomial extensions for all real parameters.
+Recipes: legendre_values (degrees 0,1,2), legendre_parity (P_n(-x)=(-1)^n P_n(x)),
+legendre_endpoints (P_n(1)=1, P_n(-1)=(-1)^n), laguerre_values and jacobi_values (0,1,2),
+laguerre_derivative (D_x L_n^alpha=-L_(n-1)^(alpha+1)),
+jacobi_derivative (D_x P_n^(alpha,beta)=(n+alpha+beta+1)/2*P_(n-1)^(alpha+1,beta+1)),
+jacobi_legendre (Jacobi(n,0,0,x)=Legendre(n,x)). Derivative lowering requires n>=1 from the fixed input.
+legendre_recurrence proves (n+1)*P_(n+1)(x)=(2*n+1)*x*P_n(x)-n*P_(n-1)(x), n>=1.
+laguerre_recurrence proves (n+1)*L_(n+1)^a(x)=(2*n+a+1-x)*L_n^a(x)-(n+a)*L_(n-1)^a(x), n>=1.
+legendre_adjacent_integral proves int(-1,1,P_n(t)*P_(n+1)(t),t)=0 for all natural n.
+Keep the exact integration variable, finite endpoints, and all real parameters.
+YNoninteger uses bessel_y_noninteger {order,arg}; order is an exact rational object and must be
+-1/2,1/2,3/2. Positive x is required. Recipes bessel_y_half_recurrence and bessel_y_half_derivative
+apply Y(-1/2,x)+Y(3/2,x)=Y(1/2,x)/x and D_x Y(1/2,x)=(Y(-1/2,x)-Y(3/2,x))/2.
+integer_y_recurrence proves Y_(n-1)(x)+Y_(n+1)(x)=2*n/x*Y_n(x), with integer n and x>0.
+integer_y_derivative proves D_x Y_0(x)=-Y_1(x) and D_x Y_1(x)=Y_0(x)-Y_1(x)/x for x>0.
+The derivative variable is exactly the common real argument. Keep composite arguments and other variables unchanged.
+Use the existing bessel_y {order,arg} AST for these integer identities. The full theorem uses
+the standard integer Y definition, with order differentiability proved from its convergent J series.
+The argument derivative formulas also use proved order/argument differentiation exchange.
+integer_y_wronskian proves J_(n+1)(x)*Y_n(x)-J_n(x)*Y_(n+1)(x)=2/(pi*x) for integer n, x>0,
+and its fixed n=0 form J_1(x)*Y_0(x)-J_0(x)*Y_1(x)=2/(pi*x).
+In the original cross convention X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t),
+X_01(x,x)=J_0(x)*Y_1(x)-Y_0(x)*J_1(x)=-2/(pi*x). Keep this negative sign and both equal arguments.
+Use bessel_j {order,arg}, bessel_y {order,arg}, bessel_cross {orders:[n,m],args:[s,t]}.
+cross_product_root proves the fixed root fraction with the original conditions z>0, 0<lambda<1,
+X_01(z,lambda*z)=0. The left denominator ends in X_02, and the right numerator is X_00 without a derivative.
+Its full theorem proves positive energy and both denominators nonzero from those original conditions.
+Keep every coefficient, order, argument, denominator and condition exactly as in the supplied target.
+Other integer Y identities and cross products retain their diagnostic route. Keep integer Y distinct from YNoninteger.
+Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
+integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.
+Do not add, remove, or strengthen assumptions or change the target. Return only a proof plan.
+For steps, use original endpoints with a concise Japanese reason and exact supplied conditions.
+Research functions use defined {function: exact semantic ID, arguments: all named real parameters}. The supplied definitions and analytic contracts are fixed. Keep the original defined calls in the target and step endpoints. Each recipe is applied after simultaneous definition expansion; do not provide or change definitions. Definition expansion preserves every original assumption. Expanded target for recipe selection:
+{"assumptions": [], "lhs": {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}, "rhs": {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}, "schema_version": 2, "variables": {"a": "real", "c": "real", "x": "real"}}
+Requested route: direct
+Fixed target JSON:
+{"assumptions": [], "definitions": [{"body": {"arg": {"name": "u", "op": "var"}, "initial": {"name": "c", "op": "var"}, "op": "linear_ivp", "rate": {"name": "a", "op": "var"}}, "definitions": [], "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0", "name": "LinearFlow", "parameters": {"a": "real", "c": "real", "u": "real"}, "schema_version": 1}], "lhs": {"arguments": {"a": {"name": "a", "op": "var"}, "c": {"name": "c", "op": "var"}, "u": {"name": "x", "op": "var"}}, "function": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0", "op": "defined"}, "rhs": {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}, "schema_version": 2, "variables": {"a": "real", "c": "real", "x": "real"}}

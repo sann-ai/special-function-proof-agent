@@ -24,10 +24,11 @@ def _target(path, conditions):
 
 
 def _summary(package):
+    from .research_functions import environment as function_environment
     result = library.read_evidence_json(package, 'result.json')
     return {'id': package['id'], 'name': package['name'], 'saved_status': result['status'],
             'statement': result.get('statement'), 'conditions': result.get('conditions'),
-            'environment_matches': result.get('environment') == environment()}
+            'environment_matches': result.get('environment') == function_environment(library.read_evidence_json(package, 'request.json'), environment())}
 
 
 def main(argv=None):
@@ -36,7 +37,7 @@ def main(argv=None):
         return function_main(argv[1:])
     parser = argparse.ArgumentParser(description='Reuse verified lemmas in new targets; store private research outside this repository.')
     commands = parser.add_subparsers(dest='command', required=True)
-    commands.add_parser('function', help='Define finite real research functions; use research function --help.')
+    commands.add_parser('function', help='Define finite or supported analytic real research functions; use research function --help.')
     for name in ('add', 'list', 'show', 'reverify', 'export', 'import', 'verify', 'generate'):
         command = commands.add_parser(name)
         command.add_argument('--research-dir', type=Path, help='External library; default ~/SpecialFunctionProofAgentData/research.')

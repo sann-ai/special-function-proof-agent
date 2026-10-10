@@ -1,0 +1,63 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "a9cd0c69e62cd05c0dda348d582b8639afb20e9074aeefbce7b704c23da4082b",
+      "name": "SeriesExp",
+      "parameters": {
+        "u": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_a9cd0c69e62cd05c0dda348d582b8639afb20e9074aeefbce7b704c23da4082b",
+      "analytic_contracts": [
+        {
+          "op": "exp_series",
+          "kind": "convergent_power_series",
+          "domain": {
+            "arg": "real"
+          },
+          "arguments": {
+            "arg": {
+              "name": "u",
+              "op": "var"
+            }
+          },
+          "semantics": {
+            "index_domain": "nat",
+            "first_index": 0,
+            "term": "arg^n / n!",
+            "summation": "infinite"
+          },
+          "definition": "SpecialFunctionProofAgent.exponentialSeries",
+          "bridge": "SpecialFunctionProofAgent.exponentialSeries_eq_exp",
+          "theorems": [
+            "SpecialFunctionProofAgent.hasSum_exponentialSeries",
+            "SpecialFunctionProofAgent.summable_exponentialSeries"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "exp",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    },
+    "rhs": {
+      "op": "exp",
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "proof_analysis": null
+}

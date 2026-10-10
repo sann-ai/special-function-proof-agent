@@ -103,9 +103,9 @@ def list_entries(root: Path | str | None = None) -> list[dict]:
 
 
 def _current_source(package: dict) -> str:
-    from .research_functions import definition_conventions, render_definition
+    from .research_functions import definition_conventions, render_definition, environment
     validate_package(package)
-    if (package['environment'] != core.environment()
+    if (package['environment'] != environment(package['definition'])
             or package['conventions'] != definition_conventions(package['definition'])):
         raise InputError('The function mathematical environment or conventions changed; use explicit reverification.')
     source = render_definition(package['definition'])
@@ -145,13 +145,13 @@ def _check(source: str, timeout: float) -> dict:
 
 def _make_package(snapshot: dict, *, source: str | None, original_input: str | None,
                   timeout: float) -> dict:
-    from .research_functions import definition_conventions, render_definition, validate_definition
+    from .research_functions import definition_conventions, render_definition, validate_definition, environment as function_environment
     snapshot = deepcopy(snapshot)
     validate_definition(snapshot)
     for text in (source, original_input):
         if text is not None:
             library._text_bytes(text)
-    environment = core.environment()
+    environment = function_environment(snapshot)
     conventions = definition_conventions(snapshot)
     generated = render_definition(snapshot)
     payload = {'schema_version': 1, 'kind': 'function_definition', 'definition': snapshot,
@@ -160,7 +160,7 @@ def _make_package(snapshot: dict, *, source: str | None, original_input: str | N
     if len(library._json_bytes(payload)) > library.MAX_PACKAGE_BYTES:
         raise InputError('A function package exceeds 256 KiB.')
     verification = _check(generated, timeout)
-    if environment != core.environment() or conventions != definition_conventions(snapshot):
+    if environment != function_environment(snapshot) or conventions != definition_conventions(snapshot):
         raise InputError('The mathematical environment changed during function verification.')
     package = {**payload, 'verification': verification}
     package['id'] = library._digest(library._json_bytes(package))

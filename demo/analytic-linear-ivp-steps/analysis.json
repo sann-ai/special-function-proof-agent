@@ -1,0 +1,123 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+      "name": "LinearFlow",
+      "parameters": {
+        "a": "real",
+        "c": "real",
+        "u": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+      "analytic_contracts": [
+        {
+          "op": "linear_ivp",
+          "kind": "unique_global_ivp_solution",
+          "domain": {
+            "rate": "real",
+            "initial": "real",
+            "arg": "real"
+          },
+          "arguments": {
+            "rate": {
+              "op": "var",
+              "name": "a"
+            },
+            "initial": {
+              "op": "var",
+              "name": "c"
+            },
+            "arg": {
+              "op": "var",
+              "name": "u"
+            }
+          },
+          "semantics": {
+            "time_domain": "real",
+            "equation": "y'(t) = rate*y(t)",
+            "fixed_parameters": [
+              "rate",
+              "initial"
+            ],
+            "initial_condition": {
+              "time": 0,
+              "value": "initial"
+            },
+            "evaluation_argument": "arg",
+            "solution_class": "real functions differentiable at every real time"
+          },
+          "definition": "SpecialFunctionProofAgent.homogeneousIVPSolution",
+          "bridge": "SpecialFunctionProofAgent.homogeneousIVPSolution_eq_exp",
+          "theorems": [
+            "SpecialFunctionProofAgent.hasDerivAt_homogeneousIVPSolution",
+            "SpecialFunctionProofAgent.homogeneousIVPSolution_zero",
+            "SpecialFunctionProofAgent.homogeneousIVPSolution_unique",
+            "SpecialFunctionProofAgent.existsUnique_homogeneousIVPSolution"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "a": "real",
+      "c": "real",
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "var",
+          "name": "c"
+        },
+        {
+          "op": "exp",
+          "arg": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "var",
+          "name": "c"
+        },
+        {
+          "op": "exp",
+          "arg": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "proof_analysis": null
+}

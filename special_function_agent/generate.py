@@ -162,7 +162,7 @@ For steps, use original endpoints with a concise Japanese reason and exact suppl
         if 'definitions' in target:
             from .research_functions import expand_target
             prompt += ('Research functions use defined {function: exact semantic ID, arguments: all named real parameters}. '
-                       'The supplied finite definitions are fixed. Keep the original defined calls in the target and step endpoints. '
+                       'The supplied definitions and analytic contracts are fixed. Keep the original defined calls in the target and step endpoints. '
                        'Each recipe is applied after simultaneous definition expansion; do not provide or change definitions. '
                        'Definition expansion preserves every original assumption. Expanded target for recipe selection:\n'
                        +json.dumps(expand_target(target), ensure_ascii=False, sort_keys=True)+'\n')

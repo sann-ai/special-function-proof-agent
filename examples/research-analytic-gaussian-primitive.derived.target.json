@@ -1,0 +1,80 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "defined",
+        "function": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+        "arguments": {
+          "u": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "sqrt",
+                "arg": {
+                  "op": "pi"
+                }
+              },
+              {
+                "op": "int",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "op": "erf",
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "GaussianArea",
+      "parameters": {
+        "u": "real"
+      },
+      "body": {
+        "op": "gaussian_primitive",
+        "arg": {
+          "op": "var",
+          "name": "u"
+        }
+      },
+      "definitions": [],
+      "id": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb"
+    }
+  ]
+}

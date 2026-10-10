@@ -60,6 +60,8 @@ def inspect(root: Path = ROOT) -> list[tuple[bool, str]]:
                    "プロジェクトのビルド出力（ソース更新後は lake build で更新）"))
     checks.append(((root / ".lake/build/lib/lean/SpecialFunctionProofAgent.olean").is_file(),
                    "特殊関数モジュールのビルド出力"))
+    checks.append(((root / ".lake/build/lib/lean/SpecialFunctionProofAgent/AnalyticDefinitions.olean").is_file(),
+                   "解析的な研究定義のビルド出力（lake build SpecialFunctionProofAgent.AnalyticDefinitions）"))
     return checks
 
 

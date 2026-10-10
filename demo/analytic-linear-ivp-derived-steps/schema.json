@@ -1,0 +1,583 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "steps"
+      ]
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "before": {
+            "$ref": "#/$defs/expr"
+          },
+          "after": {
+            "$ref": "#/$defs/expr"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "a is real",
+                "c is real",
+                "x is real"
+              ]
+            }
+          },
+          "recipe": {
+            "type": "string",
+            "enum": [
+              "research",
+              "ring"
+            ]
+          },
+          "uses": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "lemma": {
+                      "const": "7efdc31b4b5674f4bba661d90ae2fdb0392f371b938331c88fec503789132b2b",
+                      "type": "string"
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "properties": {
+                        "a": {
+                          "$ref": "#/$defs/expr"
+                        },
+                        "c": {
+                          "$ref": "#/$defs/expr"
+                        },
+                        "x": {
+                          "$ref": "#/$defs/expr"
+                        }
+                      },
+                      "required": [
+                        "a",
+                        "c",
+                        "x"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "reverse": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "lemma",
+                    "arguments",
+                    "reverse"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 12
+          }
+        },
+        "required": [
+          "before",
+          "after",
+          "reason",
+          "conditions",
+          "recipe",
+          "uses"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 12
+    }
+  },
+  "required": [
+    "mode",
+    "steps"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "expr": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "int",
+              "type": "string"
+            },
+            "value": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "op",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "var",
+              "type": "string"
+            },
+            "name": {
+              "type": "string",
+              "enum": [
+                "a",
+                "c",
+                "t",
+                "x"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "neg",
+              "type": "string"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "div"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expr"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "op",
+            "args"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "gamma",
+                "exp",
+                "erf",
+                "sqrt"
+              ]
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "pi",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "hermite_h",
+                "hermite_he",
+                "legendre"
+              ]
+            },
+            "order": {
+              "$ref": "#/$defs/expr"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "order",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "laguerre",
+              "type": "string"
+            },
+            "order": {
+              "$ref": "#/$defs/expr"
+            },
+            "alpha": {
+              "$ref": "#/$defs/expr"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "order",
+            "alpha",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "bessel_y_noninteger",
+              "type": "string"
+            },
+            "order": {
+              "$ref": "#/$defs/expr"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "order",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "bessel_y",
+              "type": "string"
+            },
+            "order": {
+              "$ref": "#/$defs/expr"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "order",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "bessel_j",
+              "type": "string"
+            },
+            "order": {
+              "$ref": "#/$defs/expr"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "order",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "bessel_cross",
+              "type": "string"
+            },
+            "orders": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expr"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expr"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "op",
+            "orders",
+            "args"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "rational",
+              "type": "string"
+            },
+            "numerator": {
+              "type": "integer"
+            },
+            "denominator": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "numerator",
+            "denominator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "jacobi",
+              "type": "string"
+            },
+            "order": {
+              "$ref": "#/$defs/expr"
+            },
+            "alpha": {
+              "$ref": "#/$defs/expr"
+            },
+            "beta": {
+              "$ref": "#/$defs/expr"
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "order",
+            "alpha",
+            "beta",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "deriv",
+              "type": "string"
+            },
+            "var": {
+              "type": "string",
+              "enum": [
+                "a",
+                "c",
+                "x"
+              ]
+            },
+            "arg": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "var",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "pow",
+              "type": "string"
+            },
+            "base": {
+              "$ref": "#/$defs/expr"
+            },
+            "exponent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 12
+            }
+          },
+          "required": [
+            "op",
+            "base",
+            "exponent"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "rpow",
+              "type": "string"
+            },
+            "base": {
+              "$ref": "#/$defs/expr"
+            },
+            "exponent": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "base",
+            "exponent"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "infinity",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "integral",
+              "type": "string"
+            },
+            "var": {
+              "type": "string",
+              "enum": [
+                "t"
+              ]
+            },
+            "lower": {
+              "$ref": "#/$defs/expr"
+            },
+            "upper": {
+              "$ref": "#/$defs/expr"
+            },
+            "body": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "var",
+            "lower",
+            "upper",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "defined",
+              "type": "string"
+            },
+            "function": {
+              "const": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+              "type": "string"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "$ref": "#/$defs/expr"
+                },
+                "c": {
+                  "$ref": "#/$defs/expr"
+                },
+                "u": {
+                  "$ref": "#/$defs/expr"
+                }
+              },
+              "required": [
+                "a",
+                "c",
+                "u"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "op",
+            "function",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

@@ -6,7 +6,7 @@ import json
 import re
 
 from .core import InputError, _keys, _sha
-from . import real_bessel, real_special
+from . import real_bessel, real_special, research_analytic as analytic
 
 MAX_DEFINITIONS = 12
 MAX_DEPTH = 4
@@ -51,6 +51,29 @@ def contains(data):
         return ('definitions' in data or data.get('op') == 'defined'
                 or any(contains(value) for key, value in data.items() if key not in {'lemmas', 'evidence', 'manifest'}))
     return isinstance(data, list) and any(contains(value) for value in data)
+
+
+def uses_analytic(value):
+    """Include structured source requests in saved lemma dependency packages."""
+    if isinstance(value, list): return any(uses_analytic(item) for item in value)
+    if not isinstance(value, dict): return False
+    if isinstance(value.get('op'), str) and value['op'] in analytic.OPS: return True
+    for key, child in value.items():
+        if key == 'request.json' and isinstance(child, str):
+            try: child = json.loads(child)
+            except (ValueError, RecursionError): continue
+        if uses_analytic(child): return True
+    return False
+
+
+def environment(data, base=None):
+    """Bind the optional analytic implementation without changing semantic IDs."""
+    from . import core
+    result = dict(core.environment() if base is None else base)
+    if uses_analytic(data):
+        name = 'SpecialFunctionProofAgent/AnalyticDefinitions.lean'
+        result[name] = _sha((core.ROOT/name).read_bytes())
+    return result
 
 
 def _finite(node, variables, depth=0, budget=None):
@@ -105,7 +128,7 @@ def _finite(node, variables, depth=0, budget=None):
         real_bessel._validate_expr(view, {})
         real_special.lean_expr(view, {}, {})
     else:
-        raise InputError('Definition bodies and call arguments use finite existing real expressions; derivatives, integrals and infinity are excluded.')
+        raise InputError('After supported analytic expansion, definition bodies and call arguments use finite existing real expressions; general derivatives, integrals and infinity are excluded.')
 
 
 def _substitute(node, arguments, budget=None):
@@ -128,6 +151,12 @@ def _expand(node, infos, variables=None, depth=0, budget=None):
         raise InputError('Expanded research expressions exceed the supported size or depth.')
     if isinstance(node, list): return [_expand(item, infos, variables, depth+1, budget) for item in node]
     if not isinstance(node, dict): return node
+    if isinstance(node.get('op'), str) and node['op'] in analytic.OPS:
+        expanded = {'op': node['op']}
+        for field in analytic.fields(node):
+            expanded[field] = _expand(node[field], infos, variables, depth+1, budget)
+            _finite(expanded[field], variables if variables is not None else _expression_variables(expanded[field]))
+        return _expand(analytic.expand(expanded), infos, variables, depth+1, budget)
     if node.get('op') == 'rational':
         from .core import _fixed_exponent
         _fixed_exponent(node)
@@ -141,8 +170,8 @@ def _expand(node, infos, variables=None, depth=0, budget=None):
         info = infos[key]
         if not isinstance(arguments, dict) or set(arguments) != set(info['snapshot']['parameters']):
             raise InputError('A research call must supply exactly every real parameter.')
-        if any(item.get('op') in ('deriv', 'integral', 'infinity') for item in real_bessel._walk(arguments)):
-            raise InputError('Research call arguments exclude derivatives, integrals and infinity.')
+        if any(item.get('op') in ('deriv', 'integral', 'infinity', *analytic.OPS) for item in real_bessel._walk(arguments)):
+            raise InputError('Research call arguments use finite expressions and exclude raw analytic forms, derivatives, integrals and infinity.')
         expanded = {name: _expand(value, infos, variables, depth+1, budget) for name, value in arguments.items()}
         for value in expanded.values():
             scope = variables if variables is not None else _expression_variables(value)
@@ -266,6 +295,10 @@ def expand_target(data):
     if any(not isinstance(name, str) or name.casefold() in function_names for name in data['variables']):
         raise InputError('Target variables must be distinct from research function names.')
     for node in real_bessel._walk([data['lhs'], data['rhs'], data['assumptions'], data.get('proof', {}).get('steps', [])] if isinstance(data.get('proof', {}), dict) else []):
+        if 'op' in node and not isinstance(node['op'], str):
+            raise InputError('Every research expression requires an operation string.')
+        if node.get('op') in analytic.OPS:
+            raise InputError('Analytic forms belong in registered definition bodies; targets use their defined calls.')
         if node.get('op') in ('integral', 'deriv') and isinstance(node.get('var'), str) and node['var'].casefold() in function_names:
             raise InputError('Calculus bindings must be distinct from research function names.')
     result = _copy({key: value for key, value in data.items() if key != 'definitions'})
@@ -322,6 +355,8 @@ def _lean_name(key):
 
 
 def _lean(node, names, types, infos):
+    if node['op'] in analytic.OPS:
+        return analytic.lean_expr(node, lambda child: _lean(child, names, types, infos))
     if node['op'] == 'defined':
         info = infos[node['function']]
         args = ' '.join('('+_lean(node['arguments'][name], names, types, infos)+')'
@@ -378,14 +413,58 @@ def lean_definitions(definitions):
 
 def metadata(definitions):
     return [{'id': key, 'name': info['snapshot']['name'], 'parameters': _copy(info['snapshot']['parameters']),
-             'dependencies': [item['id'] for item in info['snapshot']['definitions']], 'lean_name': _lean_name(key)}
+             'dependencies': [item['id'] for item in info['snapshot']['definitions']], 'lean_name': _lean_name(key),
+             **({'analytic_contracts': [analytic.contracts(node) for node in real_bessel._walk(info['snapshot']['body'])
+                                        if node.get('op') in analytic.OPS]} if uses_analytic(info['snapshot']['body']) else {})}
             for key, info in _definitions(definitions).items()]
 
 
 def definition_conventions(snapshot):
     from .registry import conventions
     infos = _definitions([snapshot])
-    return conventions({'lhs': [info['expanded'] for info in infos.values()]})
+    result = _copy(conventions({'lhs': [info['expanded'] for info in infos.values()]}))
+    if uses_analytic(snapshot): result['analytic_definitions'] = metadata([snapshot])
+    return result
+
+
+def rewrite_lemmas(definitions):
+    infos = _definitions(definitions)
+    bridges = []
+    for info in infos.values():
+        for node in real_bessel._walk(info['snapshot']['body']):
+            if node.get('op') in analytic.OPS:
+                bridge = analytic.contracts(node)['bridge']
+                if bridge not in bridges: bridges.append(bridge)
+    return [_lean_name(key) for key in reversed(infos)] + bridges
+
+
+def analytic_contracts(definitions):
+    """Generate propositions, not trusted claims, for every analytic primitive."""
+    infos = _definitions(definitions)
+    result = []
+    # Quantify each saved definition's own parameters; dependency calls may use
+    # different arguments in the selected root, and retain their full contracts.
+    for info in infos.values():
+        snapshot = info['snapshot']
+        mapping = {name: 'c'+str(index) for index, name in enumerate(sorted(snapshot['parameters']))}
+        binders = ' '.join(f'({mapping[name]} : ℝ)' for name in sorted(mapping))
+        expr = lambda node: _lean(node, mapping, snapshot['parameters'], infos)
+        for node in real_bessel._walk(snapshot['body']):
+            if node.get('op') not in analytic.OPS: continue
+            arg = expr(node['arg'])
+            ns = 'SpecialFunctionProofAgent.'
+            if node['op'] == 'exp_series':
+                proposition = f'HasSum (fun k : ℕ => ({arg}) ^ k / (k.factorial : ℝ)) (Real.exp ({arg}))'
+                proof = f'{ns}hasSum_exponentialSeries ({arg})'
+            elif node['op'] == 'gaussian_primitive':
+                proposition = f'IntervalIntegrable (fun t : ℝ => Real.exp (-(t ^ 2))) volume (0 : ℝ) ({arg})'
+                proof = f'{ns}intervalIntegrable_gaussian 0 ({arg})'
+            else:
+                rate, initial = expr(node['rate']), expr(node['initial'])
+                proposition = (f'∃! y : ℝ → ℝ, (∀ t, HasDerivAt y (({rate}) * y t) t) ∧ y 0 = ({initial})')
+                proof = f'{ns}existsUnique_homogeneousIVPSolution ({rate}) ({initial})'
+            result.append((f'∀ {binders}, {proposition}', f'fun {" ".join(mapping.values())} => {proof}'))
+    return result
 
 
 def render_definition(snapshot):
@@ -395,8 +474,17 @@ def render_definition(snapshot):
     binders = ' '.join(f'({names[name]} : ℝ)' for name in sorted(names))
     arguments = ' '.join(names[name] for name in sorted(names))
     expanded = _lean(definition['expanded'], names, snapshot['parameters'], infos)
-    return ('import SpecialFunctionProofAgent\n\nopen scoped Real\nopen MeasureTheory\n\n'
+    analytic_used = uses_analytic(snapshot)
+    equality = f'{_lean_name(snapshot["id"])} {arguments} = {expanded}'
+    contracts = analytic_contracts([snapshot]) if analytic_used else []
+    statement = ' ∧ '.join('('+item+')' for item in [equality, *(prop for prop, _ in contracts)]) if contracts else equality
+    if analytic_used:
+        rewrite = ', '.join(rewrite_lemmas([snapshot]))
+        proof = f'  refine ⟨?_, {", ".join(term for _, term in contracts)}⟩\n  simp only [{rewrite}]\n'
+    else: proof = '  rfl\n'
+    imports = 'import SpecialFunctionProofAgent\n'+('import SpecialFunctionProofAgent.AnalyticDefinitions\n' if analytic_used else '')
+    return (imports+'\nopen scoped Real\nopen MeasureTheory\n\n'
             +lean_definitions([snapshot])+'\n\nnamespace BesselAgentCandidate\n\n'
-            +f'theorem target {binders} : {_lean_name(snapshot["id"])} {arguments} = {expanded} := by\n  rfl\n'
+            +f'theorem target {binders} : {statement} := by\n'+proof
             +'\nend BesselAgentCandidate\n\n#eval IO.println "BESSEL_AUDIT_BEGIN"\n'
             +'#print axioms BesselAgentCandidate.target\n#eval IO.println "BESSEL_AUDIT_END"\n')

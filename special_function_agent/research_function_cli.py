@@ -9,7 +9,7 @@ from .core import InputError, NeedsConditions, load_json, validate_request, veri
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='Define finite real research functions, then prove fixed targets using their definitions.')
+    parser = argparse.ArgumentParser(description='Define finite real expressions, factorial exponential series, Gaussian primitives, or homogeneous real IVPs; prove fixed targets using their definitions.')
     commands = parser.add_subparsers(dest='command', required=True)
     for name in ('add', 'list', 'show', 'reverify', 'export', 'import', 'verify', 'generate'):
         command = commands.add_parser(name)

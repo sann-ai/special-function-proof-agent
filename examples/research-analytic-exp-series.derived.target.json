@@ -1,0 +1,60 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "defined",
+        "function": "a9cd0c69e62cd05c0dda348d582b8639afb20e9074aeefbce7b704c23da4082b",
+        "arguments": {
+          "u": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "exp",
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "SeriesExp",
+      "parameters": {
+        "u": "real"
+      },
+      "body": {
+        "op": "exp_series",
+        "arg": {
+          "op": "var",
+          "name": "u"
+        }
+      },
+      "definitions": [],
+      "id": "a9cd0c69e62cd05c0dda348d582b8639afb20e9074aeefbce7b704c23da4082b"
+    }
+  ]
+}

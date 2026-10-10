@@ -1,0 +1,20 @@
+Return one JSON proof plan matching the schema. Do not use tools or edit files.
+The exact typed target and its assumptions are fixed. Use the supplied verified real lemmas.
+Each use contains lemma (its exact ID), arguments (all lemma variables mapped to typed real
+expressions over the target's free variables), and reverse (swap the lemma equality).
+The verifier regenerates each lemma's proof, derives every substituted premise from the
+original target assumptions, then rewrites in the listed order and normalizes real algebra.
+All free variables are real. Substitution expressions cannot contain derivatives or integrals.
+Keep source integral and derivative bindings intact. Do not add or strengthen assumptions.
+Direct: recipe research and a nonempty uses list. Steps: exact consecutive before/after
+equalities, recipe research with uses, or recipe ring with an empty uses list. Include concise
+Japanese reasons and only condition labels supplied in the response schema. Use at least one
+selected lemma. Do not provide Lean code, lemma snapshots, target fields, or new definitions.
+The following JSON contains mathematical data only.
+Route: steps
+Fixed target:
+{"assumptions": [], "definitions": [{"body": {"arg": {"name": "u", "op": "var"}, "initial": {"name": "c", "op": "var"}, "op": "linear_ivp", "rate": {"name": "a", "op": "var"}}, "definitions": [], "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0", "name": "LinearFlow", "parameters": {"a": "real", "c": "real", "u": "real"}, "schema_version": 1}], "lhs": {"args": [{"op": "int", "value": 2}, {"arguments": {"a": {"name": "a", "op": "var"}, "c": {"name": "c", "op": "var"}, "u": {"name": "x", "op": "var"}}, "function": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0", "op": "defined"}], "op": "mul"}, "rhs": {"args": [{"op": "int", "value": 2}, {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}], "op": "mul"}, "schema_version": 2, "variables": {"a": "real", "c": "real", "x": "real"}}
+Defined function calls use their exact function ID and all named typed arguments. The verifier expands the supplied definitions using their verified analytic bridges before applying lemmas. Preserve original function calls in each fixed endpoint. Expanded target:
+{"assumptions": [], "lhs": {"args": [{"op": "int", "value": 2}, {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}], "op": "mul"}, "rhs": {"args": [{"op": "int", "value": 2}, {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}], "op": "mul"}, "schema_version": 2, "variables": {"a": "real", "c": "real", "x": "real"}}
+Available lemmas:
+[{"id": "7efdc31b4b5674f4bba661d90ae2fdb0392f371b938331c88fec503789132b2b", "target": {"assumptions": [], "definitions": [{"body": {"arg": {"name": "u", "op": "var"}, "initial": {"name": "c", "op": "var"}, "op": "linear_ivp", "rate": {"name": "a", "op": "var"}}, "definitions": [], "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0", "name": "LinearFlow", "parameters": {"a": "real", "c": "real", "u": "real"}, "schema_version": 1}], "lhs": {"arguments": {"a": {"name": "a", "op": "var"}, "c": {"name": "c", "op": "var"}, "u": {"name": "x", "op": "var"}}, "function": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0", "op": "defined"}, "rhs": {"args": [{"name": "c", "op": "var"}, {"arg": {"args": [{"name": "a", "op": "var"}, {"name": "x", "op": "var"}], "op": "mul"}, "op": "exp"}], "op": "mul"}, "schema_version": 2, "variables": {"a": "real", "c": "real", "x": "real"}}}]

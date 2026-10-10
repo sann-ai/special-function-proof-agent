@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "c": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "c": {
+        "op": "var",
+        "name": "c"
+      },
+      "u": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "c"
+      },
+      {
+        "op": "exp",
+        "arg": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "var",
+              "name": "x"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "LinearFlow",
+      "parameters": {
+        "a": "real",
+        "c": "real",
+        "u": "real"
+      },
+      "body": {
+        "op": "linear_ivp",
+        "rate": {
+          "op": "var",
+          "name": "a"
+        },
+        "initial": {
+          "op": "var",
+          "name": "c"
+        },
+        "arg": {
+          "op": "var",
+          "name": "u"
+        }
+      },
+      "definitions": [],
+      "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0"
+    }
+  ],
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "defined",
+          "function": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+          "arguments": {
+            "a": {
+              "op": "var",
+              "name": "a"
+            },
+            "c": {
+              "op": "var",
+              "name": "c"
+            },
+            "u": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "c"
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "recipe": "ring",
+        "reason": "保存した明示定義を展開する。元の全条件の下で実数の代数式を整理する。",
+        "conditions": [
+          "a is real",
+          "c is real",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

@@ -444,6 +444,9 @@ def validate(data, require_proof=True):
 
 def display(node):
     op = node['op']
+    if op in {'exp_series', 'gaussian_primitive', 'linear_ivp'}:
+        from .defined_proof import display as definition_display
+        return definition_display({'definitions': []}, node)
     if op == 'defined':
         return 'Function['+node['function']+']('+','.join(name+'='+display(value) for name, value in sorted(node['arguments'].items()))+')'
     if op == 'int': return str(node['value'])

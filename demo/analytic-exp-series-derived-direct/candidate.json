@@ -1,0 +1,16 @@
+{
+  "mode": "direct",
+  "recipe": "research",
+  "uses": [
+    {
+      "lemma": "b282c1d9e15835c110a406007a8f103b1d632a6aac514c7147b82b75854a4498",
+      "arguments": {
+        "x": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      "reverse": false
+    }
+  ]
+}

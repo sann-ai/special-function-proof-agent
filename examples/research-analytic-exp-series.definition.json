@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "SeriesExp",
+  "parameters": {
+    "u": "real"
+  },
+  "body": {
+    "op": "exp_series",
+    "arg": {
+      "op": "var",
+      "name": "u"
+    }
+  },
+  "definitions": []
+}

@@ -767,7 +767,10 @@ def environment() -> dict[str, Any]:
              ROOT / "lakefile.toml", ROOT / "BesselProofAgent.lean"]
     files += sorted((ROOT / "BesselProofAgent").glob("**/*.lean"))
     files += [ROOT / "SpecialFunctionProofAgent.lean", ROOT / "special_function_agent/registry.py"]
-    files += sorted((ROOT / "SpecialFunctionProofAgent").glob("**/*.lean"))
+    # The optional analytic-definition module is fingerprinted by its consumers;
+    # adding it does not invalidate certificates that never import it.
+    files += sorted(path for path in (ROOT / "SpecialFunctionProofAgent").glob("**/*.lean")
+                    if path != ROOT / "SpecialFunctionProofAgent/AnalyticDefinitions.lean")
     return {str(path.relative_to(ROOT)): _sha(path.read_bytes()) for path in files if path.is_file()}
 
 

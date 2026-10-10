@@ -10,6 +10,12 @@ from special_function_agent import core
 
 # Explicit public API inventory. Add each new exported definition or theorem here.
 PUBLIC_DECLARATIONS = {
+    "AnalyticDefinitions": (
+        "exponentialSeries", "hasSum_exponentialSeries", "summable_exponentialSeries", "exponentialSeries_eq_exp",
+        "gaussianPrimitive", "intervalIntegrable_gaussian", "gaussianPrimitive_eq_erf", "hasDerivAt_gaussianPrimitive",
+        "homogeneousIVPSolution", "homogeneousIVPSolution_eq_exp", "hasDerivAt_homogeneousIVPSolution",
+        "homogeneousIVPSolution_zero", "homogeneousIVPSolution_unique", "existsUnique_homogeneousIVPSolution",
+    ),
     "Gamma": (
         "gamma_recurrence",
         "gamma_scaled_integral",

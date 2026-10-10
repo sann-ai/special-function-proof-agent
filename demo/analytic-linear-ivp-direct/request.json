@@ -1,0 +1,84 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "c": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "c": {
+        "op": "var",
+        "name": "c"
+      },
+      "u": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "c"
+      },
+      {
+        "op": "exp",
+        "arg": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "var",
+              "name": "x"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "body": {
+        "arg": {
+          "name": "u",
+          "op": "var"
+        },
+        "initial": {
+          "name": "c",
+          "op": "var"
+        },
+        "op": "linear_ivp",
+        "rate": {
+          "name": "a",
+          "op": "var"
+        }
+      },
+      "definitions": [],
+      "id": "66b143907cd9432ec06146f8a839686dc1f8461d20b6022565509dbdb5a86fe0",
+      "name": "LinearFlow",
+      "parameters": {
+        "a": "real",
+        "c": "real",
+        "u": "real"
+      },
+      "schema_version": 1
+    }
+  ],
+  "proof": {
+    "mode": "direct",
+    "recipe": "ring"
+  }
+}

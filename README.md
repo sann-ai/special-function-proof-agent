@@ -16,7 +16,7 @@
 - **保存と再検査**：元式・変数型・束縛・全条件・関数規約・環境ハッシュ・証明を保持し、再利用前にLeanで再検査します。
 - **研究補題の再利用**：既存関数の検証済み等式を外部研究フォルダへ登録し、実変数を置換して別の命題へ適用できます。元補題の条件を新targetの元条件からLeanで確認し、依存証拠を保存します。[Gamma公式をつなぐ例・Codex依頼・選択共有](docs/research-lemmas.md)。
 
-- **研究関数の明示定義**：既存関数の有限合成を私有フォルダへ登録し、元の関数呼出しを保ったLean証明と、別命題への補題再利用へ接続します。[定義形式・Codex依頼・選択共有](docs/research-functions.md)。
+- **研究関数の明示定義**：既存関数の有限合成を私有フォルダへ登録し、元の関数呼出しを保ったLean証明と、別命題への補題再利用へ接続します。指数の階乗級数、0から実端点へのGaussian積分、初期時刻0の一次斉次ODEにも対応し、収束・可積分性・全実数上の存在と一意性を登録時にLeanで確認します。[対応する3形式と依頼例](docs/research-analytic-definitions.md)。[定義形式・Codex依頼・選択共有](docs/research-functions.md)。
 
 登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` にあります。
 
@@ -30,6 +30,7 @@ cd special-function-proof-agent
 elan toolchain install leanprover/lean4:v4.34.0
 lake exe cache get
 lake build
+lake build SpecialFunctionProofAgent.AnalyticDefinitions
 python3 scripts/doctor.py
 ```
 
@@ -162,6 +163,7 @@ Besselからの取り込みは明示した1記録を再検証し、出典と元�
 
 ```sh
 lake build
+lake build SpecialFunctionProofAgent.AnalyticDefinitions
 python3 scripts/audit_special_functions.py
 SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -v
 python3 scripts/replay_examples.py
@@ -169,4 +171,4 @@ python3 scripts/replay_examples.py
 
 Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式・一般直交積分と規格化の2式です。整数Yの完全証明例は `integer-y-complete`、`integer-y-zero-derivative`、`integer-y-one-derivative`、`integer-y-wronskian`、`integer-y-cross-same-point` です。根条件付き交差積の完全証明例は `cross-product-root` です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
 
-後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。研究拡張は自由次数を持つ補題と、存在・収束・一意性を要するODE・級数・積分による新関数定義を次段階とします。
+後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。研究拡張の後続は自由次数を持つ補題、一般項を指定する級数、任意の被積分関数、非線形・非斉次ODEと初期時刻・領域の拡張です。今回の3形式は [解析的研究定義](docs/research-analytic-definitions.md) に記載しています。

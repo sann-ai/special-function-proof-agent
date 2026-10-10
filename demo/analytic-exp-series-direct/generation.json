@@ -1,0 +1,10 @@
+{
+  "provider": "codex-cli",
+  "model_override": null,
+  "reasoning_effort": "ultra",
+  "route": "direct",
+  "target_sha256": "f7ff38017a488fada3ea2c79ee13b26fedb030f81812793bc3dc7437717dacbd",
+  "attempt": 1,
+  "returncode": 0,
+  "elapsed_seconds": 5.83
+}

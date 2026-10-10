@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "LinearFlow",
+  "parameters": {
+    "a": "real",
+    "c": "real",
+    "u": "real"
+  },
+  "body": {
+    "op": "linear_ivp",
+    "rate": {
+      "op": "var",
+      "name": "a"
+    },
+    "initial": {
+      "op": "var",
+      "name": "c"
+    },
+    "arg": {
+      "op": "var",
+      "name": "u"
+    }
+  },
+  "definitions": []
+}

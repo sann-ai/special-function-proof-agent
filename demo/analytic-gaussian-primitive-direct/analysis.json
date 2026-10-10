@@ -1,0 +1,104 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+      "name": "GaussianArea",
+      "parameters": {
+        "u": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+      "analytic_contracts": [
+        {
+          "op": "gaussian_primitive",
+          "kind": "oriented_finite_integral",
+          "domain": {
+            "arg": "real"
+          },
+          "arguments": {
+            "arg": {
+              "op": "var",
+              "name": "u"
+            }
+          },
+          "semantics": {
+            "lower_endpoint": 0,
+            "upper_endpoint": "arg",
+            "integrand": "exp(-(t^2))",
+            "orientation": "from_zero_to_arg",
+            "measure": "real_volume"
+          },
+          "definition": "SpecialFunctionProofAgent.gaussianPrimitive",
+          "bridge": "SpecialFunctionProofAgent.gaussianPrimitive_eq_erf",
+          "theorems": [
+            "SpecialFunctionProofAgent.intervalIntegrable_gaussian",
+            "SpecialFunctionProofAgent.hasDerivAt_gaussianPrimitive"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "div",
+          "args": [
+            {
+              "op": "sqrt",
+              "arg": {
+                "op": "pi"
+              }
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "op": "erf",
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "div",
+          "args": [
+            {
+              "op": "sqrt",
+              "arg": {
+                "op": "pi"
+              }
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "op": "erf",
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      ]
+    }
+  },
+  "proof_analysis": null
+}

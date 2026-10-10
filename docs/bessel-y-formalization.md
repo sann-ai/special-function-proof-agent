@@ -247,4 +247,4 @@ SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_cross_complet
 
 基礎の `BesselY.lean` は定義3個と公開定理22個を `#print axioms` で監査します。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。受入テストでは固定半整数の両公式・両経路・replay、次数と係数の誤り、条件不足、候補からの命題や仮定の注入、保存証拠の改変、数値backend欠落時の保存継続、旧diagnostic証拠の状態保持を検査します。
 
-`BesselYInteger.lean`、`BesselYAnalytic.lean`、`BesselYArgument.lean`、`BesselYWronskian.lean`、`BesselYCross.lean` の全公開定理を、同じ標準公理の許可集合で監査します。CLI検査には微分変数、合成引数、正値条件不足、Wronskianの符号・次数・係数、同点と異なる2点の取り違え、根条件・区間条件の欠落、X₀₂と右分子の改変、両分母の非零性を含めます。全モジュールを合わせた公開監査は141宣言です。
+`BesselYInteger.lean`、`BesselYAnalytic.lean`、`BesselYArgument.lean`、`BesselYWronskian.lean`、`BesselYCross.lean` の全公開定理を、同じ標準公理の許可集合で監査します。CLI検査には微分変数、合成引数、正値条件不足、Wronskianの符号・次数・係数、同点と異なる2点の取り違え、根条件・区間条件の欠落、X₀₂と右分子の改変、両分母の非零性を含めます。全モジュールを合わせた公開監査は155宣言です。

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "GaussianArea",
+  "parameters": {
+    "u": "real"
+  },
+  "body": {
+    "op": "gaussian_primitive",
+    "arg": {
+      "op": "var",
+      "name": "u"
+    }
+  },
+  "definitions": []
+}

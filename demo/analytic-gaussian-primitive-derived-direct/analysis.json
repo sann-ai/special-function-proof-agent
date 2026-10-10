@@ -1,0 +1,177 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+      "name": "GaussianArea",
+      "parameters": {
+        "u": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+      "analytic_contracts": [
+        {
+          "op": "gaussian_primitive",
+          "kind": "oriented_finite_integral",
+          "domain": {
+            "arg": "real"
+          },
+          "arguments": {
+            "arg": {
+              "op": "var",
+              "name": "u"
+            }
+          },
+          "semantics": {
+            "lower_endpoint": 0,
+            "upper_endpoint": "arg",
+            "integrand": "exp(-(t^2))",
+            "orientation": "from_zero_to_arg",
+            "measure": "real_volume"
+          },
+          "definition": "SpecialFunctionProofAgent.gaussianPrimitive",
+          "bridge": "SpecialFunctionProofAgent.gaussianPrimitive_eq_erf",
+          "theorems": [
+            "SpecialFunctionProofAgent.intervalIntegrable_gaussian",
+            "SpecialFunctionProofAgent.hasDerivAt_gaussianPrimitive"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "sqrt",
+                  "arg": {
+                    "op": "pi"
+                  }
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "op": "erf",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "sqrt",
+                  "arg": {
+                    "op": "pi"
+                  }
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "op": "erf",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "proof_analysis": {
+    "recipe": "research",
+    "dependencies": [
+      {
+        "id": "f57a2d4868ffb0b676d09f7e4c7c04b413ccfcaa431c7993ab5b624a5a0d8b50",
+        "name": "gaussian-primitive-identity",
+        "source": null,
+        "target_sha256": "d0cd7d7815e63d221e720f0153bc8fc8b7b5a98841b5d95f403e239ffc22e865",
+        "statement": "Function[81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb](u=x) = ((sqrt(pi)/2)*erf(x))",
+        "conditions": [
+          "x is real"
+        ],
+        "proof_mode": "steps",
+        "formal_scope": "proof of the original real target under verified analytic research definitions",
+        "definitions": [
+          {
+            "id": "81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+            "name": "GaussianArea",
+            "parameters": {
+              "u": "real"
+            },
+            "dependencies": [],
+            "lean_name": "ResearchFunction_81a34d239981e263eea547af58facdda907c950fc76bd9a9a620432e614d31eb",
+            "analytic_contracts": [
+              {
+                "op": "gaussian_primitive",
+                "kind": "oriented_finite_integral",
+                "domain": {
+                  "arg": "real"
+                },
+                "arguments": {
+                  "arg": {
+                    "name": "u",
+                    "op": "var"
+                  }
+                },
+                "semantics": {
+                  "lower_endpoint": 0,
+                  "upper_endpoint": "arg",
+                  "integrand": "exp(-(t^2))",
+                  "orientation": "from_zero_to_arg",
+                  "measure": "real_volume"
+                },
+                "definition": "SpecialFunctionProofAgent.gaussianPrimitive",
+                "bridge": "SpecialFunctionProofAgent.gaussianPrimitive_eq_erf",
+                "theorems": [
+                  "SpecialFunctionProofAgent.intervalIntegrable_gaussian",
+                  "SpecialFunctionProofAgent.hasDerivAt_gaussianPrimitive"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

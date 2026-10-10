@@ -1,18 +1,29 @@
 # Saved proof examples
 
-The eight Bessel examples retain their original generated plans from the upstream
-project and have been reverified in this independent mathematical environment.
-The six Gamma/Beta examples use the local registered direct/steps plans; their
-request, actual Lean certificate, axiom audit, numerical diagnostics and result
-are saved together.
+This directory contains 129 replayable certificates: 127 complete proofs and two
+historical conditional certificates. Each run keeps its fixed request, generated
+Lean certificate, standard-axiom audit, numerical diagnostic and result.
 
-Run `python3 scripts/replay_examples.py` after `lake build` to recheck all 16
-certificates. This operation requires no AI authentication.
+After building the base project and its analytic definitions, recheck all evidence:
 
-The Gamma direct and Beta steps AI examples were generated through Codex CLI
-with Ultra and verified in this project. The cross-product example retains an
-unresolved full Bessel theorem alongside accepted conditional algebra and nine
-numerical root samples.
+```sh
+lake build
+lake build SpecialFunctionProofAgent.AnalyticDefinitions
+python3 scripts/replay_examples.py
+```
 
-New AI-generated plans can be created with `python3 -m special_function_agent.generate`.
-Personal inputs and archives are excluded from this directory.
+Reverification requires no AI authentication. Runs with `generation.json` retain
+metadata for candidates generated through Codex CLI with Ultra; the other plans
+use the local closed proof recipes.
+
+The twelve `analytic-*` runs cover the factorial exponential series, the oriented
+Gaussian primitive, and the global homogeneous real initial-value problem. Each
+has direct/steps source proofs and direct/steps applications of the registered
+source lemma to a different target. Definitions, analytic contracts, dependency
+IDs and the optional analytic-module hash stay with the fixed request and result.
+See [the definitions and CLI examples](../docs/research-analytic-definitions.md).
+
+`cross-product` and `integer-y-recurrence` preserve their original conditional
+scope and premises. Complete proofs of their corresponding supported targets are
+saved separately, including `cross-product-root-*` and `integer-y-complete-*`.
+Personal inputs and archives belong outside this repository.
