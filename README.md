@@ -10,8 +10,9 @@
 - **Legendre・Laguerre・Jacobi**：自然数次数、実数の引数・パラメータで0〜2次の値をLean証明します。Legendreの偶奇性と両端値、正次数Laguerre/Jacobiの微分、JacobiからLegendreへの特殊化にも対応します。Legendre・一般化Laguerreの三項漸化式（n≥1）と、全自然数次数m≠nでのLegendre直交積分、規格化 `∫[-1,1]P_n(t)^2 dt=2/(2n+1)` にも対応します。[漸化式と直交・規格化](docs/polynomial-calculus.md)。パラメータは有限多項式の定義で全実数を扱います。[定義・公式・条件](docs/orthogonal-polynomials.md)。
 - **Bessel J**：引き継いだv1の符号・漸化式・微分・積分・有理数冪の閉じた証明レシピ。[詳しい対応式](docs/bessel-v1.md)。
 - **非整数Bessel Y**：明示名 `YNoninteger`、固定次数−1/2・1/2・3/2、正の実引数で、3項漸化式と1/2次の対称微分公式を直接・ステップ両経路でLean証明します。[標準定義との接続と形式化範囲](docs/bessel-y-formalization.md)。
-- **整数Bessel Y**：任意整数n、x>0で `Y_{n-1}(x)+Y_{n+1}(x)=2*n/x*Y_n(x)` を両経路で完全Lean証明します。Jの次数0・1での微分可能性を級数の一様収束から証明し、標準整数Yへの極限と漸化式へ接続しています。
-- **実Bessel J/Y・交差積の診断**：対応する完全証明レシピ以外の入力は、正の引数で数値診断と解析テンプレートを実行します。交差積の元命題は `unresolved`、`full_bessel_proof: false` を保持し、条件付き代数Leanを別に保存します。従来の条件付き整数Y証拠もその明示前提を保持して再検査できます。
+- **整数Bessel Y**：任意整数n、x>0の三項漸化式と `J_{n+1}(x)*Y_n(x)-J_n(x)*Y_{n+1}(x)=2/(pi*x)` を両経路で完全Lean証明します。x>0での `Y_0'=-Y_1`、`Y_1'=Y_0-Y_1/x`、同点交差積 `X_01(x,x)=-2/(pi*x)` にも対応します。J級数の一様評価から次数・引数微分の交換を証明し、原点極限とGamma反射からWronskianの係数と符号を確定しています。
+- **根条件付き交差積**：`examples/cross-product-root.txt` を、元の `0<lambda<1,z>0,X_01(z,lambda*z)=0` から完全Lean証明します。正エネルギー積分で両分母の非零性を導き、左末尾X₀₂・右分子X₀₀を保持します。直接・ステップ両経路に対応します。
+- **実Bessel J/Y・交差積の診断**：対応する完全証明レシピ以外の入力は、正の引数で数値診断と解析テンプレートを実行します。従来の条件付き整数Y・cross証拠は、明示した `diagnostic` 経路と元の前提を保持して再検査できます。
 - **保存と再検査**：元式・変数型・束縛・全条件・関数規約・環境ハッシュ・証明を保持し、再利用前にLeanで再検査します。
 
 登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` にあります。
@@ -54,6 +55,11 @@ python3 -m special_function_agent verify examples/legendre-orthogonal.txt --rout
 python3 -m special_function_agent verify examples/legendre-norm.txt --route direct --output runs/norm
 python3 -m special_function_agent verify examples/integer-y-complete.txt --route direct --output runs/integer-y
 python3 -m special_function_agent replay runs/integer-y
+python3 -m special_function_agent verify examples/integer-y-zero-derivative.txt --route direct --output runs/y-zero-derivative
+python3 -m special_function_agent verify examples/integer-y-one-derivative.txt --route steps --output runs/y-one-derivative
+python3 -m special_function_agent verify examples/integer-y-wronskian.txt --route steps --output runs/y-wronskian
+python3 -m special_function_agent verify examples/integer-y-cross-same-point.txt --route direct --output runs/cross-same-point
+python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/cross-root --archive
 ```
 
 直接経路は登録された補題を元の命題へ適用します。ステップ経路は各 `before = after` を同じ全条件で検査し、終点をつないで元の等式を証明します。自然言語の理由は候補として保存し、判定は構造化等式とLeanの結果に基づきます。
@@ -92,6 +98,10 @@ python3 -m special_function_agent parse examples/beta-integral.txt --output runs
 
 > `examples/integer-y-complete.txt` を任意整数n、x>0の元条件で検証してください。標準整数Yへの極限と漸化式の証明を確認し、両経路の証明を保存してreplayしてください。
 
+> `examples/integer-y-zero-derivative.txt`、`integer-y-one-derivative.txt`、`integer-y-wronskian.txt`、`integer-y-cross-same-point.txt` を直接・自然言語ステップ両経路で検証してください。x>0、Wronskianの整数次数と符号、同点交差積の引数を保持し、証拠をarchiveへ保存して再利用してください。
+
+> `examples/cross-product-root.txt` を元の3条件のまま直接・自然言語ステップ両経路で検証してください。左分母のX₀₂、右分子のX₀₀、正エネルギーから両分母の非零性へ進む証明を確認してください。旧条件付き記録を保持し、新しい完全証明をarchiveへ保存して再利用してください。
+
 既存のCodex CLIで新たな候補を生成する場合は、本人のCLI認証を利用します。モデルはCLI設定を引き継ぎ、推論量はUltraです。
 
 ```sh
@@ -113,13 +123,15 @@ v2は最大3個の自由実変数に対応します。次数変数 `n` はBessel
 - `int(0,1,body,t)` と `int(0,infinity,body,t)`、対応するLaTeX記法を使用できます。詳細は[数理仕様](docs/mathematics.md)。
 - 仮定不足は `needs_conditions`、対応レシピ・証明が未完成なら `unresolved`。既存v1で否定命題のLean証明が得られたときは `refuted`。v2の数値不一致は反例候補として保存します。
 
-Yの交差積は `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)`。整数Yから交差積への解析的な接続を検査義務として保持し、条件付き代数証明・数値診断を保存します。根条件例：
+Yの交差積は `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)`。次の固定された根条件付き恒等式は、標準J/Yの定義と積分正性から完全証明します。
 
 ```sh
-python3 -m special_function_agent verify examples/cross-product-root.txt --output runs/cross-product
+python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/cross-product
 ```
 
-この例では左分母の末尾は `X_02`、右分子は微分を含まない `X_00` です。解析テンプレートは根条件・係数・次数・両辺の一致を検査して選択します。整数Yは標準の次数微分式で定義し、Jの次数0・1での微分可能性から、全整数次数への伝播・漸化式・整数極限を証明しています。さらに、明示した微分交換の前提からY₀・Y₁の引数微分とscaled Wronskianの微分ゼロを証明しました。次数0・1での微分可能性は級数の一様評価から証明済みです。残る工程は微分交換、Wronskian定数2/πの評価、正エネルギー積分と分母非零性の証明です。[各検査義務](docs/bessel-y-formalization.md#残る解析的な接続)。
+この例では左分母の末尾は `X_02`、右分子は微分を含まない `X_00` です。完全証明は根条件・係数・次数・両辺の一致を構造で検査して選択します。標準整数Yの定義から、次数微分可能性・整数極限・漸化式・Y₀とY₁の引数微分、全整数のWronskian係数2/π、正エネルギー積分と両分母の非零性まで接続しました。変数名を変えた同じ構造にも対応します。[数学的な接続](docs/bessel-y-formalization.md)。
+
+旧条件付きcross証拠を明示的に作る場合は `--route diagnostic` を指定します。旧記録はそのscopeで再検査し、完全証明への更新は元のtargetから新しい記録を作成します。
 
 従来と同じ条件付き整数Y証拠を明示的に作る例：
 
@@ -152,6 +164,6 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 python3 scripts/replay_examples.py
 ```
 
-Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式・一般直交積分と規格化の2式です。整数Yの完全証明例は `integer-y-complete` です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
+Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式・一般直交積分と規格化の2式です。整数Yの完全証明例は `integer-y-complete`、`integer-y-zero-derivative`、`integer-y-one-derivative`、`integer-y-wronskian`、`integer-y-cross-same-point` です。根条件付き交差積の完全証明例は `cross-product-root` です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
 
-後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、整数Yの解析的接続、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。
+後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。

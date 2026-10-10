@@ -1,0 +1,1 @@
+J_{n+1}(x)*Y_n(x)-J_n(x)*Y_{n+1}(x)=2/(pi*x); n integer,x>0

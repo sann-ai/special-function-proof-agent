@@ -1,0 +1,15 @@
+{
+  "recipe": "cross_product_root",
+  "theorem": "besselCross_root_identity",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "z"
+    },
+    {
+      "op": "var",
+      "name": "lambda"
+    }
+  ],
+  "reverse": false
+}

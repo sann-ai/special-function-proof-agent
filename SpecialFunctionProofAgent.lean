@@ -11,3 +11,6 @@ import SpecialFunctionProofAgent.BesselY
 import SpecialFunctionProofAgent.BesselYInteger
 import SpecialFunctionProofAgent.BesselYAnalytic
 import SpecialFunctionProofAgent.LegendreOrthogonality
+import SpecialFunctionProofAgent.BesselYWronskian
+import SpecialFunctionProofAgent.BesselYArgument
+import SpecialFunctionProofAgent.BesselYCross

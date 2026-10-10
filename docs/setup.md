@@ -2,7 +2,7 @@
 
 保存済み候補の検証には Python 3.12以上、Git、elan が管理する固定版の Lean / Lake を使います。Python追加パッケージは不要です。最初のツール・依存取得にはネット接続が必要で、Lean、mathlib、ビルドキャッシュは数GB規模になります。
 
-数値診断は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、対応する完全Lean証明、従来Y・交差積の条件付きLean検査、アーカイブ保存とreplayを続けます。Legendreの一般直交性・規格化、Laguerre/Jacobi、固定半整数 `YNoninteger` と整数Y漸化式 もこの手順を使います。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
+数値診断は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、対応する完全Lean証明、従来Y・交差積の条件付きLean検査、アーカイブ保存とreplayを続けます。Legendreの一般直交性・規格化、Laguerre/Jacobi、固定半整数 `YNoninteger`、整数Yの漸化式・引数微分・Wronskian・同点交差積と根条件付き分数式もこの手順を使います。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
 
 macOS・Linuxでは、[Lean公式のインストール案内](https://lean-lang.org/install/)に従って elan を導入し、`python3`、`git`、`elan` がターミナルから利用できる状態にしてください。以下はmacOS・Linux向けの手順です。Windows向けの初回手順は未検証です。
 
@@ -64,10 +64,35 @@ python3 -m special_function_agent replay runs/first-yhalf
 
 Legendre漸化式は自然数n≥1と実数x、隣接直交積分は全自然数nと区間[-1,1]、Yの例は固定半整数次数とx>0を明示しています。[多項式の規約](orthogonal-polynomials.md)と[Yの対応範囲](bessel-y-formalization.md)を参照してください。
 
+整数Yの新しい4式をdirect/steps両経路で確認する場合：
+
+```sh
+for example in integer-y-zero-derivative integer-y-one-derivative integer-y-wronskian integer-y-cross-same-point; do
+  for route in direct steps; do
+    python3 -m special_function_agent verify "examples/$example.txt" --route "$route" --output "runs/first-$example-$route"
+    python3 -m special_function_agent replay "runs/first-$example-$route"
+  done
+done
+```
+
+2つの微分公式と同点交差積はx>0、一般Wronskianは `n integer,x>0` を条件とします。Wronskianは `J_{n+1}Y_n-J_nY_{n+1}=2/(pi*x)`、同点交差積は `X_01(x,x)=-2/(pi*x)` の符号で検証します。同名の `.target.json` も配布しています。微分交換と定数2/πの規格化は証明済みで、上記の4例はそれぞれの元の型・正性条件から検査します。
+
+二点の根条件付き交差積 `examples/cross-product-root.txt` は、元の `z>0`、`0<lambda<1`、根条件から正エネルギー積分と両分母の非零性を導き、完全Lean証明へ接続します。
+
+```sh
+python3 -m special_function_agent verify examples/cross-product-root.txt --route direct --output runs/first-cross-root-direct
+python3 -m special_function_agent replay runs/first-cross-root-direct
+python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/first-cross-root-steps
+python3 -m special_function_agent replay runs/first-cross-root-steps
+```
+
+正常な完全証明の結果は `proved`、`full_bessel_proof: true` です。旧整数Y・交差積の条件付き経路を使う場合は `--route diagnostic` を指定します。この経路と旧診断記録は `unresolved`、`full_bessel_proof: false`、元の条件付きscopeを保持します。旧記録を完全証明として再評価するときは、保存requestからproofを除いた同じtargetをdirect/stepsへ渡し、同じtarget IDに新しい履歴を追加します。整数Y・交差積の具体的手順は[保存仕様](archive.md#条件付き記録から完全証明へ)を参照してください。
+
 全保存例とテストを実行する場合:
 
 ```sh
 python3 scripts/replay_examples.py
+python3 scripts/audit_special_functions.py
 SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -v
 ```
 

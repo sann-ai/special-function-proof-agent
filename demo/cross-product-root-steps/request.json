@@ -1,0 +1,669 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "lambda": "real",
+    "z": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "lambda",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    },
+    {
+      "op": "compare",
+      "variable": "lambda",
+      "relation": "lt",
+      "value": {
+        "numerator": 1,
+        "denominator": 1
+      }
+    },
+    {
+      "op": "compare",
+      "variable": "z",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    },
+    {
+      "op": "expr_compare",
+      "lhs": {
+        "op": "bessel_cross",
+        "orders": [
+          {
+            "op": "int",
+            "value": 0
+          },
+          {
+            "op": "int",
+            "value": 1
+          }
+        ],
+        "args": [
+          {
+            "op": "var",
+            "name": "z"
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "lambda"
+              },
+              {
+                "op": "var",
+                "name": "z"
+              }
+            ]
+          }
+        ]
+      },
+      "relation": "eq",
+      "rhs": {
+        "op": "int",
+        "value": 0
+      }
+    }
+  ],
+  "lhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "pow",
+        "base": {
+          "op": "bessel_cross",
+          "orders": [
+            {
+              "op": "int",
+              "value": 0
+            },
+            {
+              "op": "int",
+              "value": 0
+            }
+          ],
+          "args": [
+            {
+              "op": "var",
+              "name": "z"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "lambda"
+                },
+                {
+                  "op": "var",
+                  "name": "z"
+                }
+              ]
+            }
+          ]
+        },
+        "exponent": 2
+      },
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "pow",
+            "base": {
+              "op": "bessel_cross",
+              "orders": [
+                {
+                  "op": "int",
+                  "value": 0
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ],
+              "args": [
+                {
+                  "op": "var",
+                  "name": "z"
+                },
+                {
+                  "op": "var",
+                  "name": "z"
+                }
+              ]
+            },
+            "exponent": 2
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "pow",
+                    "base": {
+                      "op": "var",
+                      "name": "lambda"
+                    },
+                    "exponent": 2
+                  },
+                  {
+                    "op": "bessel_cross",
+                    "orders": [
+                      {
+                        "op": "int",
+                        "value": 0
+                      },
+                      {
+                        "op": "int",
+                        "value": 0
+                      }
+                    ],
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "z"
+                      },
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "lambda"
+                          },
+                          {
+                            "op": "var",
+                            "name": "z"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "bessel_cross",
+                "orders": [
+                  {
+                    "op": "int",
+                    "value": 0
+                  },
+                  {
+                    "op": "int",
+                    "value": 2
+                  }
+                ],
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "z"
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "lambda"
+                      },
+                      {
+                        "op": "var",
+                        "name": "z"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "int",
+                "value": 1
+              },
+              {
+                "op": "var",
+                "name": "lambda"
+              }
+            ]
+          },
+          {
+            "op": "bessel_cross",
+            "orders": [
+              {
+                "op": "int",
+                "value": 0
+              },
+              {
+                "op": "int",
+                "value": 0
+              }
+            ],
+            "args": [
+              {
+                "op": "var",
+                "name": "z"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "lambda"
+                  },
+                  {
+                    "op": "var",
+                    "name": "z"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "sub",
+        "args": [
+          {
+            "op": "bessel_cross",
+            "orders": [
+              {
+                "op": "int",
+                "value": 1
+              },
+              {
+                "op": "int",
+                "value": 1
+              }
+            ],
+            "args": [
+              {
+                "op": "var",
+                "name": "z"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "lambda"
+                  },
+                  {
+                    "op": "var",
+                    "name": "z"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "lambda"
+              },
+              {
+                "op": "bessel_cross",
+                "orders": [
+                  {
+                    "op": "int",
+                    "value": 0
+                  },
+                  {
+                    "op": "int",
+                    "value": 0
+                  }
+                ],
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "z"
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "lambda"
+                      },
+                      {
+                        "op": "var",
+                        "name": "z"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "div",
+          "args": [
+            {
+              "op": "pow",
+              "base": {
+                "op": "bessel_cross",
+                "orders": [
+                  {
+                    "op": "int",
+                    "value": 0
+                  },
+                  {
+                    "op": "int",
+                    "value": 0
+                  }
+                ],
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "z"
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "lambda"
+                      },
+                      {
+                        "op": "var",
+                        "name": "z"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "exponent": 2
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "bessel_cross",
+                    "orders": [
+                      {
+                        "op": "int",
+                        "value": 0
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ],
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "z"
+                      },
+                      {
+                        "op": "var",
+                        "name": "z"
+                      }
+                    ]
+                  },
+                  "exponent": 2
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "lambda"
+                          },
+                          "exponent": 2
+                        },
+                        {
+                          "op": "bessel_cross",
+                          "orders": [
+                            {
+                              "op": "int",
+                              "value": 0
+                            },
+                            {
+                              "op": "int",
+                              "value": 0
+                            }
+                          ],
+                          "args": [
+                            {
+                              "op": "var",
+                              "name": "z"
+                            },
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "lambda"
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "z"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "bessel_cross",
+                      "orders": [
+                        {
+                          "op": "int",
+                          "value": 0
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ],
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "z"
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "name": "lambda"
+                            },
+                            {
+                              "op": "var",
+                              "name": "z"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "after": {
+          "op": "div",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "var",
+                      "name": "lambda"
+                    }
+                  ]
+                },
+                {
+                  "op": "bessel_cross",
+                  "orders": [
+                    {
+                      "op": "int",
+                      "value": 0
+                    },
+                    {
+                      "op": "int",
+                      "value": 0
+                    }
+                  ],
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "z"
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "lambda"
+                        },
+                        {
+                          "op": "var",
+                          "name": "z"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "bessel_cross",
+                  "orders": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "int",
+                      "value": 1
+                    }
+                  ],
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "z"
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "lambda"
+                        },
+                        {
+                          "op": "var",
+                          "name": "z"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "lambda"
+                    },
+                    {
+                      "op": "bessel_cross",
+                      "orders": [
+                        {
+                          "op": "int",
+                          "value": 0
+                        },
+                        {
+                          "op": "int",
+                          "value": 0
+                        }
+                      ],
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "z"
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "name": "lambda"
+                            },
+                            {
+                              "op": "var",
+                              "name": "z"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "recipe": "cross_product_root",
+        "reason": "元の根条件と0<λ<1、z>0から標準J・Yの漸化式とWronskianを適用する。正エネルギー積分で左分母の正値性と右分母の非零性を証明し、元の分数等式へ接続する。",
+        "conditions": [
+          "lambda is real",
+          "z is real",
+          "lambda > 0",
+          "lambda < 1",
+          "z > 0",
+          "X_{0,1}(z,(lambda*z)) = 0"
+        ]
+      }
+    ]
+  }
+}

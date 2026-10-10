@@ -10,7 +10,7 @@ python3 -m special_function_agent archive import-bessel /path/to/bessel/verifica
 
 v2の同一性には自由変数名・型・積分の束縛名、全仮定、両辺、関数規約の版を含みます。仮定の順序だけは正規化し、式の変形や変数名の付け替えは別の命題として保存します。環境はLean/toolchain/lockfile/全数学モジュール/関数登録表のハッシュで確認します。
 
-完全Leanの proved/refuted 記録は登録前と再利用前に再検査します。成功した条件付きLean証拠も登録前に再検査し、元request・環境・再生成テンプレート・analysis.json・定理本文・scope・全前提の一致を確認します。各記録のdetail.mdにも、条件付き定理の前提と残る形式化義務を表示します。固定半整数 `YNoninteger` と整数Y漸化式の完全証明は `full_bessel_proof:true`、従来Y・交差積の条件付き記録のreplayは `conditional_replayed` と `full_bessel_proof:false` を返します。後者の元命題は未解決状態を保持します。数値診断は独立の `numerical.json` に保存します。
+完全Leanの proved/refuted 記録は登録前と再利用前に再検査します。成功した条件付きLean証拠も登録前に再検査し、元request・環境・再生成テンプレート・analysis.json・定理本文・scope・全前提の一致を確認します。各記録のdetail.mdにも、条件付き定理の前提と残る形式化義務を表示します。固定半整数 `YNoninteger`、整数Y漸化式・微分・Wronskian、登録された根条件付き交差積の完全証明は `full_bessel_proof:true`、従来Y・交差積の条件付き記録のreplayは `conditional_replayed` と `full_bessel_proof:false` を返します。後者の元命題は未解決状態を保持します。数値診断は独立の `numerical.json` に保存します。
 
 ## 記録操作の詳細
 
@@ -87,7 +87,7 @@ python3 -m special_function_agent.generate demo/target.json --route direct \
 条件を変更した命題や、数学的変形で同値になる別の式は、それぞれの入力として扱います。
 同一命題の再試行には毎回新しい記録IDを付けます。
 
-従来Y・交差積のschema version 2でも、変数、スカラー条件、関数値の根・非零条件を
+Y・交差積のschema version 2のdiagnostic記録でも、変数、スカラー条件、関数値の根・非零条件を
 命題IDに含めます。診断結果、自然言語解析、条件付きLean証明、数値結果を保存し、
 元命題は `unresolved`、定義域条件の確認が必要な入力は `needs_conditions` として記録します。条件付き証明の再検査結果も、元命題の
 完全なLean証明の再検査と区別して返します。条件付きLeanの再検査が通った場合は
@@ -127,9 +127,9 @@ python3 -m special_function_agent archive replay NEW_RECORD_ID
 
 対象の型・全条件・関数規約は毎回一致を確認します。多項式の自然数次数とBesselの整数次数、物理学規約Hと確率論規約He、一般化Laguerre/Jacobiのパラメータ、明示した `YNoninteger` と従来Yは、それぞれのASTと規約を保存します。新しい多項式族と非整数Yは規約version 3、Hermite/erfはversion 2、従来Gamma/Betaはversion 1を使います。
 
-## 条件付き整数Y記録から完全証明へ
+## 条件付き記録から完全証明へ
 
-以前の `integer-y-recurrence` 記録は、2つの次数微分可能性を前提とするdiagnostic証拠です。新環境ではx>0から両前提を証明できます。元記録は保存し、同じAST・全条件・関数規約のtargetから、新しい直接/ステップ証明を作成します。
+以前の `integer-y-recurrence` 記録は、2つの次数微分可能性を前提とするdiagnostic証拠です。新環境ではx>0から両前提を証明できます。旧 `cross-product` 記録も条件付き代数証拠です。現在は元の正値・区間・根条件から、標準J/Yと両分母非零を通した完全証明を作成できます。元記録は保存し、同じAST・全条件・関数規約のtargetから、新しい直接/ステップ証明を作成します。
 
 ```sh
 python3 -m special_function_agent archive show OLD_RECORD_ID
@@ -150,3 +150,7 @@ python3 -m special_function_agent.generate runs/integer-y-target.json --route di
 既存記録の `proof: {mode: diagnostic}` を含めて再検証した場合は、元の条件付き証拠を同じ範囲で再検査します。新しい完全証明の `status: proved`・`full_bessel_proof: true` と、再利用の `reuse.ai_called: false` を確認してください。旧記録の環境差・旧前提・ファイルは維持され、同じtargetの新しい証明履歴が追加されます。既存命題IDの互換性のため、conventions内の古い関数登録情報も維持しています。現在の証明範囲と状態はresultの `formal_scope`・`status`・`full_bessel_proof` と再検査結果で確認します。
 
 更新前a7149a0のGamma、Legendre漸化式、条件付き整数Yの実記録でも上記の手順を確認しました。元記録の全ファイルを保持し、整数Yでは同じ命題IDに対する新しい完全証明を登録・再利用しています。
+
+同じ手順で旧crossの `request.json` からproofだけを取り除き、direct/stepsを明示します。元のAST・全4個の構造化条件・target IDを維持して、新しい完全証明を追加します。旧diagnostic記録のreplayは引き続き元の条件付き範囲を返します。
+
+更新前92fb085のGamma・整数Y完全証明・条件付きcrossの3記録でも、環境差検出、同じtarget IDでの新環境検査、新証拠replay、AI省略再利用を確認しました。旧entryの全35ファイルはバイト列を保持しています。

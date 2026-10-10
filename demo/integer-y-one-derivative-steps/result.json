@@ -1,0 +1,168 @@
+{
+  "status": "proved",
+  "reason": "full_lean_certificate",
+  "statement": "D_x(Y_{1}(x)) = (Y_{0}(x)-(Y_{1}(x)/x))",
+  "conditions": [
+    "x is real",
+    "x > 0"
+  ],
+  "environment": {
+    "lean-toolchain": "8733782dc070a99b312039cda424f601b80f3be6f6f512627da5ba25adc27632",
+    "lake-manifest.json": "25648cabc3e1ce08668b7d4ae91d14facb6599d78c79263a7a8bedf29fdf55d0",
+    "lakefile.toml": "b6d0555f00c8a712ee224c75a90f9a32f6c1d69ee85635d05cf8df0189a7207a",
+    "BesselProofAgent.lean": "b5cdb5a09a1526bdfed0f77a0663b39b148c0801905199a1d49713fcf85bf576",
+    "BesselProofAgent/Basic.lean": "d58249366aeb1248ea498d7418dc11a6afc9b18f4fcd2a3cce903a01a4d8da6f",
+    "BesselProofAgent/Calculus.lean": "62ba7a53d97fbc32059bb9a63c4ccea6f8a84d3d116f4463224a4b5e67042a75",
+    "BesselProofAgent/Derivative.lean": "12749753b9805d04d4dd8317eb2a9a8e17e2a07343a68b223ddf69ff24101948",
+    "BesselProofAgent/Examples.lean": "78ed25b22701aec27969045ea94f164ae05ed599fe6e9f2398c521183cbe851a",
+    "BesselProofAgent/NonintegerCalculus.lean": "15b4b6709900baf6ddd84984c42205373e9310666f2b21252632f22a494965fc",
+    "BesselProofAgent/OriginSingularBessel.lean": "c0cd353a5a5a4e8ca04a309a9896dc0aa7de579214bb5a607dbfb25173d52cab",
+    "BesselProofAgent/RealCalculus.lean": "754a717ea5704e34751f15576e78e960e07a143a4866bb84c4655030cede14b8",
+    "BesselProofAgent/Recurrence.lean": "ac74881ddb342a12218e0db00082dbac10f6922caae5a65b78a1bdaab319e94f",
+    "BesselProofAgent/SingularIntegrals.lean": "f0e6708aeeeb85a1eb1c0951ff631ee09c0ce18ac4cd0f05a1cba0570a633101",
+    "SpecialFunctionProofAgent.lean": "400122bf8316c9f66a6be15f1ec727b7fbd233d8bd128a3a17282c3fbb27b7cc",
+    "special_function_agent/registry.py": "923258bac60e94934280ba17aed110cf7ad796eae2f2e6d62497c1a51adb9988",
+    "SpecialFunctionProofAgent/BesselY.lean": "7e82f1becebc64ed25fc3e95c25b45ea2cba1548fbe9aeb7cb1efc7014325e7f",
+    "SpecialFunctionProofAgent/BesselYAnalytic.lean": "3494b90e83ce23ce882c863fe3155da109f6292643e80d9e56d371a867f4ecac",
+    "SpecialFunctionProofAgent/BesselYArgument.lean": "3e9195c284db883113143f1986327653ea7fbdbe5f7531b7251d6cdfd02b029a",
+    "SpecialFunctionProofAgent/BesselYCross.lean": "6e7aeecaa10d1457378daea2bb68cfcd1145f4aefc803263d5f5d3063b88e6fe",
+    "SpecialFunctionProofAgent/BesselYInteger.lean": "68b8777a93ba8d3ccb1960f0bfc553ab203a593c41d1de476dfa511cd692856b",
+    "SpecialFunctionProofAgent/BesselYWronskian.lean": "3889c0eb61ce293f46ab6aae3d23f75ec49771ca1b0fc823332412770878adef",
+    "SpecialFunctionProofAgent/Beta.lean": "e963f30f49998b5d87edcf7d0498472e7045fc062c1bf1cc5424930fbb528198",
+    "SpecialFunctionProofAgent/Erf.lean": "58e013b3fe6b095899c530054cd09bdee2895c0d2bb9acc642dfc081fca190f4",
+    "SpecialFunctionProofAgent/Gamma.lean": "07a9421489235b82427e8f540c5d0bd934af347cb120cea17e7b9b609aceb374",
+    "SpecialFunctionProofAgent/Hermite.lean": "32e76f35cbf15bf708b659121a329ae7494b1cc0d8620beec4a17285f4097505",
+    "SpecialFunctionProofAgent/Jacobi.lean": "16b7dd4ce0c374addbfb9d9cd5d997c703e9d0985cdacd384b1b781529af62f9",
+    "SpecialFunctionProofAgent/Laguerre.lean": "d6781eecfac744c3ff793fef7a17ceab71f5ba3a4b54b2d88fa961f60369bf03",
+    "SpecialFunctionProofAgent/LaguerreRecurrence.lean": "35d479cf23326dc9b9a51cae078f5ff78527106bc84f26ba022a72ce9803a748",
+    "SpecialFunctionProofAgent/Legendre.lean": "2a27247d7ad94f5ef73cf92b62aeb2241f3cf62af4bb4dc8284aec2ef66735a0",
+    "SpecialFunctionProofAgent/LegendreCalculus.lean": "1fdd2b3833f1640b7c1b2d8cf7d21702e69fd4b00496c20d3d4e79072d58fbc5",
+    "SpecialFunctionProofAgent/LegendreOrthogonality.lean": "392f6c8d61aaa3c2dfdbbfdcf62786d1e66424e4e560a551633b9e8238062135",
+    "SpecialFunctionProofAgent/PolynomialSeries.lean": "53adf38c7beb5071858505f86c7bf78beaf591ee8817d8f01c774877140a55ed"
+  },
+  "conventions": {
+    "version": 1,
+    "families": {
+      "bessel_j": {
+        "module": "BesselProofAgent",
+        "definition": "Complex.besselJ; v2 positive real J diagnostics",
+        "formal_scope": "v1 fixed recipes"
+      },
+      "bessel_y": {
+        "module": null,
+        "definition": "standard real Bessel Y on positive arguments",
+        "formal_scope": "pending"
+      },
+      "bessel_cross": {
+        "module": null,
+        "definition": "X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t)",
+        "formal_scope": "conditional algebra"
+      },
+      "gamma": {
+        "module": "SpecialFunctionProofAgent.Gamma",
+        "definition": "Real.Gamma",
+        "formal_scope": "positive recurrence and scaled integral"
+      },
+      "beta": {
+        "module": "SpecialFunctionProofAgent.Beta",
+        "definition": "integral 0..1 of t^(a-1)*(1-t)^(b-1), a,b>0",
+        "formal_scope": "real Euler beta integral"
+      }
+    },
+    "scalars": "Lean Real",
+    "rpow": "Real.rpow",
+    "exp": "Real.exp",
+    "finite_integral": "oriented intervalIntegral, volume",
+    "infinite_integral": "MeasureTheory integral on Set.Ioi lower, volume"
+  },
+  "full_function_proof": true,
+  "analysis": {
+    "recipe": "integer_y_derivative",
+    "theorem": "deriv_besselYInt_one",
+    "arguments": [
+      {
+        "op": "var",
+        "name": "x"
+      }
+    ],
+    "reverse": false
+  },
+  "numerical": {
+    "status": "unresolved",
+    "diagnostic": "no_mismatch_found",
+    "backend": "mpmath",
+    "full_bessel_proof": false,
+    "full_function_proof": false,
+    "precision_digits": 60,
+    "checked_samples": 3,
+    "samples": [
+      {
+        "values": {
+          "x": "0.5"
+        },
+        "lhs": "2.49842605183377958122877079557826299610861098647",
+        "rhs": "2.49842605183377958122877079557826299610861098647",
+        "absolute_difference": "3.11150763893057085357203202689006212029512608436e-61",
+        "comparison_tolerance": "2.49842605183377958122877079557826299610861098647e-30",
+        "condition_residuals": []
+      },
+      {
+        "values": {
+          "x": "1.0"
+        },
+        "lhs": "0.869469785515965674530076766071479983377723913807",
+        "rhs": "0.869469785515965674530076766071479983377723913807",
+        "absolute_difference": "0.0",
+        "comparison_tolerance": "1.0e-30",
+        "condition_residuals": []
+      },
+      {
+        "values": {
+          "x": "2.0"
+        },
+        "lhs": "0.563891888420213893040791978865896191611879676203",
+        "rhs": "0.563891888420213893040791978865896191611879676203",
+        "absolute_difference": "0.0",
+        "comparison_tolerance": "1.0e-30",
+        "condition_residuals": []
+      }
+    ],
+    "candidates": [],
+    "skipped_reasons": [],
+    "excluded_by_conditions": 0,
+    "root_search": {
+      "method": "bounded_sign_changes_then_secant",
+      "interval_cap": 60,
+      "grid_step": "0.5",
+      "roots_per_parameter_sample": 3,
+      "exhaustive": false,
+      "variable": null
+    },
+    "max_samples": 27,
+    "rigorous_interval_enclosures": false,
+    "max_root_grid_points": 720,
+    "time_limit_seconds": 30,
+    "comparison_relative_tolerance": "1e-30",
+    "root_residual_tolerance": "1e-35",
+    "explanation": "明示条件内の有限標本を計算します。根は符号変化から精密化し、根条件と全追加条件を再確認します。数値一致と差の候補を保存し、元命題の形式的な証明状態はLean検査の欄で確認します。",
+    "backend_version": "1.3.0"
+  },
+  "attempts": [
+    {
+      "accepted": true,
+      "stdout": "proof_attempt.lean:10:90: warning: Unused tactic linter: `norm_num` does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nproof_attempt.lean:10:103: warning: Unused tactic linter: `ring` does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nproof_attempt.lean:10:90: warning: this tactic is never executed\n\nNote: This linter can be disabled with `set_option linter.unreachableTactic false`\nproof_attempt.lean:10:103: warning: this tactic is never executed\n\nNote: This linter can be disabled with `set_option linter.unreachableTactic false`\nBESSEL_AUDIT_BEGIN\n'BesselAgentCandidate.target' depends on axioms: [propext, Classical.choice, Quot.sound]\nBESSEL_AUDIT_END\n",
+      "stderr": "",
+      "exit_code": 0,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  ],
+  "request_sha256": "b6799b7bcee8f284226684f7744bb0065cb86d51c517b0a7d0cd689fde1fb24d",
+  "full_bessel_proof": true,
+  "formal_scope": "standard positive-axis integer Y argument derivative from proved mixed differentiation",
+  "certificate_kind": "proof",
+  "certificate_sha256": "a5a149621390e57b389e6a36289528b78546c7aa8d6d8134e299949bec117df2"
+}

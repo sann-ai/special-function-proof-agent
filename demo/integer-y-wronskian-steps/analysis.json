@@ -1,0 +1,15 @@
+{
+  "recipe": "integer_y_wronskian",
+  "theorem": "besselYInt_wronskian",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "n"
+    },
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

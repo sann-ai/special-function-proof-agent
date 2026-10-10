@@ -1,6 +1,6 @@
 # Bessel Yの定義と形式化範囲
 
-`SpecialFunctionProofAgent/BesselY.lean` は、正実軸の第二種Bessel関数を既存の `Complex.besselJ` と標準接続式から構成します。非整数次数の公式、全整数次数での標準極限と漸化式、明示前提を持つ引数微分の補題を公開しています。
+`SpecialFunctionProofAgent/BesselY.lean` は、正実軸の第二種Bessel関数を既存の `Complex.besselJ` と標準接続式から構成します。関連モジュールは、非整数次数の公式、全整数次数での標準極限・漸化式・Wronskian、Y₀とY₁の引数微分、元の根条件付き交差積を公開しています。
 
 ## 非整数次数の標準定義
 
@@ -47,7 +47,7 @@ D_x(YNoninteger(1/2,x))=(YNoninteger(-1/2,x)-YNoninteger(3/2,x))/2; x>0
 
 directは対応する補題を元の等式へ適用します。stepsは元の全条件の下で各等式を検査し、元の左辺から右辺へ接続します。完全なLean証明と公理監査が通ると、`proved`、`full_function_proof: true`、`full_bessel_proof: true` と保存します。変数型・左右辺・全条件・関数規約は保存され、replayでは保存された証明と再生成した命題の一致も確認します。数値診断に使うmpmathがない環境でも、このLean検査と証拠保存を実行できます。
 
-従来の `Y_n(x)`、`Y(order,x)` と交差積 `X_nm(s,t)` は既存の診断用ASTを保持します。整数Yの登録漸化式は下記の完全証明へ接続します。その他の従来入力の判定は `unresolved`、`full_bessel_proof: false` です。引数や除算の条件が不足する場合は `needs_conditions` となります。既存の根条件を使う交差積の条件付き代数証明では、元の全条件と残る解析的な接続事項を保存します。
+従来の `Y_n(x)`、`Y(order,x)` と交差積 `X_nm(s,t)` は既存のASTを保持します。整数Yの登録漸化式、Y₀・Y₁の引数微分、全整数の隣接次数Wronskian、同点X₀₁と固定された根条件付き交差積は下記の完全証明へ接続します。対応範囲外の入力は `unresolved`、`full_bessel_proof: false` です。引数や除算の条件が不足する場合は `needs_conditions` となります。旧diagnostic経路では、元の全条件と条件付き代数定理の前提を保存します。
 
 ## 整数次数の標準定義と極限
 
@@ -95,14 +95,62 @@ HasDerivAt
   (deriv (fun a : ℝ => deriv (realBesselJ a) x) c) x
 ```
 
-この前提は、次数微分をxで微分でき、その値が逆順の微分と一致することを表します。
+この前提は、次数微分をxで微分でき、その値が逆順の微分と一致することを表します。`BesselYArgument.lean` はx>0からc=0,1,−1のこの前提を証明します。次の条件付き補題も、保存済み証拠の意味を保持するため引き続き利用できます。
 
 - `hasDerivAt_besselYInt_zero_of_order_derivative_exchange` はc=0の前提から `Y₀'(x)=−Y₁(x)` を導きます。
 - `hasDerivAt_besselYInt_one_of_order_derivative_exchange` はc=1,−1の前提から `Y₁'(x)=Y₀(x)−Y₁(x)/x` を導きます。
 - `besselYInt_wronskian_zero_of_order_derivative_exchange` はc=0の前提から、`J₀Y₀'−J₀'Y₀=J₁Y₀−J₀Y₁` を導きます。
-- `hasDerivAt_besselYInt_scaled_wronskian_of_order_derivative_exchange` はc=0,1,−1の前提から、`x*(J₁(x)*Y₀(x)−J₀(x)*Y₁(x))` のx微分が0であることを導きます。標準の定数2/πの評価は次の接続事項です。
+- `hasDerivAt_besselYInt_scaled_wronskian_of_order_derivative_exchange` はc=0,1,−1の前提から、`x*(J₁(x)*Y₀(x)−J₀(x)*Y₁(x))` のx微分が0であることを導きます。定数2/πの評価は下記のWronskian規格化で証明します。
 
-引数微分・Wronskianの前提付き定理を使うときは、必要な混合微分の条件を元命題と分けて明示します。交差積の入力は、微分交換・正規化・分母非零を導く証明が揃うまで `unresolved`、`full_bessel_proof: false` を保持します。
+引数微分・Wronskianの前提付き定理を使うときは、必要な混合微分の条件を元命題と分けて明示します。新しい引数微分とWronskianの完全証明は、下記の前提を解消した定理に接続します。
+
+## 引数微分の交換と完全証明
+
+`BesselYArgument.lean` は正則化超幾何級数の次数微分係数をCauchy評価で抑えます。階乗を含む可算和の評価により、次数で微分した級数を引数でも項別微分し、係数シフト式とJの積の微分公式へ接続します。非負の実次数cでは `hasDerivAt_realBesselJ_order_deriv_of_nonneg` を証明し、次数−1はJの既存漸化式から導きます。
+
+`realBesselJ_order_derivative_exchange_zero/one/neg_one` の前提はx>0のみです。これを既存のY微分補題へ適用した `hasDerivAt_besselYInt_zero/one` と `deriv_besselYInt_zero/one` は、同じ条件で
+
+\[
+Y_0'(x)=-Y_1(x),\qquad Y_1'(x)=Y_0(x)-Y_1(x)/x
+\]
+
+を証明します。CLIの微分変数は同じ実引数であり、次の2例をdirect/stepsへ接続します。
+
+```text
+D_x(Y_0(x))=-Y_1(x); x>0
+D_x(Y_1(x))=Y_0(x)-Y_1(x)/x; x>0
+```
+
+入力ファイルは `examples/integer-y-zero-derivative.txt` と `examples/integer-y-one-derivative.txt` です。別変数の微分や合成引数へこのレシピを適用するには、その式の微分を別途証明する必要があります。
+
+## Wronskianの規格化と交差積の符号
+
+`BesselYWronskian.lean` は、既存Jの微分と漸化式から
+`x*(J_(a+1)(x)*J_(-a)(x)+J_a(x)*J_(-a-1)(x))` が正実軸上で定数になることを示します。原点極限では冪を相殺して正則化超幾何関数の零点値に帰着し、Gamma反射式で定数を評価します。`realBesselJ_opposite_order_product` がこの接続を担います。
+
+標準接続式で定義した非整数Yへ代入すると、`besselYNoninteger_wronskian` はx>0、sin(aπ)≠0から係数2/πを確定します。既存の整数次数極限をa→0へ適用し、整数J/Yの漸化式で正負両方向へ伝播させた `besselYInt_wronskian` は、全整数nとx>0で
+
+\[
+J_{n+1}(x)Y_n(x)-J_n(x)Y_{n+1}(x)=\frac{2}{\pi x}
+\]
+
+を証明します。CLIも `examples/integer-y-wronskian.txt` の `n integer,x>0` をそのまま扱います。標準Wronskianの微分形と同じ並び順の隣接次数式です。
+
+既存の交差積定義 `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)` では、同点の次数0,1が逆順になり、
+
+\[
+X_{01}(x,x)=J_0(x)Y_1(x)-Y_0(x)J_1(x)=-\frac{2}{\pi x}<0
+\]
+
+です。`besselYInt_cross_zero_one` と `besselYInt_cross_zero_one_neg` が等式と厳密な負値を証明します。`examples/integer-y-cross-same-point.txt` は元のX ASTと定義の順序を保持して、この等式を検査します。
+
+```sh
+python3 -m special_function_agent verify examples/integer-y-zero-derivative.txt --route direct --output runs/y0-derivative --archive
+python3 -m special_function_agent verify examples/integer-y-one-derivative.txt --route steps --output runs/y1-derivative --archive
+python3 -m special_function_agent verify examples/integer-y-wronskian.txt --route steps --output runs/y-wronskian --archive
+python3 -m special_function_agent verify examples/integer-y-cross-same-point.txt --route direct --output runs/x01 --archive
+python3 -m special_function_agent replay runs/x01
+```
 
 ## CLIで完全証明する整数Y漸化式
 
@@ -141,16 +189,44 @@ python3 -m special_function_agent replay runs/integer-y
 
 条件付き定理の前提とLeanソースは標準名 `x` を使い、解析テンプレートの `substitutions` で元入力の実変数名へ対応させます。例えば引数名 `radius` の入力は `{"n":"n","x":"radius"}` を保存します。元入力の変数名・型・全条件を保持したまま、追加前提の意味を確認できます。
 
-## 残る解析的な接続
+## 元の根条件付き交差積の完全証明
 
-整数Yの引数微分・Wronskianと交差積の完全証明には、次の内容をLeanで証明し、接続する必要があります。
+`BesselYCross.lean` の `besselCross` は元のASTと同じ
+`X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)` を定義します。
+`z>0,0<lambda<1,X_01(z,lambda*z)=0` から、次の式を証明します。
 
-1. **整数次数の引数微分**：次数微分と引数微分の交換、または整数極限と引数微分の交換を正当化すること。Y₀・Y₁の公式は上記の交換前提から導出済みです。
-2. **Wronskianの正規化**：同じJ・Yの定義から `J_n(x)*Y_n'(x)-J_n'(x)*Y_n(x)=2/(pi*x)` を証明すること。次数0では交換前提から得る微分ゼロの関係に、標準定義による定数2/πの評価を加えます。
-3. **交差積への接続**：`X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t)` の定義、対象の根条件からの漸化式、正エネルギー積分の可積分性と厳密な正値性を証明すること。
-4. **除算の条件**：上の解析的な結果から、元の交差積等式に現れる各分母の非零性を導くこと。
+\[
+\frac{X_{00}(z,\lambda z)^2}
+ {X_{01}(z,z)^2+\lambda^2X_{00}(z,\lambda z)X_{02}(z,\lambda z)}
+=\frac1\lambda\frac{X_{00}(z,\lambda z)}
+ {X_{11}(z,\lambda z)-\lambda X_{00}(z,\lambda z)}.
+\]
 
-旧条件付き証拠は元の前提を保存します。同じ漸化式の新しい完全証明は、元記録を残して明示的に作成します。[archive更新手順](archive.md#条件付き整数y記録から完全証明へ)を参照してください。
+引数微分からエネルギー関数
+`F(t)=t^2/2*(X_00(z,t)^2+X_01(z,t)^2)` の微分が
+`t*X_00(z,t)^2` になることを証明します。区間 `[lambda*z,z]` 上で積分し、
+Wronskianと根条件から得た下端の `X_00 != 0` を使って積分の厳密な正値性を導きます。
+`besselCross_root_left_denominator_pos` は元の左分母が正であることを、
+`besselCross_root_right_denominator_ne_zero` は元の右分母が非零であることを証明します。
+`besselCross_root_identity` はこの2定理と因数分解を使って除算の等式を閉じます。
+
+```sh
+python3 -m special_function_agent verify examples/cross-product-root.txt --route direct --output runs/cross-direct --archive
+python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/cross-steps --archive
+python3 -m special_function_agent replay runs/cross-steps
+```
+
+生成される定理は元の正値条件・上限条件・根条件を保持し、両分母の非零性を証明内で導出します。
+左右を交換した式、安全な変数名を使った同じ構造にも対応します。結果は
+`proved`、`full_bessel_proof: true` で、数値診断は独立に保存します。
+
+## 今後の範囲
+
+一般整数次数の引数微分をCLIへ登録する拡張、別の次数や複数の根条件を持つ交差積、
+複素引数・枝の扱いは後続の範囲です。各公式を標準定義から証明し、元入力の条件へ接続して登録します。
+
+旧条件付き証拠は元の前提を保存します。同じ漸化式・根条件付き交差積の新しい完全証明は、
+元記録を残して明示的に作成します。[archive更新手順](archive.md#条件付き記録から完全証明へ)を参照してください。
 
 ## 検査
 
@@ -158,12 +234,17 @@ python3 -m special_function_agent replay runs/integer-y
 lake build SpecialFunctionProofAgent.BesselY
 lake build SpecialFunctionProofAgent.BesselYInteger
 lake build SpecialFunctionProofAgent.BesselYAnalytic
+lake build SpecialFunctionProofAgent.BesselYArgument
+lake build SpecialFunctionProofAgent.BesselYWronskian
+lake build SpecialFunctionProofAgent.BesselYCross
 python3 -m unittest discover -s tests -p 'test_bessel_y_formal.py' -v
 SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_bessel_y_formal.py' -v
 SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_integer_y_conditional.py' -v
 SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_integer_y_complete.py' -v
+SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_integer_y_calculus.py' -v
+SF_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -p 'test_cross_complete.py' -v
 ```
 
-数学モジュールは定義3個と公開定理22個を `#print axioms` で監査します。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。受入テストでは固定半整数の両公式・両経路・replay、次数と係数の誤り、条件不足、候補からの命題や仮定の注入、保存証拠の改変、数値backend欠落時の保存継続、従来Y・交差積の状態保持を検査します。
+基礎の `BesselY.lean` は定義3個と公開定理22個を `#print axioms` で監査します。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。受入テストでは固定半整数の両公式・両経路・replay、次数と係数の誤り、条件不足、候補からの命題や仮定の注入、保存証拠の改変、数値backend欠落時の保存継続、旧diagnostic証拠の状態保持を検査します。
 
-追加した `BesselYInteger.lean` も全公開定理をコンパイルし、同じ標準公理の許可集合で監査します。`BesselYAnalytic.lean` の7定理も同じ公理集合で監査します。x>0から次数微分可能性を解消し、引数微分の交換は後続の証明事項として保持します。
+`BesselYInteger.lean`、`BesselYAnalytic.lean`、`BesselYArgument.lean`、`BesselYWronskian.lean`、`BesselYCross.lean` の全公開定理を、同じ標準公理の許可集合で監査します。CLI検査には微分変数、合成引数、正値条件不足、Wronskianの符号・次数・係数、同点と異なる2点の取り違え、根条件・区間条件の欠落、X₀₂と右分子の改変、両分母の非零性を含めます。全モジュールを合わせた公開監査は141宣言です。

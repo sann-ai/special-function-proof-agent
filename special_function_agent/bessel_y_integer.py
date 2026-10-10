@@ -1,16 +1,56 @@
-"""Complete integer-Y recurrence and replay-compatible conditional certificates."""
+"""Complete integer-Y identities and replay-compatible conditional certificates."""
 from .classical import binary, integer
 
-RECIPES = ('integer_y_recurrence',)
+RECIPES = ('integer_y_recurrence', 'integer_y_derivative', 'integer_y_wronskian')
 FORMAL_SCOPE = 'standard positive-axis integer Y recurrence from order analyticity'
 REASONS = {'integer_y_recurrence':
-           '正の実引数と整数次数に対し、標準Yの次数微分定義と級数の局所一様収束から証明した漸化式を適用する。'}
+           '正の実引数と整数次数に対し、標準Yの次数微分定義と級数の局所一様収束から証明した漸化式を適用する。',
+           'integer_y_derivative':
+           '正の実引数に対し、標準整数Yの次数微分定義と証明済みの混合微分交換から引数微分公式を適用する。',
+           'integer_y_wronskian':
+           '正の実引数に対し、標準J・Yの原点極限とGamma反射から定数2/πを確定したWronskianを適用し、交差積の定義順序に対応する符号を保持する。'}
 
 
 def match_identity(lhs, rhs):
-    """Recognize the closed recurrence; the caller checks the fixed variable types."""
+    """Recognize closed identities; the caller checks the fixed variable types."""
     n = {'op': 'var', 'name': 'n'}
     for left, right, reverse in ((lhs, rhs, False), (rhs, lhs, True)):
+        from .real_bessel import _walk
+        arguments = [node['arg'] for node in _walk(left) if node.get('op') in {'bessel_j', 'bessel_y'}]
+        if isinstance(left, dict) and left.get('op') == 'bessel_cross':
+            arguments += left.get('args', [])
+        for x in arguments:
+            if x.get('op') != 'var':
+                continue
+            j = lambda k: {'op': 'bessel_j', 'order': integer(k) if type(k) is int else k, 'arg': x}
+            y = lambda k: {'op': 'bessel_y', 'order': integer(k) if type(k) is int else k, 'arg': x}
+            denominator = binary('mul', {'op': 'pi'}, x)
+            successor = binary('add', n, integer(1))
+            general = binary('sub', binary('mul', j(successor), y(n)), binary('mul', j(n), y(successor)))
+            if left == general and right == binary('div', integer(2), denominator):
+                return {'recipe': 'integer_y_wronskian', 'theorem': 'besselYInt_wronskian',
+                        'arguments': [n, x], 'reverse': reverse}
+            wronskian = binary('sub', binary('mul', j(1), y(0)), binary('mul', j(0), y(1)))
+            cross = binary('sub', binary('mul', j(0), y(1)), binary('mul', y(0), j(1)))
+            cross_node = {'op': 'bessel_cross', 'orders': [integer(0), integer(1)], 'args': [x, x]}
+            theorem = ('besselYInt_wronskian_zero' if left == wronskian and right == binary('div', integer(2), denominator)
+                       else 'besselYInt_cross_zero_one' if left in (cross, cross_node) and right == binary('div', integer(-2), denominator)
+                       else None)
+            if theorem:
+                return {'recipe': 'integer_y_wronskian', 'theorem': theorem,
+                        'arguments': [x], 'reverse': reverse}
+        if isinstance(left, dict) and left.get('op') == 'deriv':
+            body = left.get('arg', {})
+            x = body.get('arg', {})
+            if (body.get('op') == 'bessel_y' and x.get('op') == 'var'
+                    and left.get('var') == x['name']):
+                y = lambda order: {'op': 'bessel_y', 'order': integer(order), 'arg': x}
+                if body == y(0) and right == {'op': 'neg', 'arg': y(1)}:
+                    return {'recipe': 'integer_y_derivative', 'theorem': 'deriv_besselYInt_zero',
+                            'arguments': [x], 'reverse': reverse}
+                if body == y(1) and right == binary('sub', y(0), binary('div', y(1), x)):
+                    return {'recipe': 'integer_y_derivative', 'theorem': 'deriv_besselYInt_one',
+                            'arguments': [x], 'reverse': reverse}
         if not isinstance(left, dict) or left.get('op') != 'add':
             continue
         args = left.get('args')
@@ -32,11 +72,21 @@ def match_identity(lhs, rhs):
 
 
 def complete_target(data):
-    if not isinstance(data.get('variables'), dict) or data['variables'].get('n') != 'int':
+    if not isinstance(data.get('variables'), dict):
         return False
     matched = match_identity(data.get('lhs'), data.get('rhs'))
-    return bool(matched and
-                data['variables'].get(matched['arguments'][1]['name']) == 'real')
+    if not matched or data['variables'].get(matched['arguments'][-1]['name']) != 'real':
+        return False
+    return len(matched['arguments']) == 1 or data['variables'].get('n') == 'int'
+
+
+def formal_scope(data):
+    matched = match_identity(data.get('lhs'), data.get('rhs'))
+    if matched and matched['recipe'] == 'integer_y_derivative':
+        return 'standard positive-axis integer Y argument derivative from proved mixed differentiation'
+    if matched and matched['recipe'] == 'integer_y_wronskian':
+        return 'standard positive-axis integer J/Y Wronskian with proved normalization 2/pi'
+    return FORMAL_SCOPE
 
 
 def lean_integer(node, names):
@@ -54,8 +104,12 @@ def lean_integer(node, names):
 
 
 def proof_lines(matched, names, expression):
-    n, x = matched['arguments']
-    fact = f'SpecialFunctionProofAgent.besselYInt_recurrence {lean_integer(n, names)} {expression(x)} (by linarith)'
+    if len(matched['arguments']) == 2:
+        n, x = matched['arguments']
+        args = f'{lean_integer(n, names)} {expression(x)}'
+    else:
+        args = expression(matched['arguments'][0])
+    fact = f'SpecialFunctionProofAgent.{matched["theorem"]} {args} (by linarith)'
     if matched['reverse']:
         fact = f'({fact}).symm'
     return [f'convert ({fact}) using 1 <;> norm_num <;> ring']

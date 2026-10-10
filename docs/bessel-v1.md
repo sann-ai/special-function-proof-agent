@@ -6,7 +6,7 @@
 
 整数次数・固定有理数次数の第1種ベッセル関数について、構造化した恒等式の証明候補をAIが作り、Leanで検証する実装です。式全体を扱う直接経路と、一つずつ等式変形を検査して連結する段階経路を備えます。
 
-第2種の `Y`、交差積 `X`、複数の実変数、関数値を含む根の条件は、追加の診断経路で受け付けます。元の式と条件を保持して、自然言語の解析、条件付きLean証明、有限個の点での数値診断を保存します。[Y・交差積・根の条件](#第2種y交差積x根の条件を含む式)を参照してください。
+現行v2は第2種の `Y`、交差積 `X`、複数の実変数、関数値を含む根の条件を受け付けます。登録済みの整数Y漸化式、Y₀・Y₁の引数微分、全整数のWronskianと同点X₀₁は、正実軸で完全Lean証明へ接続します。下記の根条件付き交差積の分数式も、元の正性・根条件から完全証明します。その他のY・交差積入力では元の式と条件を保持し、自然言語の解析、条件付きLean証明、有限個の点での数値診断を保存します。[Y・交差積・根の条件](#第2種y交差積x根の条件を含む式)を参照してください。
 
 既存の証明経路（schema version 1）の対象は、すべての整数 `n` と正の実数 `x` に対する等式です。`J n x` は mathlib の `Complex.besselJ (n : ℂ) (x : ℂ)` と定義し、等式を複素数上で検査します。整数次数の符号関係、一般三項漸化式、微分公式、定積分を扱います。固定した有理数次数も入力できます。
 
@@ -108,13 +108,22 @@ D(\B{1/2}{x})=1/(2*x)*\B{1/2}{x}-\B{3/2}{x}; x > 0
 
 ## 第2種Y・交差積X・根の条件を含む式
 
-診断経路（schema version 2）は、正の実引数での `J` と `Y`、および
+現行の共通入力（schema version 2）は、正の実引数での `J` と `Y`、および
 
 \[
 X_{nm}(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)
 \]
 
-を扱います。`Y_n(x)` / `Y(n,x)`、`X_01(s,t)` / `X_{0,1}(s,t)` / `X(0,1,s,t)` を入力でき、`λ`・`\lambda` は `lambda` に正規化します。実変数は `x, z, lambda, s, w, t`、整数次数の変数は `n`（`n integer` が必要）です。各変数と有理数の比較に加え、`X_01(z,lambda*z)=0` や `Y_0(x)!=0` を条件として保存します。対応する入力から診断経路を自動選択します。
+を扱います。`Y_n(x)` / `Y(n,x)`、`X_01(s,t)` / `X_{0,1}(s,t)` / `X(0,1,s,t)` を入力でき、`λ`・`\lambda` は `lambda` に正規化します。自由実変数は予約語を除く安全なASCII名で最大3個、Besselの整数次数変数は `n`（`n integer` が必要）です。各変数と有理数の比較に加え、`X_01(z,lambda*z)=0` や `Y_0(x)!=0` を条件として保存します。
+
+整数Yの完全証明レシピは、任意整数n、x>0の三項漸化式とWronskian、x>0のY₀・Y₁微分と同点交差積に対応します。新しい公開例は次の4式で、それぞれ `.txt` と `.target.json` を配布し、direct/steps両経路で検査します。
+
+- `integer-y-zero-derivative`：`D_x(Y_0(x))=-Y_1(x); x>0`。
+- `integer-y-one-derivative`：`D_x(Y_1(x))=Y_0(x)-Y_1(x)/x; x>0`。
+- `integer-y-wronskian`：`J_{n+1}(x)*Y_n(x)-J_n(x)*Y_{n+1}(x)=2/(pi*x); n integer,x>0`。
+- `integer-y-cross-same-point`：`X_01(x,x)=-2/(pi*x); x>0`。
+
+次数・引数の微分交換とWronskianの規格化は、標準J/Yの定義から証明済みです。微分する実変数、整数次数、同点の2引数と負符号を固定したまま検査します。[標準Yの定義と形式化](bessel-y-formalization.md)に補題と証明経路を記載しています。登録公式以外は診断経路を選びます。`--route diagnostic` を明示すると従来の条件付き経路を使い、旧記録の前提とscopeを保持します。既存Y/XのAST・規約データと同じ命題のtarget IDも維持します。
 
 `examples/cross-product-root.txt` は次の式を収録しています。
 
@@ -125,14 +134,16 @@ X_00(z,lambda*z)^2/(X_01(z,z)^2+lambda^2*X_00(z,lambda*z)*X_02(z,lambda*z)) = (1
 ```sh
 mkdir -p runs
 python3 -m special_function_agent parse examples/cross-product-root.txt --output runs/cross-product-target.json
-python3 -m special_function_agent verify examples/cross-product-root.txt --output runs/cross-product --archive
+python3 -m special_function_agent verify examples/cross-product-root.txt --route direct --output runs/cross-product-direct --archive
+python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/cross-product-steps --archive
+python3 -m special_function_agent replay runs/cross-product-steps
 ```
 
-この式と条件の構造を認識した場合、漸化式、Wronskian、分母の正値性の積分表示に基づく解析を保存し、明示した仮定から分数式を導くLean証明を検査します。出力は `request.json`、`result.json`、`report.md`、`analysis.json`、`numerical.json`、`conditional_certificate.lean` です。Bessel Yの定義・漸化式・Wronskian・積分正値性をLeanへ接続する工程が残るため、元命題の状態は `unresolved`、条件付き代数証明の成否は別項目に記録します。数学的な対応は[数学ノート](mathematics.md#第2種yと交差積の診断経路)を参照してください。
+この式と全条件の構造を認識し、標準Yの定義・漸化式・Y₀とY₁の引数微分・Wronskianから、正エネルギー積分、左分母の正値性、右分母の非零性を導いて元の分数式をLeanで検査します。Leanの前提は `z>0`、`lambda>0`、`lambda<1`、`X_01(z,lambda*z)=0` の4個です。左分母のX₀₂、右分子のX₀₀の関数値と、2つの自由実変数の対応を保持します。完全証明の出力は `request.json`、`result.json`、`report.md`、`analysis.json`、`numerical.json`、`certificate.lean` です。数学的な対応は[数学ノート](mathematics.md#第2種yと交差積の診断経路)を参照してください。
 
-この例の正常な診断結果は `status: unresolved`、`full_bessel_proof: false` で、Leanの代数検査が通ると `conditional_lean.accepted: true` となります。`verify` の終了コードは、元命題の形式証明が残ることを表す `1` です。
+direct/stepsの完全証明が通ると `status: proved`、`full_bessel_proof: true`、終了コード `0` となります。旧 `proof.mode: diagnostic` と明示した `--route diagnostic` は、元の条件付き代数証明とscopeを保持します。この診断経路は `status: unresolved`、`full_bessel_proof: false`、終了コード `1` で、代数検査が通ると `conditional_lean.accepted: true` を記録し、`conditional_certificate.lean` を保存します。
 
-数値診断は、利用中のPythonに既に `mpmath` がある場合に実行し、有限個の標本、根の近似、残差、収束状況を記録します。未導入時は `backend_unavailable` を保存し、入力の解析、条件付きLean検査、アーカイブ保存を続けます。一般のY・複数変数の式は対応範囲と残る検査事項を保存します。複数の根条件の探索、微積分、複素枝を含む入力は、診断で扱える範囲を理由とともに報告します。
+数値診断は、利用中のPythonに既に `mpmath` がある場合に実行し、有限個の標本、根の近似、残差、収束状況を記録します。未導入時は `backend_unavailable` を保存し、入力の解析、選択した経路の完全Lean検査または条件付きLean検査、アーカイブ保存を続けます。一般のY・複数変数の式は対応範囲と残る検査事項を保存します。複数の根条件の探索、微積分、複素枝を含む入力は、診断で扱える範囲を理由とともに報告します。
 
 根の数値探索は、正の有限区間での符号変化から、パラメータ標本ごとに最大3根を精密化します。60桁計算を用い、探索範囲・許容差・時間制限は `numerical.json` に記録します。標本と符号走査による探索範囲を `root_search.exhaustive: false` と明示します。
 

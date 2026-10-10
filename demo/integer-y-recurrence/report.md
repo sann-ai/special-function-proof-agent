@@ -4,7 +4,7 @@
 
 条件：n is int、x is real、x > 0
 
-状態：unresolved。Jの次数0と1での次数微分可能性の証明が残っています。
+状態：unresolved。この記録は明示前提からの条件付き証拠を保持します。同じ元式の完全証明はdirect/steps経路で新しく保存できます。
 
 数値診断：no_mismatch_found。有限標本の結果を numerical.json に保存しました。
 

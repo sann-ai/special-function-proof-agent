@@ -4,7 +4,7 @@
 
 条件：lambda is real、z is real、lambda > 0、lambda < 1、z > 0、X_{0,1}(z,(lambda*z)) = 0
 
-状態：unresolved。整数Yと交差積の解析公式への接続が残っています。
+状態：unresolved。この記録は明示前提からの条件付き証拠を保持します。同じ元式の完全証明はdirect/steps経路で新しく保存できます。
 
 数値診断：no_mismatch_found。有限標本の結果を numerical.json に保存しました。
 

@@ -1,0 +1,11 @@
+{
+  "recipe": "integer_y_wronskian",
+  "theorem": "besselYInt_cross_zero_one",
+  "arguments": [
+    {
+      "op": "var",
+      "name": "x"
+    }
+  ],
+  "reverse": false
+}

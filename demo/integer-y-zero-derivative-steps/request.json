@@ -1,0 +1,88 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "bessel_y",
+      "order": {
+        "op": "int",
+        "value": 0
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "neg",
+    "arg": {
+      "op": "bessel_y",
+      "order": {
+        "op": "int",
+        "value": 1
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "deriv",
+          "var": "x",
+          "arg": {
+            "op": "bessel_y",
+            "order": {
+              "op": "int",
+              "value": 0
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "neg",
+          "arg": {
+            "op": "bessel_y",
+            "order": {
+              "op": "int",
+              "value": 1
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "recipe": "integer_y_derivative",
+        "reason": "正の実引数に対し、標準整数Yの次数微分定義と証明済みの混合微分交換から引数微分公式を適用する。",
+        "conditions": [
+          "x is real",
+          "x > 0"
+        ]
+      }
+    ]
+  }
+}

@@ -46,6 +46,9 @@ def output_schema(route: str, target: dict | None = None) -> dict:
             obj({"op":{"const":"laguerre"}, "order":ref, "alpha":ref, "arg":ref}),
             obj({"op":{"const":"bessel_y_noninteger"}, "order":ref, "arg":ref}),
             obj({"op":{"const":"bessel_y"}, "order":ref, "arg":ref}),
+            obj({"op":{"const":"bessel_j"}, "order":ref, "arg":ref}),
+            obj({"op":{"const":"bessel_cross"}, "orders":{"type":"array", "items":ref, "minItems":2, "maxItems":2},
+                 "args":{"type":"array", "items":ref, "minItems":2, "maxItems":2}}),
             obj({"op":{"const":"rational"}, "numerator":{"type":"integer"}, "denominator":{"type":"integer","minimum":1}}),
             obj({"op":{"const":"jacobi"}, "order":ref, "alpha":ref, "beta":ref, "arg":ref}),
             obj({"op":{"const":"deriv"}, "var":{"type":"string","enum":derivative_names}, "arg":ref}),
@@ -121,8 +124,20 @@ YNoninteger uses bessel_y_noninteger {order,arg}; order is an exact rational obj
 -1/2,1/2,3/2. Positive x is required. Recipes bessel_y_half_recurrence and bessel_y_half_derivative
 apply Y(-1/2,x)+Y(3/2,x)=Y(1/2,x)/x and D_x Y(1/2,x)=(Y(-1/2,x)-Y(3/2,x))/2.
 integer_y_recurrence proves Y_(n-1)(x)+Y_(n+1)(x)=2*n/x*Y_n(x), with integer n and x>0.
-Use the existing bessel_y {order,arg} AST for this exact integer recurrence. The full theorem uses
+integer_y_derivative proves D_x Y_0(x)=-Y_1(x) and D_x Y_1(x)=Y_0(x)-Y_1(x)/x for x>0.
+The derivative variable is exactly the common real argument. Keep composite arguments and other variables unchanged.
+Use the existing bessel_y {order,arg} AST for these integer identities. The full theorem uses
 the standard integer Y definition, with order differentiability proved from its convergent J series.
+The argument derivative formulas also use proved order/argument differentiation exchange.
+integer_y_wronskian proves J_(n+1)(x)*Y_n(x)-J_n(x)*Y_(n+1)(x)=2/(pi*x) for integer n, x>0,
+and its fixed n=0 form J_1(x)*Y_0(x)-J_0(x)*Y_1(x)=2/(pi*x).
+In the original cross convention X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t),
+X_01(x,x)=J_0(x)*Y_1(x)-Y_0(x)*J_1(x)=-2/(pi*x). Keep this negative sign and both equal arguments.
+Use bessel_j {order,arg}, bessel_y {order,arg}, bessel_cross {orders:[n,m],args:[s,t]}.
+cross_product_root proves the fixed root fraction with the original conditions z>0, 0<lambda<1,
+X_01(z,lambda*z)=0. The left denominator ends in X_02, and the right numerator is X_00 without a derivative.
+Its full theorem proves positive energy and both denominators nonzero from those original conditions.
+Keep every coefficient, order, argument, denominator and condition exactly as in the supplied target.
 Other integer Y identities and cross products retain their diagnostic route. Keep integer Y distinct from YNoninteger.
 Allowed recipes: gamma_recurrence for Gamma(x+1)=x*Gamma(x), beta_integral for the Euler
 integral on 0..1, gamma_scaled_integral for the positive scaled Gamma integral, and ring.

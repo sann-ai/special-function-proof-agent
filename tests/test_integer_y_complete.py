@@ -192,8 +192,9 @@ class IntegerYCompleteBoundaryTests(unittest.TestCase):
             for index, text in enumerate(('Y_0(x)=Y_0(x);x>0',
                                          (ROOT/'examples/cross-product-root.txt').read_text())):
                 target = parse_identity(text)
-                self.assertFalse(has_special(target))
-                result = verify({**target, 'proof': {'mode': 'diagnostic'}}, self.base/f'legacy-{index}', timeout=120)
+                diagnostic = {**target, 'proof': {'mode': 'diagnostic'}}
+                self.assertFalse(has_special(diagnostic))
+                result = verify(diagnostic, self.base/f'legacy-{index}', timeout=120)
                 self.assertEqual(result['status'], 'unresolved')
                 self.assertFalse(result['full_bessel_proof'])
 

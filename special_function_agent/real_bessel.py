@@ -603,9 +603,8 @@ def verify_diagnostic(data, output_dir, timeout):
     _save_json(output_dir/'analysis.json', template or {'status': 'no_matching_template'})
     _save_json(output_dir/'numerical.json', numeric)
     _save_json(output_dir/'result.json', result)
-    remaining = ('Jの次数0と1での次数微分可能性の証明が残っています。'
-                 if template and template['id'] == 'integer_y_recurrence' else
-                 '整数Yと交差積の解析公式への接続が残っています。')
+    remaining = ('この記録は明示前提からの条件付き証拠を保持します。同じ元式の完全証明はdirect/steps経路で新しく保存できます。'
+                 if template else 'この入力に対応する完全証明レシピは未登録です。')
     lines = ['# 正実数のBessel診断', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
              '状態：'+result['status']+'。'+remaining, '',
              '数値診断：'+numeric['diagnostic']+'。有限標本の結果を numerical.json に保存しました。']

@@ -2,7 +2,7 @@
 
 プロジェクト全体のルールは [AGENTS.md](../AGENTS.md) にあります。入力をparseし、全仮定・型・束縛を確認してから検証します。ユーザーが指定した全条件を保存し、証明候補で追加しません。
 
-ローカルで登録済みのGamma/Beta/Hermite/erf、Legendre/Laguerre/Jacobi、固定半整数Yレシピを使えます。例えばBeta積分は次のように検査します。
+ローカルで登録済みのGamma/Beta/Hermite/erf、Legendre/Laguerre/Jacobi、固定半整数Y・整数Yレシピを使えます。例えばBeta積分は次のように検査します。
 
 ```sh
 python3 -m special_function_agent verify examples/beta-integral.txt --route direct --output runs/beta-direct
@@ -42,7 +42,19 @@ python3 -m special_function_agent replay runs/yhalf-steps
 
 依頼例：「`examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` を直接・ステップ両経路で検証してください。明示名 `YNoninteger` の固定次数−1/2・1/2・3/2と正の実引数を保持し、Leanの完全証明と保存証明のreplayを確認してください。」
 
-`YNoninteger` は標準のJ接続式から定義した非整数Yへ接続します。整数Yは次数微分の定義に対して、次数方向の微分可能性と標準整数極限を証明しました。任意整数n、x>0の三項漸化式を完全証明できます。[Yの形式化範囲](bessel-y-formalization.md)に各条件と残る義務を記載しています。
+`YNoninteger` は標準のJ接続式から定義した非整数Yへ接続します。整数Yは次数微分の定義に対して、次数方向の微分可能性と標準整数極限を証明しました。任意整数n、x>0の三項漸化式に加え、次の引数微分・Wronskianも完全証明できます。[Yの形式化範囲](bessel-y-formalization.md)に定義と各条件を記載しています。
+
+## 整数Yの引数微分・Wronskian・同点交差積
+
+`integer-y-zero-derivative` と `integer-y-one-derivative` はx>0での `Y_0'=-Y_1`、`Y_1'=Y_0-Y_1/x`、`integer-y-wronskian` は任意整数nとx>0での `J_{n+1}Y_n-J_nY_{n+1}=2/(pi*x)`、`integer-y-cross-same-point` はx>0での `X_01(x,x)=-2/(pi*x)` です。各例は `examples/` に `.txt` と `.target.json` があり、direct/steps両経路を使えます。次数・引数の微分交換とWronskianの定数2/πは既存の標準J/Y定義から証明済みです。
+
+```sh
+python3 -m special_function_agent verify examples/integer-y-zero-derivative.txt --route direct --output runs/y0-direct --archive
+python3 -m special_function_agent verify examples/integer-y-wronskian.txt --route steps --output runs/y-wronskian-steps --archive
+python3 -m special_function_agent replay runs/y-wronskian-steps
+```
+
+依頼例：「整数Yの4例を直接・自然言語ステップ両経路で検証してください。微分する実変数とx>0、Wronskianの `n integer`、同点交差積の2引数と負符号を保持し、元命題の完全証明を保存してreplayしてください。」
 
 ## 引き継いだBesselの操作例
 
@@ -63,14 +75,22 @@ python3 -m special_function_agent replay runs/yhalf-steps
 5. 証拠と日本語レポートの保存場所、アーカイブ記録IDを示す。保存証拠の再検査が必要な場合は
    `archive replay RECORD_ID` を使う。
 
-整数Yの登録漸化式以外の `Y_n`・`Y(order,x)`・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
+整数Yの登録漸化式・引数微分・Wronskian・同点交差積、および次の根条件付き分数式以外の `Y_n`・`Y(order,x)`・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
 `python3 -m special_function_agent verify INPUT --output DIR --archive` で診断する。
 生成器へ渡した場合も診断へ進み、元の式と全条件を保持する。
-今回の交差積の例には `examples/cross-product-root.txt` を使う。
-報告では、元命題の `unresolved`、条件付き代数証明のLean検査、自然言語の解析、
-数値診断の結果をそれぞれ示す。残る次数と引数の微分交換、
-Wronskianの正規化、正エネルギー積分と分母非零性の形式化、および
-数値バックエンド未導入などの実行状況も保存された結果に沿って説明する。
+
+`examples/cross-product-root.txt` は、`z>0`、`0<lambda<1`、`X_01(z,lambda*z)=0` の元条件から完全証明する。
+正エネルギー積分を通じて左分母の正値性と右分母の非零性を導き、X₀₂を含む左分母とX₀₀の右分子を保持する。
+
+```sh
+python3 -m special_function_agent verify examples/cross-product-root.txt --route direct --output runs/cross-root-direct --archive
+python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/cross-root-steps --archive
+python3 -m special_function_agent replay runs/cross-root-steps
+```
+
+依頼例：「根条件付き交差積を元の3条件で両経路から検証してください。左分母のX₀₂、右分子のX₀₀、変数対応と両分母の非零証明を確認し、完全証明を保存してreplayしてください。」
+
+旧 `proof.mode: diagnostic` の記録は元の条件付きscopeを保持する。新たに同じ診断経路を選ぶ場合は `--route diagnostic` を指定し、`unresolved`、`full_bessel_proof: false` と条件付き代数証明の結果を報告する。数値バックエンドの有無と有限標本の結果は、選んだLean検証経路と併せて記録する。
 
 外部の個人用保存先は上流GitHubへのcommit対象に含めません。配布用の共通例へ追加する場合は、
 利用者が公開対象として選んだ内容だけを別途レビューします。
@@ -90,4 +110,4 @@ Wronskianの正規化、正エネルギー積分と分母非零性の形式化�
 
 依頼例：「`examples/integer-y-complete.txt` を任意整数n、x>0で直接・自然言語ステップ両経路へ接続してください。標準整数Yの定義と極限、生成定理の全前提を確認し、完全証明をarchiveへ保存してください。」
 
-古い整数Yのdiagnostic記録は元ファイルを保持します。保存requestからproofを除いたtargetを `verify --route direct` または `--route steps` に渡し、新しい完全証明を記録します。具体的手順は[保存仕様](archive.md#条件付き整数y記録から完全証明へ)を参照してください。
+古い整数Y・根条件付き交差積のdiagnostic記録は元ファイルと明示前提を保持します。同じ診断経路を選ぶには `--route diagnostic` を指定します。完全証明へ移す場合は、保存requestからproofを除いたtargetを `verify --route direct` または `--route steps` に渡し、同じtarget IDに新しい履歴を追加します。整数Y・交差積の具体的手順は[保存仕様](archive.md#条件付き記録から完全証明へ)を参照してください。

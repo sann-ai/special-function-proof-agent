@@ -1,11 +1,11 @@
 {
   "status": "unresolved",
-  "diagnostic": "counterexample_candidates",
+  "diagnostic": "no_mismatch_found",
   "backend": "mpmath",
   "full_bessel_proof": false,
   "full_function_proof": false,
   "precision_digits": 60,
-  "checked_samples": 8,
+  "checked_samples": 9,
   "samples": [
     {
       "values": {
@@ -27,6 +27,17 @@
       "rhs": "2.0",
       "absolute_difference": "1.97748759584344900992784659317786264079880252711e-32",
       "comparison_tolerance": "2.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "b": "2.0"
+      },
+      "lhs": "1.33333333333333333333333333333332178725835457346",
+      "rhs": "1.33333333333333333333333333333333333333333333333",
+      "absolute_difference": "1.15460749787598768134278281629304407079505622096e-32",
+      "comparison_tolerance": "1.33333333333333333333333333333333333333333333333e-30",
       "condition_residuals": []
     },
     {
@@ -67,9 +78,9 @@
         "a": "2.0",
         "b": "0.5"
       },
-      "lhs": "1.33333333333333325931846502498956397175788879395",
+      "lhs": "1.33333333333333333333333333333332178864753942352",
       "rhs": "1.33333333333333333333333333333333333333333333333",
-      "absolute_difference": "7.40148683083437693615754445393880208333333332815e-17",
+      "absolute_difference": "1.15446857939098095408267648293881554033685102135e-32",
       "comparison_tolerance": "1.33333333333333333333333333333333333333333333333e-30",
       "condition_residuals": []
     },
@@ -96,22 +107,8 @@
       "condition_residuals": []
     }
   ],
-  "candidates": [
-    {
-      "values": {
-        "a": "2.0",
-        "b": "0.5"
-      },
-      "lhs": "1.33333333333333325931846502498956397175788879395",
-      "rhs": "1.33333333333333333333333333333333333333333333333",
-      "absolute_difference": "7.40148683083437693615754445393880208333333332815e-17",
-      "comparison_tolerance": "1.33333333333333333333333333333333333333333333333e-30",
-      "condition_residuals": []
-    }
-  ],
-  "skipped_reasons": [
-    ""
-  ],
+  "candidates": [],
+  "skipped_reasons": [],
   "excluded_by_conditions": 0,
   "root_search": {
     "method": "bounded_sign_changes_then_secant",

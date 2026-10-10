@@ -272,11 +272,15 @@ class IntegerYConditionalBoundaryTests(unittest.TestCase):
         self.assertFalse((output/'certificate.lean').exists())
 
     def test_unresolved_cross_generator_routes_keep_diagnostics_and_skip_ai(self):
+        # The original root identity now has a full recipe. This altered
+        # coefficient remains outside that closed mathematical scope.
+        text = (ROOT/'examples/cross-product-root.txt').read_text().replace('(1/lambda)', '(2/lambda)')
         for route in ('direct', 'steps'):
             with self.subTest(route=route), patch('special_function_agent.generate.subprocess.Popen') as process:
-                result = generate(parse_identity((ROOT/'examples/cross-product-root.txt').read_text()), route, self.base/f'generated-{route}')
+                result = generate(parse_identity(text), route, self.base/f'generated-{route}')
                 process.assert_not_called()
-                self.assert_conditional(result)
+                self.assertNotEqual(result['status'], 'proved')
+                self.assertFalse(result['full_bessel_proof'])
                 self.assertFalse(result['generation']['ai_called'])
 
     def test_legacy_cross_and_explicit_noninteger_y_keep_their_states(self):

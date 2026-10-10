@@ -9,6 +9,7 @@ v2は実数型の自由変数（最大3個）、次数変数m,nの型、構造�
 - `hermite_h {order, arg}`、`hermite_he {order, arg}`：物理学規約H、確率論規約He。次数は自然数です。
 - `legendre {order, arg}`、`laguerre {order, alpha, arg}`、`jacobi {order, alpha, beta, arg}`：標準多項式。次数は自然数、引数とパラメータは実数です。
 - `bessel_y_noninteger {order, arg}`：正実軸の標準非整数Y。CLIの次数は−1/2、1/2、3/2の `rational {numerator, denominator}` に対応します。
+- `bessel_j {order, arg}`、`bessel_y {order, arg}`、`bessel_cross {orders, args}`：正実軸の実J、標準整数Y、および `X_nm(s,t)=J_n(s)Y_m(t)-Y_n(s)J_m(t)`。整数Yの登録公式では次数を整数型で保持します。
 - `erf {arg}`：後述する標準の実誤差関数。
 - `deriv {var, arg}`：指定した自由実変数の実微分を、その変数の現在値で評価します。
 - `integral {var, lower, upper, body}`：有限上端は向き付き実区間積分。`upper: {"op":"infinity"}` は `Set.Ioi lower` 上のルベーグ積分。`infinity`は積分上端だけで許可します。
@@ -121,15 +122,32 @@ D_x(YNoninteger(1/2,x))=(YNoninteger(-1/2,x)-YNoninteger(3/2,x))/2; x>0
 
 公開例は `examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` です。半整数での正弦の非零性はLeanで証明し、入力からはx>0を確認します。元の全命題と公理監査が通れば `proved`、`full_function_proof: true`、`full_bessel_proof: true` を保存します。
 
+## 正実軸の整数Bessel Y
+
+整数Yは標準次数微分式 `besselYInt` で定義します。`BesselYAnalytic.lean` はJ級数の局所一様評価から次数0・1での微分可能性を証明し、全整数への伝播、標準非整数Yからの整数極限、三項漸化式へ接続します。`examples/integer-y-complete.txt` は `n integer,x>0` で `Y_{n-1}(x)+Y_{n+1}(x)=2*n/x*Y_n(x)` を検査します。
+
+`BesselYArgument.lean` は次数微分した級数係数のCauchy評価と項別微分から、次数0・1の次数／引数微分交換を証明し、次数−1は漸化式から導きます。`BesselYWronskian.lean` はJの原点極限とGamma反射で定数を評価し、非整数Yの接続式と整数極限を経て全整数のWronskianへ接続します。次の4式はdirect/steps両経路で検査できます。
+
+```text
+D_x(Y_0(x))=-Y_1(x); x>0
+D_x(Y_1(x))=Y_0(x)-Y_1(x)/x; x>0
+J_{n+1}(x)*Y_n(x)-J_n(x)*Y_{n+1}(x)=2/(pi*x); n integer,x>0
+X_01(x,x)=-2/(pi*x); x>0
+```
+
+公開例は順に `integer-y-zero-derivative`、`integer-y-one-derivative`、`integer-y-wronskian`、`integer-y-cross-same-point` の `.txt` と `.target.json` です。微分変数は同じ実引数xに固定し、Wronskianのnは負・零・正の全整数を含みます。同点交差積の負符号は上記Xの定義順序から決まります。各定理の実引数条件はx>0で、微分交換やWronskianの規格化は証明内で導出します。[定義・公開補題・証明の接続](bessel-y-formalization.md)を参照してください。
+
+既存Y/XのASTと規約データを保持し、同じ命題のtarget IDを維持します。明示した `--route diagnostic` と保存済みの条件付き整数Y証拠は、元の次数微分可能性の2前提を保持して再検査します。完全証明へ移す場合は、保存requestからproofを除いた同じtargetをdirect/stepsで再検証し、新しい履歴を追加します。
+
 ## 証明の接続・監査と現在の範囲
 
-`classical.py`、`orthogonal.py`、`bessel_y_formal.py` は関数規約、微分変数、次数、パラメータ、積分端点、係数を含む等式構造を照合し、対応する公開Lean補題を選びます。`real_special.py` は元の全変数・全仮定・左右辺から対象定理を生成します。directとstepsは同じ固定対象を検査し、stepsでは各等式の端点連結も確認します。
+`classical.py`、`orthogonal.py`、`bessel_y_formal.py`、`bessel_y_integer.py`、`cross_complete.py` は関数規約、微分変数、次数、パラメータ、積分端点、係数を含む等式構造を照合し、対応する公開Lean補題を選びます。`real_special.py` は元の全変数・全仮定・左右辺から対象定理を生成します。directとstepsは同じ固定対象を検査し、stepsでは各等式の端点連結も確認します。
 
 追加関数の公開定義と定理は固定Lean/mathlibでコンパイルし、`#print axioms` を実行しました。依存公理は `propext`、`Classical.choice`、`Quot.sound` です。生成証明もこの許可集合で監査し、元入力・証明ソース・規約・環境の同一性を再検証時に確認します。数学的対象の登録表には、H/Heの区別、自然数次数、多項式のパラメータ規約、erfの正規化、非整数Yの定義と次数範囲、微分変数と積分方向を含めます。
 
 v2の完全証明経路は上記の登録公式と実数環の整理を対象とします。Hermiteは自然数次数・実引数、erfは実引数の微分・初期値・奇関数性・Gaussian有限区間積分を扱います。複素erf、erfc、誤差関数の近似式・近似誤差の評価、Gaussianの一般変形や無限区間公式は追加の定義・補題・レシピを要する範囲です。数値診断は既存mpmathによる有限標本、条件の残差、差の候補、計算できなかった理由を記録します。Hermiteの数値計算は次数0〜40・引数の絶対値60以下を対象とし、範囲外では理由を保存します。近似誤差の厳密な区間評価は今後の対象です。
 
-整数Yは標準次数微分式で定義します。次数0・1の近傍でJ級数を一様に評価し、次数方向の微分可能性、全整数への伝播、標準非整数Yからの整数極限、三項漸化式をx>0から証明しました。`examples/integer-y-complete.txt` は `n integer,x>0` で `Y_{n-1}+Y_{n+1}=2*n/x*Y_n` を完全証明します。明示diagnostic経路や保存済みの条件付き整数Y証拠は、元の2つの次数微分可能性前提を保持します。その他のY・交差積入力は正実数の数値診断、解析テンプレート、条件付き代数証明に対応し、必要な全定理が揃うまで `unresolved`、`full_bessel_proof: false` です。交換前提からのY₀・Y₁微分とscaled Wronskianの微分ゼロも数学モジュールで証明済みです。残る義務は次数と引数の微分交換、正規化したWronskian、正エネルギー積分と分母非零性の証明です。一般積分の収束、複素枝、極での式の扱いにも、それぞれ対応する条件確認と証明が必要です。
+二点の根条件付き交差積 `examples/cross-product-root.txt` も、元の `z>0`、`0<lambda<1`、根条件からdirect/stepsで完全証明へ接続します。正エネルギー積分、左分母の正値性、右分母の非零性を証明し、元の分数等式を検査します。登録公式以外のY・交差積入力、および明示diagnostic経路は、正実数の数値診断、解析テンプレート、条件付き代数証明を保存します。一般積分の収束、複素枝、極での式の扱いには、それぞれ対応する条件確認と証明が必要です。
 
 ## 引き継いだBessel v1の基盤
 
@@ -294,11 +312,12 @@ CLIは `t^(1/4)*J_{-3/4}(t)`、下端0、上端xの組を構造で認識し、
 
 ## 第2種Yと交差積の診断経路
 
-従来の診断用schema version 2では複数の実変数、J・Y、および
+共通schema version 2では複数の実変数、J・Y、および
 `X_nm(s,t) = J_n(s)*Y_m(t) - Y_n(s)*J_m(t)` を入力し、関数値の根・非零条件を保持する。
-整数Yの次数微分による定義から、標準の引数微分・Wronskian・積分公式を接続する工程が残っており、
-元命題の判定は `unresolved`、定義域条件の追加確認が必要な場合は `needs_conditions` とする。
-証拠は自然言語解析、条件付きLean証明、数値診断に分けて記録する。
+整数Yの漸化式、Y₀・Y₁の引数微分、全整数のWronskian、同点X₀₁は上記の完全証明経路へ接続する。
+下記の二点の根条件付き交差積も、正エネルギー積分と両分母の非零性を証明して完全証明経路へ接続する。
+明示した `--route diagnostic` と旧診断記録は `unresolved`、`full_bessel_proof: false` を保持し、
+自然言語解析、元の明示前提による条件付きLean証明、数値診断を保存する。
 
 `examples/cross-product-root.txt` は、`0 < lambda < 1`、`z > 0`、
 `X_01(z,lambda*z) = 0` を仮定する分数恒等式である。
@@ -310,25 +329,32 @@ CLIは `t^(1/4)*J_{-3/4}(t)`、下端0、上端xの組を構造で認識し、
 =\frac{1}{\lambda}\frac{A}{B-\lambda A}
 \]
 
-となる。根の条件と漸化式から `C = -A`、Wronskianと交差積の行列式から
-`lambda*A*B = Q^2` と `Q = -2/(pi*z) != 0` を得る。
-`u(t) = X_00(z,t)` のBessel方程式と端点の値を使うと、
+となる。`BesselYCross.lean` は根の条件と漸化式から `C = -A`、Wronskianと交差積の行列式から
+`lambda*A*B = Q^2` と `Q = -2/(pi*z) != 0`、さらに `A != 0` を証明する。
+左分母の因数分解 `Q^2+lambda^2*A*C = lambda*A*(B-lambda*A)` も証明済みである。
+`u(t) = X_00(z,t)` と `v(t) = X_01(z,t)` は、正のtで `u'=-v`、`v'=u-v/t` を満たす。
+これにより `t^2*(u(t)^2+v(t)^2)/2` の微分は `t*u(t)^2` となる。
+正区間上の連続性・可積分性と積分の基本定理から積分表示を得て、下端の `A != 0` と連続性から厳密正性を証明する。
 
 \[
 Q^2-\lambda^2 A^2
 =\frac{2}{z^2}\int_{\lambda z}^{z}t\,u(t)^2\,dt>0.
 \]
 
-これにより両分母の非零性が従い、約分して対象式を得る。
-生成する条件付きLean証明は `0 < lambda`、`Q != 0`、`C = -A`、
+`besselCross_root_energy` と `besselCross_root_energy_pos` が積分表示と正性、
+`besselCross_root_left_denominator_pos` と `besselCross_root_right_denominator_ne_zero` が元の両分母の条件を与える。
+`besselCross_root_identity` はこれらを使って元の分数等式を証明する。
+Leanの前提は `0<z`、`0<lambda`、`lambda<1`、`X_01(z,lambda*z)=0` の4個である。
+左分母の次数はX₀₂、右分子はX₀₀の関数値であり、入力どおり保持する。
+CLIは安全な2つの自由実変数名を構造で対応させ、同じ条件と式をdirect/stepsの両経路へ接続する。
+
+明示diagnostic経路で生成する従来の条件付きLean証明は `0 < lambda`、`Q != 0`、`C = -A`、
 `lambda*A*B = Q^2`、`0 < Q^2-lambda^2*A^2` を前提にした代数定理を検査する。
-自然言語解析のBessel関数・微分方程式・正の積分からこれらの前提を導く部分を、
-元命題の形式化で残る検査義務として記録する。
-この解析と条件付き証明は、対応する式と全条件を構造で認識した場合に生成する。
+旧証拠の前提とscopeを保持し、同じ命題の完全証明は新しい記録として保存する。
 
 既存の `mpmath` が使える場合は有限個の標本を数値評価し、根の近似、条件の残差、
 対象式の差、評価できなかった標本の理由を保存する。根の数値近似と式の一致は数値診断として扱う。
-数値バックエンドがない場合も、条件付きLeanと解析の結果を独立に保存する。
+数値バックエンドがない場合も、選択した経路の完全Lean証明または条件付きLean証明と解析結果を保存する。
 
 ## 数学ライブラリと入力インターフェイスの対応
 

@@ -70,7 +70,7 @@ class RealParserTests(unittest.TestCase):
                      'Y_0(x)=0;x>0,Y_0(x)=0']:
             with self.subTest(text=text), self.assertRaises(NeedsConditions):
                 parse_identity(text)
-        for field,value in [('variables',{'z':'complex'}),('proof',{'mode':'direct','recipe':'ring'})]:
+        for field,value in [('variables',{'z':'complex'}),('proof',{'mode':'direct','recipe':'ring','assumptions':[]})]:
             data=request();data[field]=value
             with self.assertRaises(InputError): validate_request(data)
         data=request();data['lhs']={'op':['bad']}

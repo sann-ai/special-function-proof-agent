@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "x": "real"
+  },
+  "assumptions": [
+    {
+      "op": "compare",
+      "variable": "x",
+      "relation": "gt",
+      "value": {
+        "numerator": 0,
+        "denominator": 1
+      }
+    }
+  ],
+  "lhs": {
+    "op": "deriv",
+    "var": "x",
+    "arg": {
+      "op": "bessel_y",
+      "order": {
+        "op": "int",
+        "value": 1
+      },
+      "arg": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "sub",
+    "args": [
+      {
+        "op": "bessel_y",
+        "order": {
+          "op": "int",
+          "value": 0
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      {
+        "op": "div",
+        "args": [
+          {
+            "op": "bessel_y",
+            "order": {
+              "op": "int",
+              "value": 1
+            },
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          },
+          {
+            "op": "var",
+            "name": "x"
+          }
+        ]
+      }
+    ]
+  },
+  "proof": {
+    "mode": "direct",
+    "recipe": "integer_y_derivative"
+  }
+}
