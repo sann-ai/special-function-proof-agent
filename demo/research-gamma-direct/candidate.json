@@ -1,0 +1,1 @@
+{"mode":"direct","recipe":"research","uses":[{"lemma":"b2d6b64014f068f0def5d3915656e24a4e87278f5830181a4acf8985bd689421","arguments":{"x":{"op":"add","args":[{"op":"var","name":"x"},{"op":"int","value":1}]}},"reverse":false},{"lemma":"b2d6b64014f068f0def5d3915656e24a4e87278f5830181a4acf8985bd689421","arguments":{"x":{"op":"var","name":"x"}},"reverse":false}]}

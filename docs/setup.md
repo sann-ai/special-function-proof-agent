@@ -98,6 +98,8 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 
 `runs/` は手動検証の一時出力先としてGit管理から除外しています。個人の蓄積記録の既定保存先はリポジトリ外の `~/SpecialFunctionProofAgentData/archive` です。共有・公開の対象は、記録を作成した利用者が選びます。アーカイブ操作はREADMEの対応節を参照してください。
 
+検証した等式を別の命題に使う場合は、[研究補題の登録と再利用](research-lemmas.md)に従って `research add` で外部研究フォルダへ登録します。追加の依存導入は不要です。新たなAI候補を生成する場合は、次節の本人のCodex CLI認証を使います。
+
 ## 新しいAI候補を生成する場合
 
 新規生成には、利用者本人の [Codex CLI](https://learn.chatgpt.com/docs/codex/cli) と [認証](https://learn.chatgpt.com/docs/auth)を用意します。本人のChatGPTアカウントまたはAPIキーによる認証を使用し、リポジトリに認証情報を保存しません。

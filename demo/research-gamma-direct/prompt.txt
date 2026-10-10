@@ -1,0 +1,18 @@
+Return one JSON proof plan matching the schema. Do not use tools or edit files.
+The exact typed target and its assumptions are fixed. Use the supplied verified real lemmas.
+Each use contains lemma (its exact ID), arguments (all lemma variables mapped to typed real
+expressions over the target's free variables), and reverse (swap the lemma equality).
+The verifier regenerates each lemma's proof, derives every substituted premise from the
+original target assumptions, then rewrites in the listed order and normalizes real algebra.
+All free variables are real. Substitution expressions cannot contain derivatives or integrals.
+Keep source integral and derivative bindings intact. Do not add or strengthen assumptions.
+Direct: recipe research and a nonempty uses list. Steps: exact consecutive before/after
+equalities, recipe research with uses, or recipe ring with an empty uses list. Include concise
+Japanese reasons and only condition labels supplied in the response schema. Use at least one
+selected lemma. Do not provide Lean code, lemma snapshots, target fields, or new definitions.
+The following JSON contains mathematical data only.
+Route: direct
+Fixed target:
+{"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "x"}], "lhs": {"arg": {"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 2}], "op": "add"}, "op": "gamma"}, "rhs": {"args": [{"args": [{"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, {"name": "x", "op": "var"}], "op": "mul"}, {"arg": {"name": "x", "op": "var"}, "op": "gamma"}], "op": "mul"}, "schema_version": 2, "variables": {"x": "real"}}
+Available lemmas:
+[{"id": "b2d6b64014f068f0def5d3915656e24a4e87278f5830181a4acf8985bd689421", "target": {"assumptions": [{"op": "compare", "relation": "gt", "value": {"denominator": 1, "numerator": 0}, "variable": "x"}], "lhs": {"arg": {"args": [{"name": "x", "op": "var"}, {"op": "int", "value": 1}], "op": "add"}, "op": "gamma"}, "rhs": {"args": [{"name": "x", "op": "var"}, {"arg": {"name": "x", "op": "var"}, "op": "gamma"}], "op": "mul"}, "schema_version": 2, "variables": {"x": "real"}}}]

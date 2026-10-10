@@ -23,11 +23,11 @@ def obj(properties: dict) -> dict:
             "required": list(properties), "additionalProperties": False}
 
 
-def output_schema(route: str, target: dict | None = None) -> dict:
+def output_schema(route: str, target: dict | None = None, *, real_ast: bool = False) -> dict:
     """Structured generation is separate from the verifier's strict parser."""
     conditions = condition_labels(target or {})
     from .real_special import has_special, RECIPES as SPECIAL_RECIPES
-    if target and has_special(target):
+    if target and (has_special(target) or real_ast):
         recipe = {"type":"string", "enum":list(SPECIAL_RECIPES)}
         if route == "direct":
             return obj({"mode":{"type":"string", "enum":["direct"]}, "recipe":recipe})
@@ -209,7 +209,8 @@ State conditions directly without unnecessary negations.
 
 def generate(target: dict, route: str, output_dir: Path, *, model: str | None = None,
              timeout: float = 240, attempts: int = 1, archive: bool = False,
-             archive_dir: Path | None = None, original_input: str | None = None) -> dict:
+             archive_dir: Path | None = None, original_input: str | None = None,
+             research_lemmas: list[dict] | None = None) -> dict:
     """Optionally search and append to the user's separate proof archive."""
     if archive_dir is not None and not archive:
         raise ValueError("--archive-dir requires --archive.")
@@ -222,7 +223,7 @@ def generate(target: dict, route: str, output_dir: Path, *, model: str | None = 
     try:
         return _generate(target, route, Path(output_dir), model=model, timeout=timeout,
                          attempts=attempts, archive_root=archive_root, context=context,
-                         original_input=original_input)
+                         original_input=original_input, research_lemmas=research_lemmas)
     except (ValueError, OSError) as exc:
         if archive_root is not None:
             from .archive import register_failure
@@ -238,17 +239,22 @@ def generate(target: dict, route: str, output_dir: Path, *, model: str | None = 
 
 def _generate(target: dict, route: str, output_dir: Path, *, model: str | None,
               timeout: float, attempts: int, archive_root: Path | None, context: dict,
-              original_input: str) -> dict:
+              original_input: str, research_lemmas: list[dict] | None = None) -> dict:
     validate_request(target, require_proof=False)
     target = dict(target)
     target.pop("proof", None)
     validate_request(target, require_proof=False)
+    if research_lemmas is not None:
+        from .research_proof import inspect_packages
+        inspect_packages(research_lemmas)
+        if target['schema_version'] != 2 or any(kind != 'real' for kind in target['variables'].values()):
+            raise ValueError('Research composition supports schema_version 2 with real free variables.')
     if output_dir.exists():
         raise ValueError("出力先が既に存在します。別のディレクトリを指定してください。")
     output_dir.mkdir(parents=True)
     (output_dir / "target.json").write_text(json.dumps(target, ensure_ascii=False, indent=2) + "\n")
     from .real_special import has_special
-    if target["schema_version"] == 2 and not has_special(target):
+    if research_lemmas is None and target["schema_version"] == 2 and not has_special(target):
         request = {**target, "proof": {"mode": "diagnostic"}}
         result = verify(request, output_dir / "verification", timeout=min(timeout, 60))
         result = {**result, "generation": {"ai_called": False, "requested_route": route,
@@ -268,6 +274,8 @@ def _generate(target: dict, route: str, output_dir: Path, *, model: str | None,
         for record in find_exact(target, archive_root):
             candidate = record.get("candidate")
             if record["status"] not in {"proved", "refuted"} or not isinstance(candidate, dict) or candidate.get("mode") != route:
+                continue
+            if research_lemmas is not None and {p['id'] for p in candidate.get('lemmas', [])} != {p['id'] for p in research_lemmas}:
                 continue
             try:
                 checked = replay_record(record["id"], archive_root, timeout=60)
@@ -292,7 +300,11 @@ def _generate(target: dict, route: str, output_dir: Path, *, model: str | None,
             (output_dir / "archive-reuse-skipped.json").write_text(json.dumps(skipped, ensure_ascii=False, indent=2) + "\n")
     if shutil.which("codex") is None:
         raise ValueError("Codex CLI が見つかりません。保存された候補は verify で検査できます。")
-    schema = output_schema(route, target)
+    if research_lemmas is not None:
+        from .research_generation import output_schema as research_schema, make_prompt as research_prompt
+        schema = research_schema(route, target, research_lemmas)
+    else:
+        schema = output_schema(route, target)
     target_hash = hashlib.sha256(json.dumps(target, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     prior_error = ""
     result = {"status": "unresolved"}
@@ -302,7 +314,8 @@ def _generate(target: dict, route: str, output_dir: Path, *, model: str | None,
         schema_path = attempt_dir / "schema.json"
         response_path = attempt_dir / "candidate.json"
         schema_path.write_text(json.dumps(schema, ensure_ascii=False, indent=2) + "\n")
-        prompt = make_prompt(target, route, prior_error)
+        prompt = (research_prompt(target, route, research_lemmas, prior_error) if research_lemmas is not None
+                  else make_prompt(target, route, prior_error))
         (attempt_dir / "prompt.txt").write_text(prompt)
         cmd = ["codex", "exec", "--sandbox", "read-only", "--ephemeral", "--color", "never",
                "-c", 'model_reasoning_effort="ultra"', "--output-schema", str(schema_path.resolve()),
@@ -340,6 +353,10 @@ def _generate(target: dict, route: str, output_dir: Path, *, model: str | None,
         context["candidate"] = proof
         if not isinstance(proof, dict) or proof.get("mode") != route:
             raise ValueError("AI の候補経路が指定と一致しません。")
+        if research_lemmas is not None:
+            from .research_generation import attach_lemmas
+            proof = attach_lemmas(proof, research_lemmas)
+            context['candidate'] = proof
         request = {**target, "proof": proof}
         # This is the exact original target plus an untrusted, validated plan.
         validate_request(request)

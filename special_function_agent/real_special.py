@@ -216,6 +216,9 @@ def _recipe(recipe, lhs, rhs, names, types=None):
 
 
 def render(data):
+    from .research_proof import is_research, render as render_research
+    if is_research(data):
+        return render_research(data)
     validate_proof(data)
     names = {name: f'v{i}' for i, name in enumerate(sorted(data['variables']))}
     types = data['variables']
@@ -259,8 +262,13 @@ def render(data):
 def verify(data, output_dir, timeout):
     from .real_bessel import display, labels, domains, _walk
     from .real_numeric import diagnose
-    numeric = diagnose(data)
+    from . import research_proof
+    research = research_proof.is_research(data)
+    numeric = diagnose({key: value for key, value in data.items() if key != 'proof'} if research else data)
     analysis = match_identity(data['lhs'], data['rhs'])
+    dependencies = research_proof.inspect_dependencies(data) if research else None
+    if research:
+        analysis = {'recipe': 'research', 'dependencies': dependencies}
     result = {'status':'unresolved', 'reason':'no_accepted_full_certificate',
               'statement':display(data['lhs'])+' = '+display(data['rhs']), 'conditions':labels(data),
               'environment':environment(), 'conventions':conventions(data), 'full_function_proof':False,
@@ -272,6 +280,9 @@ def verify(data, output_dir, timeout):
     if bessel_scope:
         result['full_bessel_proof'] = False
         result['formal_scope'] = bessel_scope
+    if research:
+        result['formal_scope'] = research_proof.FORMAL_SCOPE
+        result['research_dependencies'] = dependencies
     bounds = domains(data)
     pending = []
     if analysis and analysis['recipe'] in {'gamma_recurrence', 'beta_integral', 'gamma_scaled_integral'}:
@@ -310,6 +321,20 @@ def verify(data, output_dir, timeout):
     _save_json(output_dir/'result.json', result)
     lines = ['# Special Function Proof Agent', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
              '完全Lean証明：'+result['status'], '数値診断：'+numeric['diagnostic']]
+    if research:
+        lines += ['', '研究補題の再利用：元の命題と全条件を固定し、各補題の仮定をこの命題の条件からLeanで確認します。']
+        for dependency in dependencies:
+            lines += [f'- {dependency["name"]} ({dependency["id"]})',
+                      '  '+dependency['statement'], '  補題の条件：'+'、'.join(dependency['conditions'])]
+        applications = ([data['proof']['uses']] if data['proof']['mode'] == 'direct' else
+                        [step['uses'] for step in data['proof']['steps']])
+        application_index = 0
+        for uses in applications:
+            for use in uses:
+                application_index += 1
+                arguments = '、'.join(name+' ← '+display(value) for name, value in use['arguments'].items())
+                lines += [f'適用{application_index}：{use["lemma"]}、{arguments}。'+('右辺から左辺へ使います。' if use['reverse'] else '左辺から右辺へ使います。')]
+        lines += ['証明と依存関係は certificate.lean、request.json、analysis.json に保存します。']
     from .real_bessel import _walk
     if any(node.get('op') in {'hermite_h', 'hermite_he'} for node in _walk([data['lhs'], data['rhs']])):
         lines += ['', 'Hermite規約：Hは物理学規約、Heは確率論規約。次数は自然数です。']
@@ -328,6 +353,8 @@ def verify(data, output_dir, timeout):
 
 
 def replay(data, result, output_dir, timeout):
+    from . import research_proof
+    research = research_proof.is_research(data)
     if result.get('status') != 'proved' or result.get('full_function_proof') is not True:
         raise InputError('This run has no full special-function certificate.')
     if result.get('certificate_kind') != 'proof':
@@ -335,9 +362,20 @@ def replay(data, result, output_dir, timeout):
     bessel_scope = (cross_complete.FORMAL_SCOPE if cross_complete.complete_target(data) else
                     bessel_y_integer.formal_scope(data) if bessel_y_integer.complete_target(data) else
                     bessel_y_formal.FORMAL_SCOPE if bessel_y_formal.contains(data) else None)
-    if bessel_scope and (result.get('full_bessel_proof') is not True or
-                         result.get('formal_scope') != bessel_scope):
+    if bessel_scope and result.get('full_bessel_proof') is not True:
         raise InputError('The Bessel proof status disagrees with the full certificate.')
+    if bessel_scope is None and 'full_bessel_proof' in result:
+        raise InputError('The saved Bessel flag differs from the fixed proof scope.')
+    if not research and result.get('formal_scope') != bessel_scope:
+        raise InputError('The saved formal scope differs from the fixed target.')
+    if research:
+        dependencies = research_proof.inspect_dependencies(data)
+        analysis = {'recipe': 'research', 'dependencies': dependencies}
+        from .core import load_json
+        if (result.get('formal_scope') != research_proof.FORMAL_SCOPE or
+                result.get('research_dependencies') != dependencies or
+                result.get('analysis') != analysis or load_json(output_dir/'analysis.json') != analysis):
+            raise InputError('Saved research dependencies or scope changed.')
     source = render(data)
     certificate = output_dir/'certificate.lean'
     if result.get('environment') != environment() or result.get('conventions') != conventions(data):

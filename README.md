@@ -14,6 +14,7 @@
 - **根条件付き交差積**：`examples/cross-product-root.txt` を、元の `0<lambda<1,z>0,X_01(z,lambda*z)=0` から完全Lean証明します。正エネルギー積分で両分母の非零性を導き、左末尾X₀₂・右分子X₀₀を保持します。直接・ステップ両経路に対応します。
 - **実Bessel J/Y・交差積の診断**：対応する完全証明レシピ以外の入力は、正の引数で数値診断と解析テンプレートを実行します。従来の条件付き整数Y・cross証拠は、明示した `diagnostic` 経路と元の前提を保持して再検査できます。
 - **保存と再検査**：元式・変数型・束縛・全条件・関数規約・環境ハッシュ・証明を保持し、再利用前にLeanで再検査します。
+- **研究補題の再利用**：既存関数の検証済み等式を外部研究フォルダへ登録し、実変数を置換して別の命題へ適用できます。元補題の条件を新targetの元条件からLeanで確認し、依存証拠を保存します。[Gamma公式をつなぐ例・Codex依頼・選択共有](docs/research-lemmas.md)。
 
 登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` にあります。
 
@@ -166,4 +167,4 @@ python3 scripts/replay_examples.py
 
 Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式・一般直交積分と規格化の2式です。整数Yの完全証明例は `integer-y-complete`、`integer-y-zero-derivative`、`integer-y-one-derivative`、`integer-y-wronskian`、`integer-y-cross-same-point` です。根条件付き交差積の完全証明例は `cross-product-root` です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
 
-後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。
+後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。研究拡張は自由次数を持つ補題と、新関数の定義・規約・Lean API登録を次段階とします。

@@ -1,0 +1,18 @@
+{
+  "recipe": "research",
+  "dependencies": [
+    {
+      "id": "b2d6b64014f068f0def5d3915656e24a4e87278f5830181a4acf8985bd689421",
+      "name": "gamma-step",
+      "source": null,
+      "target_sha256": "2866593a408219281c10dc996ea6b6ac4afd9a9f9d1bf69658f2d92a1213795e",
+      "statement": "Gamma((x+1)) = (x*Gamma(x))",
+      "conditions": [
+        "x is real",
+        "x > 0"
+      ],
+      "proof_mode": "direct",
+      "formal_scope": null
+    }
+  ]
+}

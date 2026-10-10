@@ -11,8 +11,12 @@ from . import archive
 
 
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == 'research':
+        from .research_cli import main as research_main
+        return research_main(sys.argv[2:])
     parser = argparse.ArgumentParser(description="Check structured special-function identities with Lean.")
     subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers.add_parser('research', help='Register private verified lemmas and reuse them in different targets; use research --help.')
     check = subparsers.add_parser("verify")
     check.add_argument("input", type=Path)
     check.add_argument("--output", type=Path, required=True)

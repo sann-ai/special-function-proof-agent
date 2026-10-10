@@ -316,6 +316,12 @@ def _expr(node: Any, sort: str, depth: int = 0, budget: list[int] | None = None,
 
 def validate_request(data: Any, require_proof: bool = True) -> dict[str, Any]:
     from .real_bessel import is_extended, validate
+    from .research_proof import is_research, validate_proof
+    if is_research(data):
+        target = {key: value for key, value in data.items() if key != 'proof'}
+        validate(target, require_proof=False)
+        validate_proof(data)
+        return data
     if is_extended(data):
         return validate(data, require_proof)
     required = {"schema_version", "assumptions", "lhs", "rhs"}
@@ -690,7 +696,8 @@ def render_lean(data: dict[str, Any], kind: str = "proof") -> str:
     validate_request(data)
     if data["schema_version"] == 2:
         from .real_special import has_special, render
-        if has_special(data) and kind == "proof":
+        from .research_proof import is_research
+        if (has_special(data) or is_research(data)) and kind == "proof":
             return render(data)
         raise InputError("This version 2 target has scoped diagnostics only.")
     if kind not in {"proof", "refutation"}:
@@ -845,7 +852,8 @@ def verify(data: Any, output_dir: Path, timeout: float = 60) -> dict[str, Any]:
         return result
     if data["schema_version"] == 2:
         from .real_special import has_special, verify as verify_special
-        if has_special(data):
+        from .research_proof import is_research
+        if has_special(data) or is_research(data):
             return verify_special(data, output_dir, timeout)
         from .real_bessel import verify_diagnostic
         return verify_diagnostic(data, output_dir, timeout)
@@ -877,7 +885,8 @@ def replay(output_dir: Path, timeout: float = 60) -> dict[str, Any]:
     validate_request(data)
     if data["schema_version"] == 2:
         from .real_special import has_special, replay as replay_special
-        if has_special(data):
+        from .research_proof import is_research
+        if has_special(data) or is_research(data):
             return replay_special(data, result, output_dir, timeout)
         from .real_bessel import replay_diagnostic
         return replay_diagnostic(data, result, output_dir, timeout)
