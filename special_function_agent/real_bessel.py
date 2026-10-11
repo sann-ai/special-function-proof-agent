@@ -444,7 +444,8 @@ def validate(data, require_proof=True):
 
 def display(node):
     op = node['op']
-    if op in {'exp_series', 'gaussian_primitive', 'linear_ivp'}:
+    if op in {'exp_series', 'gaussian_primitive', 'linear_ivp',
+              'series_definition', 'integral_definition', 'ode_definition'}:
         from .defined_proof import display as definition_display
         return definition_display({'definitions': []}, node)
     if op == 'defined':

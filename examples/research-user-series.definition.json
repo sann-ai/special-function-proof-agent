@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "name": "WeightedSeries",
+  "parameters": {
+    "a": "real",
+    "x": "real"
+  },
+  "body": {
+    "op": "series_definition",
+    "index": "k",
+    "term": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "var",
+                    "name": "x"
+                  },
+                  "exponent": {
+                    "op": "var",
+                    "name": "k"
+                  }
+                },
+                {
+                  "op": "factorial",
+                  "arg": {
+                    "op": "var",
+                    "name": "k"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "var",
+                  "name": "a"
+                }
+              ]
+            },
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "neg",
+                    "arg": {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  },
+                  "exponent": {
+                    "op": "var",
+                    "name": "k"
+                  }
+                },
+                {
+                  "op": "factorial",
+                  "arg": {
+                    "op": "var",
+                    "name": "k"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "definitions": []
+}

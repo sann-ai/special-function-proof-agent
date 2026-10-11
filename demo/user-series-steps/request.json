@@ -1,0 +1,244 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "a57070a8fad22ee60df32dff63ce460de5d28198e293d254874dd7caa41e650d",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "x": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "add",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "var",
+            "name": "a"
+          },
+          {
+            "op": "exp",
+            "arg": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "int",
+                "value": 1
+              },
+              {
+                "op": "var",
+                "name": "a"
+              }
+            ]
+          },
+          {
+            "op": "exp",
+            "arg": {
+              "op": "neg",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "WeightedSeries",
+      "parameters": {
+        "a": "real",
+        "x": "real"
+      },
+      "body": {
+        "op": "series_definition",
+        "index": "k",
+        "term": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "pow",
+                      "base": {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      "exponent": {
+                        "op": "var",
+                        "name": "k"
+                      }
+                    },
+                    {
+                      "op": "factorial",
+                      "arg": {
+                        "op": "var",
+                        "name": "k"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "var",
+                      "name": "a"
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "pow",
+                      "base": {
+                        "op": "neg",
+                        "arg": {
+                          "op": "var",
+                          "name": "x"
+                        }
+                      },
+                      "exponent": {
+                        "op": "var",
+                        "name": "k"
+                      }
+                    },
+                    {
+                      "op": "factorial",
+                      "arg": {
+                        "op": "var",
+                        "name": "k"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "definitions": [],
+      "id": "a57070a8fad22ee60df32dff63ce460de5d28198e293d254874dd7caa41e650d"
+    }
+  ],
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "defined",
+          "function": "a57070a8fad22ee60df32dff63ce460de5d28198e293d254874dd7caa41e650d",
+          "arguments": {
+            "a": {
+              "op": "var",
+              "name": "a"
+            },
+            "x": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "exp",
+                  "arg": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "var",
+                      "name": "a"
+                    }
+                  ]
+                },
+                {
+                  "op": "exp",
+                  "arg": {
+                    "op": "neg",
+                    "arg": {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "recipe": "ring",
+        "reason": "保存した明示定義を展開する。元の全条件の下で実数の代数式を整理する。",
+        "conditions": [
+          "a is real",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

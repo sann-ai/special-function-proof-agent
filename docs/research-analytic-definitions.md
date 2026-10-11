@@ -4,6 +4,8 @@
 
 研究関数の登録状態は `defined`、その関数について検査した恒等式の状態は `proved` です。恒等式は直接証明と自然言語ステップの両経路で扱い、成功した source の証明を研究補題として別の derived target へ適用できます。[研究関数の基本手順](research-functions.md)と[研究補題の保存・適用](research-lemmas.md)も参照してください。
 
+ユーザーが一般項・被積分式・ODE右辺を指定する形式は、[ユーザー指定の解析定義](research-user-analytic-definitions.md)を参照してください。このページは既存の固定3形式を説明します。
+
 ## 3 種類の定義と成立域
 
 ### 指数級数

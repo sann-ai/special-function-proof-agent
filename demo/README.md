@@ -1,6 +1,6 @@
 # Saved proof examples
 
-This directory contains 129 replayable certificates: 127 complete proofs and two
+This directory contains 141 replayable certificates: 139 complete proofs and two
 historical conditional certificates. Each run keeps its fixed request, generated
 Lean certificate, standard-axiom audit, numerical diagnostic and result.
 
@@ -8,7 +8,7 @@ After building the base project and its analytic definitions, recheck all eviden
 
 ```sh
 lake build
-lake build SpecialFunctionProofAgent.AnalyticDefinitions
+lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
 python3 scripts/replay_examples.py
 ```
 
@@ -22,6 +22,13 @@ has direct/steps source proofs and direct/steps applications of the registered
 source lemma to a different target. Definitions, analytic contracts, dependency
 IDs and the optional analytic-module hash stay with the fixed request and result.
 See [the definitions and CLI examples](../docs/research-analytic-definitions.md).
+
+The twelve `user-*` runs use user-specified factorial-kernel combinations,
+polynomial integrands with real endpoints, and polynomial-coefficient homogeneous
+ODEs with initial conditions. Each class includes both proof routes and both routes
+of source-lemma application to a different target. The generated bridges check the
+original user expression against its normalization and retain its analytic contract.
+See [user expression syntax and examples](../docs/research-user-analytic-definitions.md).
 
 `cross-product` and `integer-y-recurrence` preserve their original conditional
 scope and premises. Complete proofs of their corresponding supported targets are

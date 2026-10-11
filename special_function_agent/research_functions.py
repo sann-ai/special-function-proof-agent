@@ -7,6 +7,7 @@ import re
 
 from .core import InputError, _keys, _sha
 from . import real_bessel, real_special, research_analytic as analytic
+from . import research_user_analytic_lean as user_analytic
 
 MAX_DEFINITIONS = 12
 MAX_DEPTH = 4
@@ -57,7 +58,7 @@ def uses_analytic(value):
     """Include structured source requests in saved lemma dependency packages."""
     if isinstance(value, list): return any(uses_analytic(item) for item in value)
     if not isinstance(value, dict): return False
-    if isinstance(value.get('op'), str) and value['op'] in analytic.OPS: return True
+    if isinstance(value.get('op'), str) and value['op'] in analytic.OPS | user_analytic.OPS: return True
     for key, child in value.items():
         if key == 'request.json' and isinstance(child, str):
             try: child = json.loads(child)
@@ -73,7 +74,22 @@ def environment(data, base=None):
     if uses_analytic(data):
         name = 'SpecialFunctionProofAgent/AnalyticDefinitions.lean'
         result[name] = _sha((core.ROOT/name).read_bytes())
+    if uses_user_analytic(data):
+        name = 'SpecialFunctionProofAgent/UserAnalyticDefinitions.lean'
+        result[name] = _sha((core.ROOT/name).read_bytes())
     return result
+
+
+def uses_user_analytic(value):
+    if isinstance(value, list): return any(uses_user_analytic(item) for item in value)
+    if not isinstance(value, dict): return False
+    if isinstance(value.get('op'), str) and value['op'] in user_analytic.OPS: return True
+    for key, child in value.items():
+        if key == 'request.json' and isinstance(child, str):
+            try: child = json.loads(child)
+            except (ValueError, RecursionError): continue
+        if uses_user_analytic(child): return True
+    return False
 
 
 def _finite(node, variables, depth=0, budget=None):
@@ -151,6 +167,10 @@ def _expand(node, infos, variables=None, depth=0, budget=None):
         raise InputError('Expanded research expressions exceed the supported size or depth.')
     if isinstance(node, list): return [_expand(item, infos, variables, depth+1, budget) for item in node]
     if not isinstance(node, dict): return node
+    if isinstance(node.get('op'), str) and node['op'] in user_analytic.OPS:
+        from .research_user_analytic import normalize
+        normalize(node, variables if variables is not None else user_analytic.parameters(node))
+        return _expand(user_analytic.expand(node), infos, variables, depth+1, budget)
     if isinstance(node.get('op'), str) and node['op'] in analytic.OPS:
         expanded = {'op': node['op']}
         for field in analytic.fields(node):
@@ -170,7 +190,7 @@ def _expand(node, infos, variables=None, depth=0, budget=None):
         info = infos[key]
         if not isinstance(arguments, dict) or set(arguments) != set(info['snapshot']['parameters']):
             raise InputError('A research call must supply exactly every real parameter.')
-        if any(item.get('op') in ('deriv', 'integral', 'infinity', *analytic.OPS) for item in real_bessel._walk(arguments)):
+        if any(item.get('op') in ('deriv', 'integral', 'infinity', *analytic.OPS, *user_analytic.OPS) for item in real_bessel._walk(arguments)):
             raise InputError('Research call arguments use finite expressions and exclude raw analytic forms, derivatives, integrals and infinity.')
         expanded = {name: _expand(value, infos, variables, depth+1, budget) for name, value in arguments.items()}
         for value in expanded.values():
@@ -297,7 +317,7 @@ def expand_target(data):
     for node in real_bessel._walk([data['lhs'], data['rhs'], data['assumptions'], data.get('proof', {}).get('steps', [])] if isinstance(data.get('proof', {}), dict) else []):
         if 'op' in node and not isinstance(node['op'], str):
             raise InputError('Every research expression requires an operation string.')
-        if node.get('op') in analytic.OPS:
+        if node.get('op') in analytic.OPS | user_analytic.OPS:
             raise InputError('Analytic forms belong in registered definition bodies; targets use their defined calls.')
         if node.get('op') in ('integral', 'deriv') and isinstance(node.get('var'), str) and node['var'].casefold() in function_names:
             raise InputError('Calculus bindings must be distinct from research function names.')
@@ -355,6 +375,12 @@ def _lean_name(key):
 
 
 def _lean(node, names, types, infos):
+    if node['op'] in user_analytic.OPS:
+        return user_analytic.render(node, names, types, infos)
+    if node['op'] == 'factorial':
+        return '('+names[node['arg']['name']]+'.factorial : ℝ)'
+    if node['op'] == 'pow' and isinstance(node['exponent'], dict):
+        return '('+_lean(node['base'], names, types, infos)+' ^ '+names[node['exponent']['name']]+')'
     if node['op'] in analytic.OPS:
         return analytic.lean_expr(node, lambda child: _lean(child, names, types, infos))
     if node['op'] == 'defined':
@@ -401,9 +427,13 @@ def lean_expr(node, names, types, definitions):
 
 def lean_definitions(definitions):
     infos = _definitions(definitions)
-    lines = []
+    lines, bridges = [], set()
     for key, info in infos.items():
         definition = info['snapshot']
+        for node in real_bessel._walk(definition['body']):
+            if node.get('op') in user_analytic.OPS and user_analytic.name(node) not in bridges:
+                lines.append(user_analytic.declarations(node)[0])
+                bridges.add(user_analytic.name(node))
         names = {name: 'p'+str(index) for index, name in enumerate(sorted(definition['parameters']))}
         binders = ' '.join(f'({names[name]} : ℝ)' for name in sorted(names))
         body = _lean(definition['body'], names, definition['parameters'], infos)
@@ -414,8 +444,9 @@ def lean_definitions(definitions):
 def metadata(definitions):
     return [{'id': key, 'name': info['snapshot']['name'], 'parameters': _copy(info['snapshot']['parameters']),
              'dependencies': [item['id'] for item in info['snapshot']['definitions']], 'lean_name': _lean_name(key),
-             **({'analytic_contracts': [analytic.contracts(node) for node in real_bessel._walk(info['snapshot']['body'])
-                                        if node.get('op') in analytic.OPS]} if uses_analytic(info['snapshot']['body']) else {})}
+             **({'analytic_contracts': [(user_analytic.contract(node) if node.get('op') in user_analytic.OPS
+                                        else analytic.contracts(node)) for node in real_bessel._walk(info['snapshot']['body'])
+                                        if node.get('op') in analytic.OPS | user_analytic.OPS]} if uses_analytic(info['snapshot']['body']) else {})}
             for key, info in _definitions(definitions).items()]
 
 
@@ -432,8 +463,9 @@ def rewrite_lemmas(definitions):
     bridges = []
     for info in infos.values():
         for node in real_bessel._walk(info['snapshot']['body']):
-            if node.get('op') in analytic.OPS:
-                bridge = analytic.contracts(node)['bridge']
+            if node.get('op') in analytic.OPS | user_analytic.OPS:
+                bridge = (user_analytic.contract(node) if node.get('op') in user_analytic.OPS
+                          else analytic.contracts(node))['bridge']
                 if bridge not in bridges: bridges.append(bridge)
     return [_lean_name(key) for key in reversed(infos)] + bridges
 
@@ -450,6 +482,14 @@ def analytic_contracts(definitions):
         binders = ' '.join(f'({mapping[name]} : ℝ)' for name in sorted(mapping))
         expr = lambda node: _lean(node, mapping, snapshot['parameters'], infos)
         for node in real_bessel._walk(snapshot['body']):
+            if node.get('op') in user_analytic.OPS:
+                _, proposition, local_names = user_analytic.declarations(node)
+                binders_local = ' '.join(f'({value} : ℝ)' for value in local_names.values())
+                args = ' '.join(local_names.values())
+                prop = f'∀ {binders_local}, {proposition}' if local_names else proposition
+                proof = (f'fun {args} => ' if local_names else '')+user_analytic.name(node)+'_contract '+args
+                result.append((prop, proof))
+                continue
             if node.get('op') not in analytic.OPS: continue
             arg = expr(node['arg'])
             ns = 'SpecialFunctionProofAgent.'
@@ -483,6 +523,7 @@ def render_definition(snapshot):
         proof = f'  refine ⟨?_, {", ".join(term for _, term in contracts)}⟩\n  simp only [{rewrite}]\n'
     else: proof = '  rfl\n'
     imports = 'import SpecialFunctionProofAgent\n'+('import SpecialFunctionProofAgent.AnalyticDefinitions\n' if analytic_used else '')
+    if uses_user_analytic(snapshot): imports += 'import SpecialFunctionProofAgent.UserAnalyticDefinitions\n'
     return (imports+'\nopen scoped Real\nopen MeasureTheory\n\n'
             +lean_definitions([snapshot])+'\n\nnamespace BesselAgentCandidate\n\n'
             +f'theorem target {binders} : {statement} := by\n'+proof

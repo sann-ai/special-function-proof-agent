@@ -22,8 +22,28 @@ def conventions(data):
 
 
 def display(data, node):
-    from .real_bessel import display as ordinary_display
+    from .real_bessel import display as ordinary_display, _walk
     from . import research_analytic as analytic
+    from . import research_user_analytic_lean as user_analytic
+    if isinstance(node, dict) and node.get('op') in user_analytic.OPS:
+        child = lambda value: display(data, value)
+        if node['op'] == 'series_definition':
+            return 'sum('+node['index']+'=0..infinity, '+child(node['term'])+')'
+        if node['op'] == 'integral_definition':
+            return 'integral('+child(node['lower'])+'..'+child(node['upper'])+', '+child(node['integrand'])+' d'+node['var']+')'
+        return ("IVP("+node['state']+"'="+child(node['rhs'])+', '+node['state']+'('
+                +child(node['initial_time'])+')='+child(node['initial_value'])+'; '
+                +node['var']+'='+child(node['arg'])+')')
+    if isinstance(node, dict) and node.get('op') == 'factorial': return display(data, node['arg'])+'!'
+    if isinstance(node, dict) and node.get('op') == 'pow' and isinstance(node['exponent'], dict):
+        return '('+display(data, node['base'])+')^('+display(data, node['exponent'])+')'
+    if isinstance(node, dict) and any(item.get('op') in {'factorial'} or
+          item.get('op') == 'pow' and isinstance(item.get('exponent'), dict)
+          for item in _walk(node)):
+        if node['op'] == 'neg': return '-('+display(data, node['arg'])+')'
+        if node['op'] in {'add', 'sub', 'mul', 'div'}:
+            symbol = {'add': '+', 'sub': '-', 'mul': '*', 'div': '/'}[node['op']]
+            return '('+display(data, node['args'][0])+symbol+display(data, node['args'][1])+')'
     if isinstance(node, dict) and node.get('op') in analytic.OPS:
         analytic.fields(node)
         args = {name: display(data, node[name]) for name in analytic.fields(node)}
@@ -53,6 +73,9 @@ def definition_lines(data):
                 'exp_series': '全実引数で階乗級数の HasSum と収束を検証し、exp との等式を適用します。',
                 'gaussian_primitive': '0から実端点への有向区間で可積分性を検証し、sqrt(pi)/2 * erf との等式を適用します。',
                 'linear_ivp': "rate と initial を固定し、全実数上の各点で y'=rate*y を満たし y(0)=initial となる関数の存在・一意性を検証します。",
+                'series_definition': '入力された一般項と階乗核の有限線形結合の一致、および HasSum・収束を Lean で検証します。係数と核引数は自然数の和変数に依存しません。',
+                'integral_definition': '入力された被積分多項式との一致と、指定した実端点間の有向積分の可積分性・原始関数公式を Lean で検証します。',
+                'ode_definition': '入力された右辺・初期時刻・初期値を保持し、全実数上の各点でその微分条件を満たす実関数の存在一意性を Lean で検証します。',
             }[contract['op']]
             lines.append('- '+item['name']+' の定義根拠：'+statement+' 橋渡し：'+contract['bridge'])
     return lines

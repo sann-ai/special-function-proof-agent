@@ -21,7 +21,7 @@ jobs:
           lint: 'false'
           use-mathlib-cache: 'true'
       - name: Build analytic research definitions
-        run: lake build SpecialFunctionProofAgent.AnalyticDefinitions
+        run: lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
       - name: Check available tools and compiled modules
         run: python3 scripts/doctor.py
       - name: Input boundary and Lean verification tests

@@ -10,6 +10,14 @@ from special_function_agent import core
 
 # Explicit public API inventory. Add each new exported definition or theorem here.
 PUBLIC_DECLARATIONS = {
+    "UserAnalyticDefinitions": (
+        "evalPolynomial", "primitivePolynomial", "hasDerivAt_primitivePolynomial",
+        "continuous_evalPolynomial", "intervalIntegrable_evalPolynomial", "polynomialIntegral",
+        "polynomialIntegral_eq_primitive_sub", "polynomialIVPSolution", "polynomialIVPSolution_eq_exp",
+        "hasDerivAt_polynomialIVPSolution", "polynomialIVPSolution_initial", "polynomialIVPSolution_unique",
+        "existsUnique_polynomialIVPSolution", "finiteExponentialCombination", "factorialCombination",
+        "hasSum_factorialCombination", "summable_factorialCombination", "factorialCombination_eq_finiteExponentialCombination",
+    ),
     "AnalyticDefinitions": (
         "exponentialSeries", "hasSum_exponentialSeries", "summable_exponentialSeries", "exponentialSeries_eq_exp",
         "gaussianPrimitive", "intervalIntegrable_gaussian", "gaussianPrimitive_eq_erf", "hasDerivAt_gaussianPrimitive",

@@ -89,14 +89,18 @@ def _source(body, dependencies):
     if any(name in content for name in rewrite_lemmas()):
         preamble = preamble.replace('import SpecialFunctionProofAgent\n',
                                     'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AnalyticDefinitions\n', 1)
+    if 'ResearchAnalytic_' in content:
+        preamble = preamble.replace('import SpecialFunctionProofAgent\n',
+                                    'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.UserAnalyticDefinitions\n', 1)
     return preamble + content + '\n' + _AUDIT
 
 
 def _ordinary_body(source):
-    prefix = _PREAMBLE + 'namespace BesselAgentCandidate\n\n'
-    if source.startswith('import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AnalyticDefinitions\n'):
-        prefix = prefix.replace('import SpecialFunctionProofAgent\n',
-                                'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AnalyticDefinitions\n', 1)
+    imports = 'import SpecialFunctionProofAgent\n'
+    for module in ('UserAnalyticDefinitions', 'AnalyticDefinitions'):
+        line = 'import SpecialFunctionProofAgent.'+module+'\n'
+        if source.startswith(imports+line): imports += line
+    prefix = imports + '\nopen scoped Real\nopen MeasureTheory\n\nnamespace BesselAgentCandidate\n\n'
     suffix = '\nend BesselAgentCandidate\n' + _AUDIT
     if not source.startswith(prefix) or not source.endswith(suffix):
         raise InputError('The registered renderer has an unsupported certificate layout.')

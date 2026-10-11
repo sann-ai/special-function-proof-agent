@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "PolynomialFlow",
+  "parameters": {
+    "a": "real",
+    "c": "real",
+    "x": "real"
+  },
+  "body": {
+    "op": "ode_definition",
+    "var": "t",
+    "state": "y",
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "t"
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "op": "var",
+          "name": "y"
+        }
+      ]
+    },
+    "initial_time": {
+      "op": "int",
+      "value": 1
+    },
+    "initial_value": {
+      "op": "var",
+      "name": "c"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "definitions": []
+}

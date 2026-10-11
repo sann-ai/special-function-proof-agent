@@ -1,0 +1,616 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+      "name": "ShiftedArea",
+      "parameters": {
+        "a": "real",
+        "b": "real",
+        "x": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+      "analytic_contracts": [
+        {
+          "op": "integral_definition",
+          "kind": "user_polynomial_integral",
+          "domain": {
+            "x": "real",
+            "a": "real",
+            "b": "real"
+          },
+          "semantics": {
+            "original": {
+              "op": "integral_definition",
+              "var": "t",
+              "integrand": {
+                "op": "pow",
+                "base": {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "t"
+                    },
+                    {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  ]
+                },
+                "exponent": 2
+              },
+              "lower": {
+                "op": "var",
+                "name": "a"
+              },
+              "upper": {
+                "op": "var",
+                "name": "b"
+              }
+            },
+            "normalized": {
+              "op": "integral_definition",
+              "var": "t",
+              "coefficients": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "x"
+                    },
+                    {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  ]
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "x"
+                    },
+                    {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 1
+                }
+              ],
+              "lower": {
+                "op": "var",
+                "name": "a"
+              },
+              "upper": {
+                "op": "var",
+                "name": "b"
+              },
+              "scalar_expressions": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "b"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ],
+              "nonzero_denominators": [],
+              "original": {
+                "op": "integral_definition",
+                "var": "t",
+                "integrand": {
+                  "op": "pow",
+                  "base": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "t"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "exponent": 2
+                },
+                "lower": {
+                  "op": "var",
+                  "name": "a"
+                },
+                "upper": {
+                  "op": "var",
+                  "name": "b"
+                }
+              }
+            },
+            "parameter_domain": "real",
+            "orientation": "lower_to_upper",
+            "endpoints": "arbitrary finite reals"
+          },
+          "definition": "ResearchAnalytic_afaea59c0c1ce0b13c3a5051c72089744a1763649dc6403f0f2622f324569129",
+          "bridge": "ResearchAnalytic_afaea59c0c1ce0b13c3a5051c72089744a1763649dc6403f0f2622f324569129_bridge",
+          "theorems": [
+            "ResearchAnalytic_afaea59c0c1ce0b13c3a5051c72089744a1763649dc6403f0f2622f324569129_contract"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "a": "real",
+      "b": "real",
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "sub",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "b"
+                              },
+                              "exponent": 1
+                            }
+                          ]
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "b"
+                              },
+                              "exponent": 2
+                            }
+                          ]
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "int",
+                          "value": 1
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "b"
+                          },
+                          "exponent": 3
+                        }
+                      ]
+                    },
+                    {
+                      "op": "int",
+                      "value": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "a"
+                              },
+                              "exponent": 1
+                            }
+                          ]
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "a"
+                              },
+                              "exponent": 2
+                            }
+                          ]
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "int",
+                          "value": 1
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          "exponent": 3
+                        }
+                      ]
+                    },
+                    {
+                      "op": "int",
+                      "value": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "div",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "b"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "exponent": 3
+                },
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "exponent": 3
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "proof_analysis": {
+    "recipe": "research",
+    "dependencies": [
+      {
+        "id": "6c0fa73c0407cfcdf7d4a9b516728719fab8af8c3fa9c13dc11be285fd7882b8",
+        "name": "integral-identity",
+        "source": null,
+        "target_sha256": "0182ad16d63ff0c1c895b64b3753abc8c3462a1cf9552b017a7a8eb27937468e",
+        "statement": "Function[5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e](a=a,b=b,x=x) = ((((b+x)^3)-((a+x)^3))/3)",
+        "conditions": [
+          "a is real",
+          "b is real",
+          "x is real"
+        ],
+        "proof_mode": "steps",
+        "formal_scope": "proof of the original real target under verified analytic research definitions",
+        "definitions": [
+          {
+            "id": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+            "name": "ShiftedArea",
+            "parameters": {
+              "a": "real",
+              "b": "real",
+              "x": "real"
+            },
+            "dependencies": [],
+            "lean_name": "ResearchFunction_5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+            "analytic_contracts": [
+              {
+                "op": "integral_definition",
+                "kind": "user_polynomial_integral",
+                "domain": {
+                  "x": "real",
+                  "a": "real",
+                  "b": "real"
+                },
+                "semantics": {
+                  "original": {
+                    "integrand": {
+                      "base": {
+                        "args": [
+                          {
+                            "name": "t",
+                            "op": "var"
+                          },
+                          {
+                            "name": "x",
+                            "op": "var"
+                          }
+                        ],
+                        "op": "add"
+                      },
+                      "exponent": 2,
+                      "op": "pow"
+                    },
+                    "lower": {
+                      "name": "a",
+                      "op": "var"
+                    },
+                    "op": "integral_definition",
+                    "upper": {
+                      "name": "b",
+                      "op": "var"
+                    },
+                    "var": "t"
+                  },
+                  "normalized": {
+                    "op": "integral_definition",
+                    "var": "t",
+                    "coefficients": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "name": "x",
+                            "op": "var"
+                          },
+                          {
+                            "name": "x",
+                            "op": "var"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "name": "x",
+                            "op": "var"
+                          },
+                          {
+                            "name": "x",
+                            "op": "var"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ],
+                    "lower": {
+                      "name": "a",
+                      "op": "var"
+                    },
+                    "upper": {
+                      "name": "b",
+                      "op": "var"
+                    },
+                    "scalar_expressions": [
+                      {
+                        "name": "a",
+                        "op": "var"
+                      },
+                      {
+                        "name": "b",
+                        "op": "var"
+                      },
+                      {
+                        "name": "x",
+                        "op": "var"
+                      }
+                    ],
+                    "nonzero_denominators": [],
+                    "original": {
+                      "integrand": {
+                        "base": {
+                          "args": [
+                            {
+                              "name": "t",
+                              "op": "var"
+                            },
+                            {
+                              "name": "x",
+                              "op": "var"
+                            }
+                          ],
+                          "op": "add"
+                        },
+                        "exponent": 2,
+                        "op": "pow"
+                      },
+                      "lower": {
+                        "name": "a",
+                        "op": "var"
+                      },
+                      "op": "integral_definition",
+                      "upper": {
+                        "name": "b",
+                        "op": "var"
+                      },
+                      "var": "t"
+                    }
+                  },
+                  "parameter_domain": "real",
+                  "orientation": "lower_to_upper",
+                  "endpoints": "arbitrary finite reals"
+                },
+                "definition": "ResearchAnalytic_afaea59c0c1ce0b13c3a5051c72089744a1763649dc6403f0f2622f324569129",
+                "bridge": "ResearchAnalytic_afaea59c0c1ce0b13c3a5051c72089744a1763649dc6403f0f2622f324569129_bridge",
+                "theorems": [
+                  "ResearchAnalytic_afaea59c0c1ce0b13c3a5051c72089744a1763649dc6403f0f2622f324569129_contract"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

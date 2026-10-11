@@ -1,0 +1,121 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "b": {
+        "op": "var",
+        "name": "b"
+      },
+      "x": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "sub",
+        "args": [
+          {
+            "op": "pow",
+            "base": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "b"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ]
+            },
+            "exponent": 3
+          },
+          {
+            "op": "pow",
+            "base": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ]
+            },
+            "exponent": 3
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 3
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "ShiftedArea",
+      "parameters": {
+        "a": "real",
+        "b": "real",
+        "x": "real"
+      },
+      "body": {
+        "op": "integral_definition",
+        "var": "t",
+        "integrand": {
+          "op": "pow",
+          "base": {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "t"
+              },
+              {
+                "op": "var",
+                "name": "x"
+              }
+            ]
+          },
+          "exponent": 2
+        },
+        "lower": {
+          "op": "var",
+          "name": "a"
+        },
+        "upper": {
+          "op": "var",
+          "name": "b"
+        }
+      },
+      "definitions": [],
+      "id": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e"
+    }
+  ],
+  "proof": {
+    "mode": "direct",
+    "recipe": "ring"
+  }
+}

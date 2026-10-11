@@ -770,7 +770,8 @@ def environment() -> dict[str, Any]:
     # The optional analytic-definition module is fingerprinted by its consumers;
     # adding it does not invalidate certificates that never import it.
     files += sorted(path for path in (ROOT / "SpecialFunctionProofAgent").glob("**/*.lean")
-                    if path != ROOT / "SpecialFunctionProofAgent/AnalyticDefinitions.lean")
+                    if path not in {ROOT / "SpecialFunctionProofAgent/AnalyticDefinitions.lean",
+                                    ROOT / "SpecialFunctionProofAgent/UserAnalyticDefinitions.lean"})
     return {str(path.relative_to(ROOT)): _sha(path.read_bytes()) for path in files if path.is_file()}
 
 

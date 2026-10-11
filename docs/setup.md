@@ -32,7 +32,7 @@ ZIPにはプロジェクトのGit履歴が含まれません。Lakeはmathlibな
 elan toolchain install leanprover/lean4:v4.34.0
 lake exe cache get
 lake build
-lake build SpecialFunctionProofAgent.AnalyticDefinitions
+lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
 python3 scripts/doctor.py
 ```
 

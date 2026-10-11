@@ -1,0 +1,268 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "c": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "82261b175938d10e2dea2c231c3706699e10d94f3a2fdfcd598fc7c557a0e96a",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "c": {
+        "op": "var",
+        "name": "c"
+      },
+      "x": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "var",
+        "name": "c"
+      },
+      {
+        "op": "exp",
+        "arg": {
+          "op": "add",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "a"
+                    },
+                    {
+                      "op": "sub",
+                      "args": [
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "x"
+                          },
+                          "exponent": 2
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 2
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "x"
+                    },
+                    {
+                      "op": "int",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "PolynomialFlow",
+      "parameters": {
+        "a": "real",
+        "c": "real",
+        "x": "real"
+      },
+      "body": {
+        "op": "ode_definition",
+        "var": "t",
+        "state": "y",
+        "rhs": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "a"
+                    },
+                    {
+                      "op": "var",
+                      "name": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "op": "var",
+              "name": "y"
+            }
+          ]
+        },
+        "initial_time": {
+          "op": "int",
+          "value": 1
+        },
+        "initial_value": {
+          "op": "var",
+          "name": "c"
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      "definitions": [],
+      "id": "82261b175938d10e2dea2c231c3706699e10d94f3a2fdfcd598fc7c557a0e96a"
+    }
+  ],
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "defined",
+          "function": "82261b175938d10e2dea2c231c3706699e10d94f3a2fdfcd598fc7c557a0e96a",
+          "arguments": {
+            "a": {
+              "op": "var",
+              "name": "a"
+            },
+            "c": {
+              "op": "var",
+              "name": "c"
+            },
+            "x": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "c"
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "a"
+                          },
+                          {
+                            "op": "sub",
+                            "args": [
+                              {
+                                "op": "pow",
+                                "base": {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                "exponent": 2
+                              },
+                              {
+                                "op": "int",
+                                "value": 1
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "int",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 2
+                      },
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "op": "var",
+                            "name": "x"
+                          },
+                          {
+                            "op": "int",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "recipe": "ring",
+        "reason": "保存した明示定義を展開する。元の全条件の下で実数の代数式を整理する。",
+        "conditions": [
+          "a is real",
+          "c is real",
+          "x is real"
+        ]
+      }
+    ]
+  }
+}

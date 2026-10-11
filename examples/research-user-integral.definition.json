@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "name": "ShiftedArea",
+  "parameters": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "body": {
+    "op": "integral_definition",
+    "var": "t",
+    "integrand": {
+      "op": "pow",
+      "base": {
+        "op": "add",
+        "args": [
+          {
+            "op": "var",
+            "name": "t"
+          },
+          {
+            "op": "var",
+            "name": "x"
+          }
+        ]
+      },
+      "exponent": 2
+    },
+    "lower": {
+      "op": "var",
+      "name": "a"
+    },
+    "upper": {
+      "op": "var",
+      "name": "b"
+    }
+  },
+  "definitions": []
+}

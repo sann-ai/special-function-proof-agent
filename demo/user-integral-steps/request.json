@@ -1,0 +1,193 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "lhs": {
+    "op": "defined",
+    "function": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "b": {
+        "op": "var",
+        "name": "b"
+      },
+      "x": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "div",
+    "args": [
+      {
+        "op": "sub",
+        "args": [
+          {
+            "op": "pow",
+            "base": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "b"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ]
+            },
+            "exponent": 3
+          },
+          {
+            "op": "pow",
+            "base": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ]
+            },
+            "exponent": 3
+          }
+        ]
+      },
+      {
+        "op": "int",
+        "value": 3
+      }
+    ]
+  },
+  "definitions": [
+    {
+      "body": {
+        "integrand": {
+          "base": {
+            "args": [
+              {
+                "name": "t",
+                "op": "var"
+              },
+              {
+                "name": "x",
+                "op": "var"
+              }
+            ],
+            "op": "add"
+          },
+          "exponent": 2,
+          "op": "pow"
+        },
+        "lower": {
+          "name": "a",
+          "op": "var"
+        },
+        "op": "integral_definition",
+        "upper": {
+          "name": "b",
+          "op": "var"
+        },
+        "var": "t"
+      },
+      "definitions": [],
+      "id": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+      "name": "ShiftedArea",
+      "parameters": {
+        "a": "real",
+        "b": "real",
+        "x": "real"
+      },
+      "schema_version": 1
+    }
+  ],
+  "proof": {
+    "mode": "steps",
+    "steps": [
+      {
+        "before": {
+          "op": "defined",
+          "function": "5dc64c7ea8c9d68692eede8fd9dea99b1921b04e399fcde1429b8d23b7993d4e",
+          "arguments": {
+            "a": {
+              "op": "var",
+              "name": "a"
+            },
+            "b": {
+              "op": "var",
+              "name": "b"
+            },
+            "x": {
+              "op": "var",
+              "name": "x"
+            }
+          }
+        },
+        "after": {
+          "op": "div",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "b"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "exponent": 3
+                },
+                {
+                  "op": "pow",
+                  "base": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "exponent": 3
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 3
+            }
+          ]
+        },
+        "reason": "定義の同時展開後、三乗を展開して環の恒等式を確認する。",
+        "conditions": [],
+        "recipe": "ring"
+      }
+    ]
+  }
+}

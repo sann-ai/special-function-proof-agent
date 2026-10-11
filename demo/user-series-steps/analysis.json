@@ -1,0 +1,382 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "a57070a8fad22ee60df32dff63ce460de5d28198e293d254874dd7caa41e650d",
+      "name": "WeightedSeries",
+      "parameters": {
+        "a": "real",
+        "x": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_a57070a8fad22ee60df32dff63ce460de5d28198e293d254874dd7caa41e650d",
+      "analytic_contracts": [
+        {
+          "op": "series_definition",
+          "kind": "user_factorial_series",
+          "domain": {
+            "a": "real",
+            "x": "real"
+          },
+          "semantics": {
+            "original": {
+              "op": "series_definition",
+              "index": "k",
+              "term": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "pow",
+                            "base": {
+                              "op": "var",
+                              "name": "x"
+                            },
+                            "exponent": {
+                              "op": "var",
+                              "name": "k"
+                            }
+                          },
+                          {
+                            "op": "factorial",
+                            "arg": {
+                              "op": "var",
+                              "name": "k"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 1
+                          },
+                          {
+                            "op": "var",
+                            "name": "a"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "pow",
+                            "base": {
+                              "op": "neg",
+                              "arg": {
+                                "op": "var",
+                                "name": "x"
+                              }
+                            },
+                            "exponent": {
+                              "op": "var",
+                              "name": "k"
+                            }
+                          },
+                          {
+                            "op": "factorial",
+                            "arg": {
+                              "op": "var",
+                              "name": "k"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "normalized": {
+              "op": "series_definition",
+              "index": "k",
+              "terms": [
+                {
+                  "coefficient": {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  "argument": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                },
+                {
+                  "coefficient": {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 1
+                      },
+                      {
+                        "op": "var",
+                        "name": "a"
+                      }
+                    ]
+                  },
+                  "argument": {
+                    "op": "neg",
+                    "arg": {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  }
+                }
+              ],
+              "scalar_expressions": [
+                {
+                  "op": "neg",
+                  "arg": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "var",
+                      "name": "a"
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                }
+              ],
+              "nonzero_denominators": [],
+              "original": {
+                "op": "series_definition",
+                "index": "k",
+                "term": {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "x"
+                              },
+                              "exponent": {
+                                "op": "var",
+                                "name": "k"
+                              }
+                            },
+                            {
+                              "op": "factorial",
+                              "arg": {
+                                "op": "var",
+                                "name": "k"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "var",
+                              "name": "a"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "neg",
+                                "arg": {
+                                  "op": "var",
+                                  "name": "x"
+                                }
+                              },
+                              "exponent": {
+                                "op": "var",
+                                "name": "k"
+                              }
+                            },
+                            {
+                              "op": "factorial",
+                              "arg": {
+                                "op": "var",
+                                "name": "k"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "parameter_domain": "real",
+            "index_domain": "nat",
+            "first_index": 0,
+            "convergence": "HasSum and Summable"
+          },
+          "definition": "ResearchAnalytic_90db31acc78eebd021d3330f316406541c6b10968aa2350c41bed421a3e67b84",
+          "bridge": "ResearchAnalytic_90db31acc78eebd021d3330f316406541c6b10968aa2350c41bed421a3e67b84_bridge",
+          "theorems": [
+            "ResearchAnalytic_90db31acc78eebd021d3330f316406541c6b10968aa2350c41bed421a3e67b84_contract"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "a": "real",
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "var",
+                  "name": "a"
+                }
+              ]
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "neg",
+                "arg": {
+                  "op": "var",
+                  "name": "x"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "name": "a"
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "var",
+                  "name": "a"
+                }
+              ]
+            },
+            {
+              "op": "exp",
+              "arg": {
+                "op": "neg",
+                "arg": {
+                  "op": "var",
+                  "name": "x"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "proof_analysis": null
+}
