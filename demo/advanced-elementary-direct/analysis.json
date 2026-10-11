@@ -1,0 +1,889 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "b986f1978247a78cfdf0803337f4e332fb93b4eae06cd70bf83ff162e372a61b",
+      "name": "ElementaryArea",
+      "parameters": {
+        "a": "real",
+        "b": "real",
+        "x": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_b986f1978247a78cfdf0803337f4e332fb93b4eae06cd70bf83ff162e372a61b",
+      "analytic_contracts": [
+        {
+          "op": "elementary_integral_definition",
+          "kind": "elementary_affine_integral",
+          "domain": {
+            "x": "real",
+            "a": "real",
+            "b": "real"
+          },
+          "semantics": {
+            "original": {
+              "op": "elementary_integral_definition",
+              "var": "t",
+              "integrand": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "exp",
+                        "arg": {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 2
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "t"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "var",
+                              "name": "x"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 3
+                          },
+                          {
+                            "op": "sin",
+                            "arg": {
+                              "op": "sub",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "t"
+                                },
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "cos",
+                    "arg": {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  }
+                ]
+              },
+              "lower": {
+                "op": "var",
+                "name": "a"
+              },
+              "upper": {
+                "op": "var",
+                "name": "b"
+              }
+            },
+            "normalized": {
+              "op": "elementary_integral_definition",
+              "var": "t",
+              "terms": [
+                {
+                  "kind": "exp",
+                  "coefficient": {
+                    "op": "int",
+                    "value": 1
+                  },
+                  "slope": {
+                    "op": "int",
+                    "value": 2
+                  },
+                  "intercept": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                },
+                {
+                  "kind": "sin",
+                  "coefficient": {
+                    "op": "int",
+                    "value": 3
+                  },
+                  "slope": {
+                    "op": "int",
+                    "value": 1
+                  },
+                  "intercept": {
+                    "op": "neg",
+                    "arg": {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  }
+                },
+                {
+                  "kind": "cos",
+                  "coefficient": {
+                    "op": "int",
+                    "value": 1
+                  },
+                  "slope": {
+                    "op": "int",
+                    "value": 0
+                  },
+                  "intercept": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                }
+              ],
+              "affine_arguments": [
+                {
+                  "original": {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "t"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "slope": {
+                    "op": "int",
+                    "value": 1
+                  },
+                  "intercept": {
+                    "op": "neg",
+                    "arg": {
+                      "op": "var",
+                      "name": "x"
+                    }
+                  }
+                },
+                {
+                  "original": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 2
+                          },
+                          {
+                            "op": "var",
+                            "name": "t"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  },
+                  "slope": {
+                    "op": "int",
+                    "value": 2
+                  },
+                  "intercept": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                },
+                {
+                  "original": {
+                    "op": "var",
+                    "name": "x"
+                  },
+                  "slope": {
+                    "op": "int",
+                    "value": 0
+                  },
+                  "intercept": {
+                    "op": "var",
+                    "name": "x"
+                  }
+                }
+              ],
+              "lower": {
+                "op": "var",
+                "name": "a"
+              },
+              "upper": {
+                "op": "var",
+                "name": "b"
+              },
+              "scalar_expressions": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "b"
+                },
+                {
+                  "op": "var",
+                  "name": "x"
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                },
+                {
+                  "op": "int",
+                  "value": 3
+                }
+              ],
+              "nonzero_denominators": [],
+              "required_conditions": [],
+              "original": {
+                "op": "elementary_integral_definition",
+                "var": "t",
+                "integrand": {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "exp",
+                          "arg": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "t"
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "var",
+                                "name": "x"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 3
+                            },
+                            {
+                              "op": "sin",
+                              "arg": {
+                                "op": "sub",
+                                "args": [
+                                  {
+                                    "op": "var",
+                                    "name": "t"
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "x"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "cos",
+                      "arg": {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    }
+                  ]
+                },
+                "lower": {
+                  "op": "var",
+                  "name": "a"
+                },
+                "upper": {
+                  "op": "var",
+                  "name": "b"
+                }
+              }
+            },
+            "parameter_domain": "real",
+            "elementary_functions": {
+              "arsinh": "Real.arsinh on all real arguments",
+              "cos": "Real.cos on all real arguments",
+              "sin": "Real.sin on all real arguments",
+              "sinh": "Real.sinh on all real arguments"
+            },
+            "orientation": "lower_to_upper",
+            "endpoints": "arbitrary finite reals"
+          },
+          "definition": "ResearchAdvanced_c49593e9c96b7619457e349bd6f8c59aafe6c3deb0c81a59dc0c2732e888d391",
+          "bridge": "ResearchAdvanced_c49593e9c96b7619457e349bd6f8c59aafe6c3deb0c81a59dc0c2732e888d391_bridge",
+          "theorems": [
+            "ResearchAdvanced_c49593e9c96b7619457e349bd6f8c59aafe6c3deb0c81a59dc0c2732e888d391_contract"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "a": "real",
+      "b": "real",
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "sub",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "exp",
+                          "arg": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "b"
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "var",
+                                "name": "x"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 3
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "arg": {
+                            "op": "cos",
+                            "arg": {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    {
+                                      "op": "var",
+                                      "name": "b"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "op": "neg",
+                                  "arg": {
+                                    "op": "var",
+                                    "name": "x"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "b"
+                    },
+                    {
+                      "op": "cos",
+                      "arg": {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "exp",
+                          "arg": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "a"
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "var",
+                                "name": "x"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 3
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "arg": {
+                            "op": "cos",
+                            "arg": {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    {
+                                      "op": "var",
+                                      "name": "a"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "op": "neg",
+                                  "arg": {
+                                    "op": "var",
+                                    "name": "x"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "a"
+                    },
+                    {
+                      "op": "cos",
+                      "arg": {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "sub",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "exp",
+                          "arg": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "b"
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "var",
+                                "name": "x"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 3
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "arg": {
+                            "op": "cos",
+                            "arg": {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    {
+                                      "op": "var",
+                                      "name": "b"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "op": "neg",
+                                  "arg": {
+                                    "op": "var",
+                                    "name": "x"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "b"
+                    },
+                    {
+                      "op": "cos",
+                      "arg": {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "exp",
+                          "arg": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "a"
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "var",
+                                "name": "x"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 3
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "arg": {
+                            "op": "cos",
+                            "arg": {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    {
+                                      "op": "var",
+                                      "name": "a"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "op": "neg",
+                                  "arg": {
+                                    "op": "var",
+                                    "name": "x"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "op": "int",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 1
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "a"
+                    },
+                    {
+                      "op": "cos",
+                      "arg": {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "proof_analysis": null
+}

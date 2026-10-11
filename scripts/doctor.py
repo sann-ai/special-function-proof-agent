@@ -64,6 +64,8 @@ def inspect(root: Path = ROOT) -> list[tuple[bool, str]]:
                    "解析的な研究定義のビルド出力（lake build SpecialFunctionProofAgent.AnalyticDefinitions）"))
     checks.append(((root / ".lake/build/lib/lean/SpecialFunctionProofAgent/UserAnalyticDefinitions.olean").is_file(),
                    "ユーザー指定解析式のビルド出力（lake build SpecialFunctionProofAgent.UserAnalyticDefinitions）"))
+    checks.append(((root / ".lake/build/lib/lean/SpecialFunctionProofAgent/AdvancedAnalyticDefinitions.olean").is_file(),
+                   "幾何級数・初等積分・非線形/二階ODEのビルド出力（lake build SpecialFunctionProofAgent.AdvancedAnalyticDefinitions）"))
     return checks
 
 

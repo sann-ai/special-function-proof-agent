@@ -1,0 +1,24 @@
+{
+  "mode": "direct",
+  "recipe": "research",
+  "uses": [
+    {
+      "lemma": "ce3faa3814cd1945c34fee234dce1b6418198932956e800fc1015f2f5ce4bb5f",
+      "arguments": {
+        "c": {
+          "op": "var",
+          "name": "c"
+        },
+        "v0": {
+          "op": "var",
+          "name": "v0"
+        },
+        "x": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      "reverse": false
+    }
+  ]
+}

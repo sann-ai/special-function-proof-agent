@@ -1,0 +1,354 @@
+{
+  "status": "unresolved",
+  "diagnostic": "no_mismatch_found",
+  "backend": "mpmath",
+  "full_bessel_proof": false,
+  "full_function_proof": false,
+  "precision_digits": 60,
+  "checked_samples": 27,
+  "samples": [
+    {
+      "values": {
+        "a": "0.5",
+        "c": "0.5",
+        "x": "0.5"
+      },
+      "lhs": "-1.53298294764899366041645316153816038431772363878",
+      "rhs": "-1.53298294764899366041645316153816038431772363878",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.53298294764899366041645316153816038431772363878e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "0.5",
+        "x": "1.0"
+      },
+      "lhs": "1.0",
+      "rhs": "1.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "0.5",
+        "x": "2.0"
+      },
+      "lhs": "25.2708004710654393679316218026833816584055365225",
+      "rhs": "25.2708004710654393679316218026833816584055365225",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.52708004710654393679316218026833816584055365225e-29",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "1.0",
+        "x": "0.5"
+      },
+      "lhs": "-0.621860447477234809781989859215500869675224729405",
+      "rhs": "-0.621860447477234809781989859215500869675224729405",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "1.0",
+        "x": "1.0"
+      },
+      "lhs": "2.0",
+      "rhs": "2.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "1.0",
+        "x": "2.0"
+      },
+      "lhs": "37.7381742588915626370987596019098656565392851133",
+      "rhs": "37.7381742588915626370987596019098656565392851133",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "3.77381742588915626370987596019098656565392851133e-29",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "2.0",
+        "x": "0.5"
+      },
+      "lhs": "0.517890641351745607660425168835918232674363473455",
+      "rhs": "0.517890641351745607660425168835918232674363473455",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "2.0",
+        "x": "1.0"
+      },
+      "lhs": "4.0",
+      "rhs": "4.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "4.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "0.5",
+        "c": "2.0",
+        "x": "2.0"
+      },
+      "lhs": "66.2481606875257579187783716770813739111577421742",
+      "rhs": "66.2481606875257579187783716770813739111577421742",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "6.62481606875257579187783716770813739111577421742e-29",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "0.5",
+        "x": "0.5"
+      },
+      "lhs": "-2.03526878316460182420818385347710058947656502736",
+      "rhs": "-2.03526878316460182420818385347710058947656502736",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.03526878316460182420818385347710058947656502736e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "0.5",
+        "x": "1.0"
+      },
+      "lhs": "1.0",
+      "rhs": "1.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "0.5",
+        "x": "2.0"
+      },
+      "lhs": "53.5632638126521370492305287236607918741692967837",
+      "rhs": "53.5632638126521370492305287236607918741692967837",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "5.35632638126521370492305287236607918741692967837e-29",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "1.0",
+        "x": "0.5"
+      },
+      "lhs": "-1.02783763756308838545725127251614141479676073675",
+      "rhs": "-1.02783763756308838545725127251614141479676073675",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.02783763756308838545725127251614141479676073675e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "1.0",
+        "x": "1.0"
+      },
+      "lhs": "2.0",
+      "rhs": "2.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "1.0",
+        "x": "2.0"
+      },
+      "lhs": "79.935265077027954015872888447124693304750195632",
+      "rhs": "79.935265077027954015872888447124693304750195632",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "7.9935265077027954015872888447124693304750195632e-29",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "2.0",
+        "x": "0.5"
+      },
+      "lhs": "0.137378752396119955605578261454577657478466525557",
+      "rhs": "0.137378752396119955605578261454577657478466525557",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "2.0",
+        "x": "1.0"
+      },
+      "lhs": "4.0",
+      "rhs": "4.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "4.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "1.0",
+        "c": "2.0",
+        "x": "2.0"
+      },
+      "lhs": "140.272176967418906349854093090073819885881982326",
+      "rhs": "140.272176967418906349854093090073819885881982326",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.40272176967418906349854093090073819885881982326e-28",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "0.5",
+        "x": "0.5"
+      },
+      "lhs": "-3.27536789866071799930656130025305866603376941811",
+      "rhs": "-3.27536789866071799930656130025305866603376941811",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "3.27536789866071799930656130025305866603376941811e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "0.5",
+        "x": "1.0"
+      },
+      "lhs": "1.0",
+      "rhs": "1.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "0.5",
+        "x": "2.0"
+      },
+      "lhs": "240.133371525454955950427295705656064512350373429",
+      "rhs": "240.133371525454955950427295705656064512350373429",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.40133371525454955950427295705656064512350373429e-28",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "1.0",
+        "x": "0.5"
+      },
+      "lhs": "-1.96410706340495940522347411354755770893950729412",
+      "rhs": "-1.96410706340495940522347411354755770893950729412",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.96410706340495940522347411354755770893950729412e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "1.0",
+        "x": "1.0"
+      },
+      "lhs": "2.0",
+      "rhs": "2.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "2.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "1.0",
+        "x": "2.0"
+      },
+      "lhs": "358.298270591046827664608463057080513562000754144",
+      "rhs": "358.298270591046827664608463057080513562000754144",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "3.58298270591046827664608463057080513562000754144e-28",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "2.0",
+        "x": "0.5"
+      },
+      "lhs": "-0.622359177865260435065905636997053945129895674545",
+      "rhs": "-0.622359177865260435065905636997053945129895674545",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "1.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "2.0",
+        "x": "1.0"
+      },
+      "lhs": "4.0",
+      "rhs": "4.0",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "4.0e-30",
+      "condition_residuals": []
+    },
+    {
+      "values": {
+        "a": "2.0",
+        "c": "2.0",
+        "x": "2.0"
+      },
+      "lhs": "628.686640100485600789066807500287557072437264038",
+      "rhs": "628.686640100485600789066807500287557072437264038",
+      "absolute_difference": "0.0",
+      "comparison_tolerance": "6.28686640100485600789066807500287557072437264038e-28",
+      "condition_residuals": []
+    }
+  ],
+  "candidates": [],
+  "skipped_reasons": [],
+  "excluded_by_conditions": 0,
+  "root_search": {
+    "method": "bounded_sign_changes_then_secant",
+    "interval_cap": 60,
+    "grid_step": "0.5",
+    "roots_per_parameter_sample": 3,
+    "exhaustive": false,
+    "variable": null
+  },
+  "max_samples": 27,
+  "rigorous_interval_enclosures": false,
+  "max_root_grid_points": 720,
+  "time_limit_seconds": 30,
+  "comparison_relative_tolerance": "1e-30",
+  "root_residual_tolerance": "1e-35",
+  "explanation": "明示条件内の有限標本を計算します。根は符号変化から精密化し、根条件と全追加条件を再確認します。数値一致と差の候補を保存し、元命題の形式的な証明状態はLean検査の欄で確認します。",
+  "backend_version": "1.3.0"
+}

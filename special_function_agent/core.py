@@ -560,7 +560,7 @@ def lean_expr(node: dict[str, Any], sort: str = "complex") -> str:
 
 def display_expr(node: dict[str, Any]) -> str:
     op = node["op"]
-    if op in {"defined", "bessel_y", "bessel_cross", "gamma", "exp", "rpow", "hermite_h", "hermite_he", "legendre", "laguerre", "jacobi", "bessel_y_noninteger", "erf", "pi"} or (op in {"integral", "deriv"} and "var" in node):
+    if op in {"defined", "bessel_y", "bessel_cross", "gamma", "exp", "sin", "cos", "sinh", "arsinh", "rpow", "hermite_h", "hermite_he", "legendre", "laguerre", "jacobi", "bessel_y_noninteger", "erf", "pi"} or (op in {"integral", "deriv"} and "var" in node):
         from .real_bessel import display
         return display(node)
     if op == "int":
@@ -771,7 +771,8 @@ def environment() -> dict[str, Any]:
     # adding it does not invalidate certificates that never import it.
     files += sorted(path for path in (ROOT / "SpecialFunctionProofAgent").glob("**/*.lean")
                     if path not in {ROOT / "SpecialFunctionProofAgent/AnalyticDefinitions.lean",
-                                    ROOT / "SpecialFunctionProofAgent/UserAnalyticDefinitions.lean"})
+                                    ROOT / "SpecialFunctionProofAgent/UserAnalyticDefinitions.lean",
+                                    ROOT / "SpecialFunctionProofAgent/AdvancedAnalyticDefinitions.lean"})
     return {str(path.relative_to(ROOT)): _sha(path.read_bytes()) for path in files if path.is_file()}
 
 

@@ -30,7 +30,7 @@ cd special-function-proof-agent
 elan toolchain install leanprover/lean4:v4.34.0
 lake exe cache get
 lake build
-lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
+lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions SpecialFunctionProofAgent.AdvancedAnalyticDefinitions
 python3 scripts/doctor.py
 ```
 
@@ -163,7 +163,7 @@ Besselからの取り込みは明示した1記録を再検証し、出典と元�
 
 ```sh
 lake build
-lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
+lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions SpecialFunctionProofAgent.AdvancedAnalyticDefinitions
 python3 scripts/audit_special_functions.py
 SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s tests -v
 python3 scripts/replay_examples.py
@@ -172,3 +172,7 @@ python3 scripts/replay_examples.py
 Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式・一般直交積分と規格化の2式です。整数Yの完全証明例は `integer-y-complete`、`integer-y-zero-derivative`、`integer-y-one-derivative`、`integer-y-wronskian`、`integer-y-cross-same-point` です。根条件付き交差積の完全証明例は `cross-product-root` です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
 
 後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。研究拡張の後続は自由次数を持つ補題、階乗核の有限線形結合以外の級数、多項式以外の被積分関数、非線形・非斉次ODEと領域の拡張です。ユーザー指定式の対応範囲は [解析式の定義](docs/research-user-analytic-definitions.md) に記載しています。
+
+### 幾何級数・初等積分・非線形と二階ODE
+
+利用者指定の幾何核の有限線形結合、exp/sin/cosの固定有理傾きの有限積分、`y'=p(t)*sqrt(1+y²)`、`y''=p(t)` を研究関数として登録できます。収束・可積分性・全実数上の存在一意性を検証し、別targetへの補題適用と選択共有まで接続します。入力範囲・初期条件・使い方は[追加の解析定義](docs/research-advanced-analytic-definitions.md)を参照してください。

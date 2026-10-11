@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "name": "ForcedMotion",
+  "parameters": {
+    "c": "real",
+    "v0": "real",
+    "x": "real"
+  },
+  "body": {
+    "op": "second_order_ode_definition",
+    "var": "t",
+    "state": "y",
+    "velocity": "v",
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "var",
+          "name": "t"
+        },
+        {
+          "op": "int",
+          "value": 2
+        }
+      ]
+    },
+    "initial_time": {
+      "op": "int",
+      "value": 1
+    },
+    "initial_value": {
+      "op": "var",
+      "name": "c"
+    },
+    "initial_derivative": {
+      "op": "var",
+      "name": "v0"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "definitions": []
+}

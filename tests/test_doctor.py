@@ -27,6 +27,7 @@ class DoctorTests(unittest.TestCase):
             (output.parent / "SpecialFunctionProofAgent").mkdir()
             (output.parent / "SpecialFunctionProofAgent/AnalyticDefinitions.olean").touch()
             (output.parent / "SpecialFunctionProofAgent/UserAnalyticDefinitions.olean").touch()
+            (output.parent / "SpecialFunctionProofAgent/AdvancedAnalyticDefinitions.olean").touch()
             def version(command, root):
                 self.assertNotIn("--install", command)
                 return True, "pinned" if "rev-parse" in command else "version"

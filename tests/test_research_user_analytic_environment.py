@@ -35,7 +35,7 @@ class UserAnalyticEnvironmentTests(unittest.TestCase):
         for output in (core.ROOT/'demo').iterdir():
             if not (output/'result.json').exists(): continue
             request = core.load_json(output/'request.json')
-            if functions.uses_user_analytic(request): continue
+            if functions.uses_user_analytic(request) or functions.uses_advanced_analytic(request): continue
             with self.subTest(output=output.name):
                 self.assertEqual(functions.environment(request), core.load_json(output/'result.json')['environment'])
                 self.assertNotIn(MODULE, functions.environment(request))

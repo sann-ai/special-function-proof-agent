@@ -88,6 +88,8 @@ def diagnose(data):
         if op == 'rpow': return ev(node['base'])**ev(node['exponent'])
         if op == 'gamma': return mp.gamma(ev(node['arg']))
         if op == 'exp': return mp.exp(ev(node['arg']))
+        if op in {'sin', 'cos', 'sinh'}: return getattr(mp, op)(ev(node['arg']))
+        if op == 'arsinh': return mp.asinh(ev(node['arg']))
         if op == 'pi': return mp.pi
         if op == 'sqrt': return mp.sqrt(ev(node['arg']))
         if op == 'erf': return mp.erf(ev(node['arg']))

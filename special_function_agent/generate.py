@@ -44,7 +44,7 @@ def output_schema(route: str, target: dict | None = None, *, real_ast: bool = Fa
             obj({"op":{"const":"var"}, "name":{"type":"string", "enum":sorted(set(target['variables']) | set(bound))}}),
             obj({"op":{"const":"neg"}, "arg":ref}),
             obj({"op":{"type":"string", "enum":["add","sub","mul","div"]}, "args":{"type":"array","items":ref,"minItems":2,"maxItems":2}}),
-            obj({"op":{"type":"string", "enum":["gamma","exp","erf","sqrt"]}, "arg":ref}),
+            obj({"op":{"type":"string", "enum":["gamma","exp","erf","sqrt","sin","cos","sinh","arsinh"]}, "arg":ref}),
             obj({"op":{"const":"pi"}}),
             obj({"op":{"type":"string", "enum":["hermite_h","hermite_he","legendre"]}, "order":ref, "arg":ref}),
             obj({"op":{"const":"laguerre"}, "order":ref, "alpha":ref, "arg":ref}),
@@ -163,6 +163,7 @@ For steps, use original endpoints with a concise Japanese reason and exact suppl
             from .research_functions import expand_target
             prompt += ('Research functions use defined {function: exact semantic ID, arguments: all named real parameters}. '
                        'The supplied definitions and analytic contracts are fixed. Keep the original defined calls in the target and step endpoints. '
+                       'Copy the original lhs/rhs AST exactly into the first/last step endpoints, including zero terms and parentheses represented in the tree; do not simplify these endpoints. '
                        'Each recipe is applied after simultaneous definition expansion; do not provide or change definitions. '
                        'Definition expansion preserves every original assumption. Expanded target for recipe selection:\n'
                        +json.dumps(expand_target(target), ensure_ascii=False, sort_keys=True)+'\n')

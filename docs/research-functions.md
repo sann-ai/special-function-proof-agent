@@ -95,3 +95,5 @@ python3 -m special_function_agent replay demo/defined-gamma-tail-steps
 - Gammaの正引数、分母非零などの使用条件は展開後の式で検査し、元の仮定から確認します。数値標本の一致は独立した診断として保存します。mpmath未導入時もLean検査・保存を続けます。
 - 依存定義は最大12個・深さ4、入力とpackageは256 KiB以内です。循環、不足した引数、型違い、未知ID、内容改変を拒否します。
 - 自由な自然数／整数次数の研究代入、任意の一般項・被積分関数・ODEの指定は後続です。それぞれ型、収束、存在、一意性、規約の根拠を追加する段階で対応します。
+
+幾何級数、exp/sin/cos積分、指定クラスの非線形・二階初期値問題は[追加の解析定義](research-advanced-analytic-definitions.md)を参照してください。

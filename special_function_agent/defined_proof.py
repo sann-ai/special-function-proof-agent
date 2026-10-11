@@ -13,8 +13,12 @@ def formal_scope(data):
 def conventions(data):
     from .registry import conventions as ordinary_conventions
     if not functions.contains(data):
-        return ordinary_conventions(data)
+        from . import research_advanced_analytic_lean as advanced
+        return {**ordinary_conventions(data), **({'advanced_real_functions': dict(advanced.SCALAR_CONVENTIONS)}
+                if functions.uses_advanced_analytic(data) else {})}
+    from . import research_advanced_analytic_lean as advanced
     return {**ordinary_conventions(functions.expand_target(data)),
+            **({'advanced_real_functions': dict(advanced.SCALAR_CONVENTIONS)} if functions.uses_advanced_analytic(data) else {}),
             'research_definitions': functions.metadata(data['definitions']),
             'research_definition_semantics': ('explicit real expressions and verified closed analytic forms; simultaneous typed parameter substitution'
                 if functions.uses_analytic(data['definitions']) else
@@ -25,6 +29,17 @@ def display(data, node):
     from .real_bessel import display as ordinary_display, _walk
     from . import research_analytic as analytic
     from . import research_user_analytic_lean as user_analytic
+    from . import research_advanced_analytic_lean as advanced
+    if isinstance(node, dict) and node.get('op') in advanced.OPS:
+        child = lambda value: display(data, value)
+        if node['op'] == 'geometric_series_definition':
+            return 'sum('+node['index']+'=0..infinity, '+child(node['term'])+')'
+        if node['op'] == 'elementary_integral_definition':
+            return 'integral('+child(node['lower'])+'..'+child(node['upper'])+', '+child(node['integrand'])+' d'+node['var']+')'
+        time, initial = child(node['initial_time']), child(node['initial_value'])
+        degree = "''" if node['op'] == 'second_order_ode_definition' else "'"
+        velocity = (', '+node['state']+"'("+time+')='+child(node['initial_derivative'])) if degree == "''" else ''
+        return 'IVP('+node['state']+degree+'='+child(node['rhs'])+', '+node['state']+'('+time+')='+initial+velocity+'; '+node['var']+'='+child(node['arg'])+')'
     if isinstance(node, dict) and node.get('op') in user_analytic.OPS:
         child = lambda value: display(data, value)
         if node['op'] == 'series_definition':
@@ -73,6 +88,10 @@ def definition_lines(data):
                 'exp_series': '全実引数で階乗級数の HasSum と収束を検証し、exp との等式を適用します。',
                 'gaussian_primitive': '0から実端点への有向区間で可積分性を検証し、sqrt(pi)/2 * erf との等式を適用します。',
                 'linear_ivp': "rate と initial を固定し、全実数上の各点で y'=rate*y を満たし y(0)=initial となる関数の存在・一意性を検証します。",
+                'geometric_series_definition': '入力一般項を幾何核の有限線形結合へ接続し、各底の絶対値が1未満であることと HasSum・収束を Lean で検証します。',
+                'elementary_integral_definition': '固定有理傾きのexp/sin/cos有限線形結合と元被積分式の一致、指定実端点間の可積分性・原始関数公式を Lean で検証します。傾き0と逆向き区間を含みます。',
+                'nonlinear_ode_definition': '元右辺 p(t)*sqrt(1+y^2) と初期条件を固定し、全実時間の各点で微分条件を満たす実関数の存在一意性を、arsinh変換から Lean で検証します。',
+                'second_order_ode_definition': '元二階式 y\'\'=p(t) を位置・速度の組の y\'=v, v\'=p(t) へ接続します。全実時間の両微分条件と独立な位置・速度初期値を満たす組の存在一意性を Lean で検証します。',
                 'series_definition': '入力された一般項と階乗核の有限線形結合の一致、および HasSum・収束を Lean で検証します。係数と核引数は自然数の和変数に依存しません。',
                 'integral_definition': '入力された被積分多項式との一致と、指定した実端点間の有向積分の可積分性・原始関数公式を Lean で検証します。',
                 'ode_definition': '入力された右辺・初期時刻・初期値を保持し、全実数上の各点でその微分条件を満たす実関数の存在一意性を Lean で検証します。',

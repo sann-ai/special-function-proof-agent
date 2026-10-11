@@ -1,0 +1,364 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "c": "real",
+    "v0": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "ForcedMotion",
+      "parameters": {
+        "c": "real",
+        "v0": "real",
+        "x": "real"
+      },
+      "body": {
+        "op": "second_order_ode_definition",
+        "var": "t",
+        "state": "y",
+        "velocity": "v",
+        "rhs": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "t"
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        "initial_time": {
+          "op": "int",
+          "value": 1
+        },
+        "initial_value": {
+          "op": "var",
+          "name": "c"
+        },
+        "initial_derivative": {
+          "op": "var",
+          "name": "v0"
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      "definitions": [],
+      "id": "1812679c57e9e54a71dd7d16484548c093ff85a26526ec75c3e442e92dc3ab12"
+    }
+  ],
+  "lhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "defined",
+        "function": "1812679c57e9e54a71dd7d16484548c093ff85a26526ec75c3e442e92dc3ab12",
+        "arguments": {
+          "c": {
+            "op": "var",
+            "name": "c"
+          },
+          "v0": {
+            "op": "var",
+            "name": "v0"
+          },
+          "x": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      }
+    ]
+  },
+  "rhs": {
+    "op": "mul",
+    "args": [
+      {
+        "op": "int",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "c"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "name": "v0"
+                  },
+                  {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "sub",
+            "args": [
+              {
+                "op": "sub",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "pow",
+                                    "base": {
+                                      "op": "var",
+                                      "name": "x"
+                                    },
+                                    "exponent": 2
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "int",
+                                "value": 1
+                              }
+                            ]
+                          },
+                          {
+                            "op": "int",
+                            "value": 2
+                          }
+                        ]
+                      },
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 1
+                                  },
+                                  {
+                                    "op": "pow",
+                                    "base": {
+                                      "op": "var",
+                                      "name": "x"
+                                    },
+                                    "exponent": 3
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "int",
+                                "value": 2
+                              }
+                            ]
+                          },
+                          {
+                            "op": "int",
+                            "value": 3
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  },
+                                  {
+                                    "op": "pow",
+                                    "base": {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    "exponent": 2
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "int",
+                                "value": 1
+                              }
+                            ]
+                          },
+                          {
+                            "op": "int",
+                            "value": 2
+                          }
+                        ]
+                      },
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 1
+                                  },
+                                  {
+                                    "op": "pow",
+                                    "base": {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    "exponent": 3
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "int",
+                                "value": 2
+                              }
+                            ]
+                          },
+                          {
+                            "op": "int",
+                            "value": 3
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "int",
+                                "value": 2
+                              },
+                              {
+                                "op": "pow",
+                                "base": {
+                                  "op": "int",
+                                  "value": 1
+                                },
+                                "exponent": 1
+                              }
+                            ]
+                          },
+                          {
+                            "op": "int",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "int",
+                                "value": 1
+                              },
+                              {
+                                "op": "pow",
+                                "base": {
+                                  "op": "int",
+                                  "value": 1
+                                },
+                                "exponent": 2
+                              }
+                            ]
+                          },
+                          {
+                            "op": "int",
+                            "value": 2
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      {
+                        "op": "int",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

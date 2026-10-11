@@ -130,3 +130,5 @@ python3 -m special_function_agent research generate examples/research-user-serie
 ## Codex への依頼例
 
 > `W(a,x)=Σ_{k=0}^∞[a*x^k/k!+(1-a)*(-x)^k/k!]` を自分の研究関数として登録してください。実数 a,x で `W(a,x)=a*exp(x)+(1-a)*exp(-x)` を direct で証明し、その補題で `2*W(a,x)=2*(a*exp(x)+(1-a)*exp(-x))` を steps で検査してください。収束根拠、元式との対応、Lean 証明、日本語説明を保存し、履歴から再利用してください。手順は `docs/research-user-analytic-definitions.md` にあります。
+
+幾何級数、exp/sin/cos積分、指定クラスの非線形・二階初期値問題は[追加の解析定義](research-advanced-analytic-definitions.md)を参照してください。

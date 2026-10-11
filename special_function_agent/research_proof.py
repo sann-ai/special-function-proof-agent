@@ -92,12 +92,15 @@ def _source(body, dependencies):
     if 'ResearchAnalytic_' in content:
         preamble = preamble.replace('import SpecialFunctionProofAgent\n',
                                     'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.UserAnalyticDefinitions\n', 1)
+    if 'ResearchAdvanced_' in content or '(Real.arsinh ' in content:
+        preamble = preamble.replace('import SpecialFunctionProofAgent\n',
+                                    'import SpecialFunctionProofAgent\nimport SpecialFunctionProofAgent.AdvancedAnalyticDefinitions\n', 1)
     return preamble + content + '\n' + _AUDIT
 
 
 def _ordinary_body(source):
     imports = 'import SpecialFunctionProofAgent\n'
-    for module in ('UserAnalyticDefinitions', 'AnalyticDefinitions'):
+    for module in ('AdvancedAnalyticDefinitions', 'UserAnalyticDefinitions', 'AnalyticDefinitions'):
         line = 'import SpecialFunctionProofAgent.'+module+'\n'
         if source.startswith(imports+line): imports += line
     prefix = imports + '\nopen scoped Real\nopen MeasureTheory\n\nnamespace BesselAgentCandidate\n\n'

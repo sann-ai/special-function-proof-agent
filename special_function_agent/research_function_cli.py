@@ -9,7 +9,7 @@ from .core import InputError, NeedsConditions, load_json, validate_request, veri
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='Define finite real expressions, factorial-kernel series, finite polynomial integrals, polynomial-coefficient homogeneous IVPs, and the fixed analytic forms; certify their analytic contracts and prove fixed targets.')
+    parser = argparse.ArgumentParser(description='Define finite real expressions, factorial/geometric-kernel series, polynomial or fixed-rational-affine exp/sin/cos integrals, polynomial-coefficient homogeneous IVPs, y\'=p(t)*sqrt(1+y^2), and y\'\'=p(t) with independent position/velocity initial values. Certify the supported analytic contracts and prove fixed targets; see docs/research-advanced-analytic-definitions.md for input bounds.')
     commands = parser.add_subparsers(dest='command', required=True)
     for name in ('add', 'list', 'show', 'reverify', 'export', 'import', 'verify', 'generate'):
         command = commands.add_parser(name)

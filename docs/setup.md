@@ -32,7 +32,7 @@ ZIPにはプロジェクトのGit履歴が含まれません。Lakeはmathlibな
 elan toolchain install leanprover/lean4:v4.34.0
 lake exe cache get
 lake build
-lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
+lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions SpecialFunctionProofAgent.AdvancedAnalyticDefinitions
 python3 scripts/doctor.py
 ```
 
@@ -145,3 +145,5 @@ python3 -m special_function_agent replay runs/integer-y-check
 ```
 
 条件は順に自然数m≠n、全自然数n、任意整数nかつx>0です。各出力先は未使用のディレクトリを指定します。
+
+幾何級数、exp/sin/cos積分、指定クラスの非線形・二階初期値問題は[追加の解析定義](research-advanced-analytic-definitions.md)を参照してください。

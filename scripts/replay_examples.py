@@ -64,7 +64,11 @@ for route in ("direct", "steps", "recurrence-direct", "recurrence-steps", "calcu
               "analytic-linear-ivp-derived-direct", "analytic-linear-ivp-derived-steps",
               "user-series-direct", "user-series-steps", "user-series-derived-direct", "user-series-derived-steps",
               "user-integral-direct", "user-integral-steps", "user-integral-derived-direct", "user-integral-derived-steps",
-              "user-ode-direct", "user-ode-steps", "user-ode-derived-direct", "user-ode-derived-steps"):
+              "user-ode-direct", "user-ode-steps", "user-ode-derived-direct", "user-ode-derived-steps",
+              "advanced-geometric-direct", "advanced-geometric-steps", "advanced-geometric-derived-direct", "advanced-geometric-derived-steps",
+              "advanced-elementary-direct", "advanced-elementary-steps", "advanced-elementary-derived-direct", "advanced-elementary-derived-steps",
+              "advanced-nonlinear-direct", "advanced-nonlinear-steps", "advanced-nonlinear-derived-direct", "advanced-nonlinear-derived-steps",
+              "advanced-second-order-direct", "advanced-second-order-steps", "advanced-second-order-derived-direct", "advanced-second-order-derived-steps"):
     path = ROOT / "demo" / route / "request.json"
     if not path.exists():
         raise SystemExit(f"Missing saved proof plan: {path}")

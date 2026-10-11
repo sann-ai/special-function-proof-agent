@@ -8,7 +8,7 @@ from .core import InputError, NeedsConditions, _keys, _run_lean, _save_json, _sh
 from . import classical, orthogonal, bessel_y_formal, bessel_y_integer, cross_complete
 
 RECIPES = ('gamma_recurrence', 'beta_integral', 'gamma_scaled_integral', 'ring') + classical.RECIPES + orthogonal.RECIPES + bessel_y_formal.RECIPES + bessel_y_integer.RECIPES + cross_complete.RECIPES
-SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger', 'erf', 'pi', 'sqrt', 'deriv'}
+SPECIAL_OPS = {'gamma', 'exp', 'rpow', 'integral', 'hermite_h', 'hermite_he', 'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger', 'erf', 'pi', 'sqrt', 'deriv', 'sin', 'cos', 'sinh', 'arsinh'}
 
 
 def has_special(data):
@@ -137,7 +137,7 @@ def lean_expr(node, names, types=None):
         text = lean_expr(n, names, types)
         # A bare rpow application needs grouping when passed as another
         # function's argument. Preserve the established infix translations.
-        if n['op'] == 'rpow' and op in {'gamma', 'exp', 'sqrt', 'erf', 'hermite_h', 'hermite_he',
+        if n['op'] == 'rpow' and op in {'gamma', 'exp', 'sqrt', 'erf', 'sin', 'cos', 'sinh', 'arsinh', 'hermite_h', 'hermite_he',
                 'legendre', 'laguerre', 'jacobi', 'bessel_y_noninteger', 'bessel_y', 'bessel_j', 'rpow'}:
             return '('+text+')'
         return text
@@ -181,6 +181,7 @@ def lean_expr(node, names, types=None):
         return '(' + ev(node['args'][0]) + {'add':' + ', 'sub':' - ', 'mul':' * ', 'div':' / '}[op] + ev(node['args'][1]) + ')'
     if op == 'pow': return f'({ev(node["base"])} ^ {node["exponent"]})'
     if op == 'rpow': return f'Real.rpow {ev(node["base"])} {ev(node["exponent"])}'
+    if op in {'sin', 'cos', 'sinh', 'arsinh'}: return f'(Real.{op} {ev(node["arg"])})'
     if op in {'gamma', 'exp'}: return f'({"Real.Gamma" if op == "gamma" else "Real.exp"} {ev(node["arg"])})'
     if op == 'integral':
         bound = f'b{len(names)}'
@@ -245,6 +246,9 @@ def render(data, *, definition_context=False):
     proposition = f'{lean_expr(data["lhs"], names, types)} = {lean_expr(data["rhs"], names, types)}'
     lines = ['import SpecialFunctionProofAgent', '', 'open scoped Real', 'open MeasureTheory', '',
              'namespace BesselAgentCandidate', '', f'theorem target {binders} {conditions} : {proposition} := by']
+    from .research_functions import uses_advanced_analytic
+    if uses_advanced_analytic(data):
+        lines.insert(1, 'import SpecialFunctionProofAgent.AdvancedAnalyticDefinitions')
     # Derive integer comparisons from the fixed real-valued rational bounds. This
     # preserves Nat's discreteness (n>0, n>=1/2, and n!=0 all imply n>=1).
     from .real_bessel import RELATIONS

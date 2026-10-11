@@ -1,0 +1,204 @@
+{
+  "mode": "steps",
+  "steps": [
+    {
+      "before": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "int",
+            "value": 2
+          },
+          {
+            "op": "defined",
+            "function": "a1432ffb0b5922c9c3e7b2ac9f27e134804d06f5d8a229f345649294f0c067be",
+            "arguments": {
+              "a": {
+                "op": "var",
+                "name": "a"
+              },
+              "c": {
+                "op": "var",
+                "name": "c"
+              },
+              "x": {
+                "op": "var",
+                "name": "x"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "int",
+            "value": 2
+          },
+          {
+            "op": "sinh",
+            "arg": {
+              "op": "add",
+              "args": [
+                {
+                  "op": "arsinh",
+                  "arg": {
+                    "op": "var",
+                    "name": "c"
+                  }
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 2
+                                },
+                                {
+                                  "op": "pow",
+                                  "base": {
+                                    "op": "var",
+                                    "name": "x"
+                                  },
+                                  "exponent": 1
+                                }
+                              ]
+                            },
+                            {
+                              "op": "int",
+                              "value": 1
+                            }
+                          ]
+                        },
+                        {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "a"
+                                },
+                                {
+                                  "op": "pow",
+                                  "base": {
+                                    "op": "var",
+                                    "name": "x"
+                                  },
+                                  "exponent": 2
+                                }
+                              ]
+                            },
+                            {
+                              "op": "int",
+                              "value": 2
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 2
+                                },
+                                {
+                                  "op": "pow",
+                                  "base": {
+                                    "op": "int",
+                                    "value": 1
+                                  },
+                                  "exponent": 1
+                                }
+                              ]
+                            },
+                            {
+                              "op": "int",
+                              "value": 1
+                            }
+                          ]
+                        },
+                        {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "a"
+                                },
+                                {
+                                  "op": "pow",
+                                  "base": {
+                                    "op": "int",
+                                    "value": 1
+                                  },
+                                  "exponent": 2
+                                }
+                              ]
+                            },
+                            {
+                              "op": "int",
+                              "value": 2
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "recipe": "research",
+      "uses": [
+        {
+          "lemma": "582e21b23a5f4ed1f312c40b31d2d4952ae32c53d43ed7f3004bf1d8faf7a328",
+          "arguments": {
+            "a": {
+              "op": "var",
+              "name": "a"
+            },
+            "c": {
+              "op": "var",
+              "name": "c"
+            },
+            "x": {
+              "op": "var",
+              "name": "x"
+            }
+          },
+          "reverse": false
+        }
+      ],
+      "reason": "元のユーザー指定解析式の検証済み等式を適用し、両辺を2倍する。",
+      "conditions": [
+        "a is real",
+        "c is real",
+        "x is real"
+      ]
+    }
+  ]
+}

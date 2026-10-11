@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "name": "ElementaryArea",
+  "parameters": {
+    "a": "real",
+    "b": "real",
+    "x": "real"
+  },
+  "body": {
+    "op": "elementary_integral_definition",
+    "var": "t",
+    "integrand": {
+      "op": "add",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "exp",
+              "arg": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 2
+                      },
+                      {
+                        "op": "var",
+                        "name": "t"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "name": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 3
+                },
+                {
+                  "op": "sin",
+                  "arg": {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "t"
+                      },
+                      {
+                        "op": "var",
+                        "name": "x"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "cos",
+          "arg": {
+            "op": "var",
+            "name": "x"
+          }
+        }
+      ]
+    },
+    "lower": {
+      "op": "var",
+      "name": "a"
+    },
+    "upper": {
+      "op": "var",
+      "name": "b"
+    }
+  },
+  "definitions": []
+}

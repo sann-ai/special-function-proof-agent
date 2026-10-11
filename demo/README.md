@@ -1,6 +1,6 @@
 # Saved proof examples
 
-This directory contains 141 replayable certificates: 139 complete proofs and two
+This directory contains 157 replayable certificates: 155 complete proofs and two
 historical conditional certificates. Each run keeps its fixed request, generated
 Lean certificate, standard-axiom audit, numerical diagnostic and result.
 
@@ -8,7 +8,7 @@ After building the base project and its analytic definitions, recheck all eviden
 
 ```sh
 lake build
-lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions
+lake build SpecialFunctionProofAgent.AnalyticDefinitions SpecialFunctionProofAgent.UserAnalyticDefinitions SpecialFunctionProofAgent.AdvancedAnalyticDefinitions
 python3 scripts/replay_examples.py
 ```
 
@@ -34,3 +34,9 @@ See [user expression syntax and examples](../docs/research-user-analytic-definit
 scope and premises. Complete proofs of their corresponding supported targets are
 saved separately, including `cross-product-root-*` and `integer-y-complete-*`.
 Personal inputs and archives belong outside this repository.
+
+The sixteen `advanced-*` runs cover bounded geometric series, affine exp/sin/cos
+integrals, nonlinear sqrt-state IVPs, and polynomial second-order forcing. Each
+class includes direct/steps source and distinct-target lemma proofs. Five plans
+were generated through Codex; their verified evidence is retained alongside
+local deterministic plans. See [the exact input classes](../docs/research-advanced-analytic-definitions.md).

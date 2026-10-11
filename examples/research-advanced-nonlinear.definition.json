@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "name": "NonlinearFlow",
+  "parameters": {
+    "a": "real",
+    "c": "real",
+    "x": "real"
+  },
+  "body": {
+    "op": "nonlinear_ode_definition",
+    "var": "t",
+    "state": "y",
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "name": "a"
+                },
+                {
+                  "op": "var",
+                  "name": "t"
+                }
+              ]
+            },
+            {
+              "op": "int",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "op": "sqrt",
+          "arg": {
+            "op": "add",
+            "args": [
+              {
+                "op": "int",
+                "value": 1
+              },
+              {
+                "op": "pow",
+                "base": {
+                  "op": "var",
+                  "name": "y"
+                },
+                "exponent": 2
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "initial_time": {
+      "op": "int",
+      "value": 1
+    },
+    "initial_value": {
+      "op": "var",
+      "name": "c"
+    },
+    "arg": {
+      "op": "var",
+      "name": "x"
+    }
+  },
+  "definitions": []
+}

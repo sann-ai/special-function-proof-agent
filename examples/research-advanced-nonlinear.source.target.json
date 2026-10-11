@@ -1,0 +1,238 @@
+{
+  "schema_version": 2,
+  "variables": {
+    "a": "real",
+    "c": "real",
+    "x": "real"
+  },
+  "assumptions": [],
+  "definitions": [
+    {
+      "schema_version": 1,
+      "name": "NonlinearFlow",
+      "parameters": {
+        "a": "real",
+        "c": "real",
+        "x": "real"
+      },
+      "body": {
+        "op": "nonlinear_ode_definition",
+        "var": "t",
+        "state": "y",
+        "rhs": {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "a"
+                    },
+                    {
+                      "op": "var",
+                      "name": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "int",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "op": "sqrt",
+              "arg": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "int",
+                    "value": 1
+                  },
+                  {
+                    "op": "pow",
+                    "base": {
+                      "op": "var",
+                      "name": "y"
+                    },
+                    "exponent": 2
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "initial_time": {
+          "op": "int",
+          "value": 1
+        },
+        "initial_value": {
+          "op": "var",
+          "name": "c"
+        },
+        "arg": {
+          "op": "var",
+          "name": "x"
+        }
+      },
+      "definitions": [],
+      "id": "a1432ffb0b5922c9c3e7b2ac9f27e134804d06f5d8a229f345649294f0c067be"
+    }
+  ],
+  "lhs": {
+    "op": "defined",
+    "function": "a1432ffb0b5922c9c3e7b2ac9f27e134804d06f5d8a229f345649294f0c067be",
+    "arguments": {
+      "a": {
+        "op": "var",
+        "name": "a"
+      },
+      "c": {
+        "op": "var",
+        "name": "c"
+      },
+      "x": {
+        "op": "var",
+        "name": "x"
+      }
+    }
+  },
+  "rhs": {
+    "op": "sinh",
+    "arg": {
+      "op": "add",
+      "args": [
+        {
+          "op": "arsinh",
+          "arg": {
+            "op": "var",
+            "name": "c"
+          }
+        },
+        {
+          "op": "sub",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "int",
+                          "value": 2
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "x"
+                          },
+                          "exponent": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "int",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "x"
+                          },
+                          "exponent": 2
+                        }
+                      ]
+                    },
+                    {
+                      "op": "int",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "int",
+                          "value": 2
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "int",
+                            "value": 1
+                          },
+                          "exponent": 1
+                        }
+                      ]
+                    },
+                    {
+                      "op": "int",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "int",
+                            "value": 1
+                          },
+                          "exponent": 2
+                        }
+                      ]
+                    },
+                    {
+                      "op": "int",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

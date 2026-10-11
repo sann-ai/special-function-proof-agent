@@ -50,7 +50,7 @@ def _convert(node, order_names=frozenset({"n"})):
         return {'op': op, 'args': [convert(a) for a in node['args']]}
     if op == 'neg':
         return {'op': op, 'arg': convert(node['arg'])}
-    if op in {'gamma', 'exp', 'erf', 'sqrt'}:
+    if op in {'gamma', 'exp', 'erf', 'sqrt', 'sin', 'cos', 'sinh', 'arsinh'}:
         return {'op': op, 'arg': convert(node['arg'])}
     if op in {'infinity', 'pi'}:
         return {'op': op}
@@ -267,7 +267,7 @@ def _validate_expr(node, variables, depth=0, budget=None, scalar=False, bound=fr
         child(node['base'])
     elif op == 'pi':
         _keys(node, {'op'})
-    elif op in {'gamma', 'exp', 'erf', 'sqrt'}:
+    elif op in {'gamma', 'exp', 'erf', 'sqrt', 'sin', 'cos', 'sinh', 'arsinh'}:
         _keys(node, {'op', 'arg'})
         child(node['arg'])
     elif op == 'deriv' and not scalar:
@@ -445,7 +445,7 @@ def validate(data, require_proof=True):
 def display(node):
     op = node['op']
     if op in {'exp_series', 'gaussian_primitive', 'linear_ivp',
-              'series_definition', 'integral_definition', 'ode_definition'}:
+              'series_definition', 'integral_definition', 'ode_definition', 'geometric_series_definition', 'elementary_integral_definition', 'nonlinear_ode_definition', 'second_order_ode_definition'}:
         from .defined_proof import display as definition_display
         return definition_display({'definitions': []}, node)
     if op == 'defined':
@@ -459,7 +459,7 @@ def display(node):
     if op == 'pow': return f'({display(node["base"])}^{node["exponent"]})'
     if op == 'rpow': return f'({display(node["base"])}^({display(node["exponent"])}))'
     if op == 'gamma': return f'Gamma({display(node["arg"])})'
-    if op == 'exp': return f'exp({display(node["arg"])})'
+    if op in {'exp', 'sin', 'cos', 'sinh', 'arsinh'}: return f'{op}({display(node["arg"])})'
     if op == 'erf': return f'erf({display(node["arg"])})'
     if op == 'sqrt': return f'sqrt({display(node["arg"])})'
     if op == 'pi': return 'pi'
@@ -498,6 +498,7 @@ def _nonnegative(node, bounds):
     if node['op'] == 'var':
         lo = bounds.get(node['name'], [None, None, set()])[0]
         return lo is not None and lo[0] >= 0
+    if node['op'] == 'pow' and node['exponent'] % 2 == 0: return True
     if node['op'] in {'add', 'mul'}:
         return all(_nonnegative(arg, bounds) for arg in node['args'])
     return _positive(node, bounds)
@@ -506,6 +507,9 @@ def _nonnegative(node, bounds):
 def _positive(node, bounds):
     value = _constant(node)
     if value is not None: return value > 0
+    if node['op'] == 'sub' and node['args'][0] == {'op':'int', 'value':1}:
+        from .research_advanced_analytic_lean import geometric_denominator_positive
+        if geometric_denominator_positive(node['args'][1]): return True
     if node['op'] == 'pi': return True
     if node['op'] == 'var':
         lo = bounds.get(node['name'], [None, None, set()])[0]

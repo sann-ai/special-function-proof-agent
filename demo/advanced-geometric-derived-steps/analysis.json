@@ -1,0 +1,1159 @@
+{
+  "recipe": "defined_functions",
+  "definitions": [
+    {
+      "id": "655b230b3da1f3b789f60e7dcf8db2398965b254efe2ef288552f123f64c10e1",
+      "name": "GeometricBlend",
+      "parameters": {
+        "a": "real",
+        "x": "real"
+      },
+      "dependencies": [],
+      "lean_name": "ResearchFunction_655b230b3da1f3b789f60e7dcf8db2398965b254efe2ef288552f123f64c10e1",
+      "analytic_contracts": [
+        {
+          "op": "geometric_series_definition",
+          "kind": "bounded_geometric_series",
+          "domain": {
+            "a": "real",
+            "x": "real"
+          },
+          "semantics": {
+            "original": {
+              "op": "geometric_series_definition",
+              "index": "k",
+              "term": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "a"
+                      },
+                      {
+                        "op": "pow",
+                        "base": {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "var",
+                              "name": "x"
+                            },
+                            {
+                              "op": "add",
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 1
+                                },
+                                {
+                                  "op": "pow",
+                                  "base": {
+                                    "op": "var",
+                                    "name": "x"
+                                  },
+                                  "exponent": 2
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "exponent": {
+                          "op": "var",
+                          "name": "k"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 1
+                          },
+                          {
+                            "op": "var",
+                            "name": "a"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "pow",
+                        "base": {
+                          "op": "div",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": -1
+                            },
+                            {
+                              "op": "int",
+                              "value": 2
+                            }
+                          ]
+                        },
+                        "exponent": {
+                          "op": "var",
+                          "name": "k"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "normalized": {
+              "op": "geometric_series_definition",
+              "index": "k",
+              "terms": [
+                {
+                  "coefficient": {
+                    "op": "var",
+                    "name": "a"
+                  },
+                  "argument": {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 1
+                          },
+                          {
+                            "op": "pow",
+                            "base": {
+                              "op": "var",
+                              "name": "x"
+                            },
+                            "exponent": 2
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "base_kind": "bounded_rational",
+                  "base_argument": {
+                    "op": "var",
+                    "name": "x"
+                  },
+                  "base_sign": 1
+                },
+                {
+                  "coefficient": {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": 1
+                      },
+                      {
+                        "op": "var",
+                        "name": "a"
+                      }
+                    ]
+                  },
+                  "argument": {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": -1
+                      },
+                      {
+                        "op": "int",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  "base_kind": "rational",
+                  "base_value": {
+                    "numerator": -1,
+                    "denominator": 2
+                  }
+                }
+              ],
+              "scalar_expressions": [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "x"
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "int",
+                          "value": 1
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "var",
+                            "name": "x"
+                          },
+                          "exponent": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": -1
+                    },
+                    {
+                      "op": "int",
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 1
+                    },
+                    {
+                      "op": "var",
+                      "name": "a"
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "name": "a"
+                }
+              ],
+              "nonzero_denominators": [],
+              "required_conditions": [
+                {
+                  "kind": "abs_lt_one",
+                  "argument": {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "var",
+                        "name": "x"
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 1
+                          },
+                          {
+                            "op": "pow",
+                            "base": {
+                              "op": "var",
+                              "name": "x"
+                            },
+                            "exponent": 2
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "kind": "abs_lt_one",
+                  "argument": {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "int",
+                        "value": -1
+                      },
+                      {
+                        "op": "int",
+                        "value": 2
+                      }
+                    ]
+                  }
+                }
+              ],
+              "original": {
+                "op": "geometric_series_definition",
+                "index": "k",
+                "term": {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "var",
+                                "name": "x"
+                              },
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 1
+                                  },
+                                  {
+                                    "op": "pow",
+                                    "base": {
+                                      "op": "var",
+                                      "name": "x"
+                                    },
+                                    "exponent": 2
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "exponent": {
+                            "op": "var",
+                            "name": "k"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "var",
+                              "name": "a"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "pow",
+                          "base": {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "int",
+                                "value": -1
+                              },
+                              {
+                                "op": "int",
+                                "value": 2
+                              }
+                            ]
+                          },
+                          "exponent": {
+                            "op": "var",
+                            "name": "k"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "parameter_domain": "real",
+            "elementary_functions": {
+              "arsinh": "Real.arsinh on all real arguments",
+              "cos": "Real.cos on all real arguments",
+              "sin": "Real.sin on all real arguments",
+              "sinh": "Real.sinh on all real arguments"
+            },
+            "index_domain": "nat",
+            "first_index": 0,
+            "convergence": "HasSum and Summable; each base has proved absolute value below one"
+          },
+          "definition": "ResearchAdvanced_3a6696db636081d74397ba2a69439339210b2f63a001de3de37e80f7d88cf7c6",
+          "bridge": "ResearchAdvanced_3a6696db636081d74397ba2a69439339210b2f63a001de3de37e80f7d88cf7c6_bridge",
+          "theorems": [
+            "ResearchAdvanced_3a6696db636081d74397ba2a69439339210b2f63a001de3de37e80f7d88cf7c6_contract"
+          ]
+        }
+      ]
+    }
+  ],
+  "expanded_target": {
+    "schema_version": 2,
+    "variables": {
+      "a": "real",
+      "x": "real"
+    },
+    "assumptions": [],
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "div",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                {
+                                  "op": "add",
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    {
+                                      "op": "pow",
+                                      "base": {
+                                        "op": "var",
+                                        "name": "x"
+                                      },
+                                      "exponent": 2
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "var",
+                              "name": "a"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "div",
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": -1
+                                },
+                                {
+                                  "op": "int",
+                                  "value": 2
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 0
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "x"
+                        },
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "x"
+                              },
+                              "exponent": 2
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 0
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": -1
+                    },
+                    {
+                      "op": "int",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "int",
+          "value": 2
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "a"
+                        },
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "div",
+                              "args": [
+                                {
+                                  "op": "var",
+                                  "name": "x"
+                                },
+                                {
+                                  "op": "add",
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": 1
+                                    },
+                                    {
+                                      "op": "pow",
+                                      "base": {
+                                        "op": "var",
+                                        "name": "x"
+                                      },
+                                      "exponent": 2
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "var",
+                              "name": "a"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "div",
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": -1
+                                },
+                                {
+                                  "op": "int",
+                                  "value": 2
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": 0
+                    },
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "x"
+                        },
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "op": "pow",
+                              "base": {
+                                "op": "var",
+                                "name": "x"
+                              },
+                              "exponent": 2
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "int",
+                  "value": 0
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "int",
+                      "value": -1
+                    },
+                    {
+                      "op": "int",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "proof_analysis": {
+    "recipe": "research",
+    "dependencies": [
+      {
+        "id": "7d36d96b79dce44cb85e39346600b72adecaeb8153bd6043c78621faf2d7a552",
+        "name": "geometric-identity",
+        "source": null,
+        "target_sha256": "9fa6a5409d7dd9a5bd779904eadf349fca00a8497b5d540817424859858e90c5",
+        "statement": "Function[655b230b3da1f3b789f60e7dcf8db2398965b254efe2ef288552f123f64c10e1](a=a,x=x) = ((((a/(1-(x/(1+(x^2)))))+((1-a)/(1-(-1/2))))+(0*(x/(1+(x^2)))))+(0*(-1/2)))",
+        "conditions": [
+          "a is real",
+          "x is real"
+        ],
+        "proof_mode": "direct",
+        "formal_scope": "proof of the original real target under verified analytic research definitions",
+        "definitions": [
+          {
+            "id": "655b230b3da1f3b789f60e7dcf8db2398965b254efe2ef288552f123f64c10e1",
+            "name": "GeometricBlend",
+            "parameters": {
+              "a": "real",
+              "x": "real"
+            },
+            "dependencies": [],
+            "lean_name": "ResearchFunction_655b230b3da1f3b789f60e7dcf8db2398965b254efe2ef288552f123f64c10e1",
+            "analytic_contracts": [
+              {
+                "op": "geometric_series_definition",
+                "kind": "bounded_geometric_series",
+                "domain": {
+                  "a": "real",
+                  "x": "real"
+                },
+                "semantics": {
+                  "original": {
+                    "index": "k",
+                    "op": "geometric_series_definition",
+                    "term": {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "name": "a",
+                              "op": "var"
+                            },
+                            {
+                              "base": {
+                                "args": [
+                                  {
+                                    "name": "x",
+                                    "op": "var"
+                                  },
+                                  {
+                                    "args": [
+                                      {
+                                        "op": "int",
+                                        "value": 1
+                                      },
+                                      {
+                                        "base": {
+                                          "name": "x",
+                                          "op": "var"
+                                        },
+                                        "exponent": 2,
+                                        "op": "pow"
+                                      }
+                                    ],
+                                    "op": "add"
+                                  }
+                                ],
+                                "op": "div"
+                              },
+                              "exponent": {
+                                "name": "k",
+                                "op": "var"
+                              },
+                              "op": "pow"
+                            }
+                          ],
+                          "op": "mul"
+                        },
+                        {
+                          "args": [
+                            {
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 1
+                                },
+                                {
+                                  "name": "a",
+                                  "op": "var"
+                                }
+                              ],
+                              "op": "sub"
+                            },
+                            {
+                              "base": {
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": -1
+                                  },
+                                  {
+                                    "op": "int",
+                                    "value": 2
+                                  }
+                                ],
+                                "op": "div"
+                              },
+                              "exponent": {
+                                "name": "k",
+                                "op": "var"
+                              },
+                              "op": "pow"
+                            }
+                          ],
+                          "op": "mul"
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  },
+                  "normalized": {
+                    "op": "geometric_series_definition",
+                    "index": "k",
+                    "terms": [
+                      {
+                        "coefficient": {
+                          "name": "a",
+                          "op": "var"
+                        },
+                        "argument": {
+                          "args": [
+                            {
+                              "name": "x",
+                              "op": "var"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 1
+                                },
+                                {
+                                  "base": {
+                                    "name": "x",
+                                    "op": "var"
+                                  },
+                                  "exponent": 2,
+                                  "op": "pow"
+                                }
+                              ],
+                              "op": "add"
+                            }
+                          ],
+                          "op": "div"
+                        },
+                        "base_kind": "bounded_rational",
+                        "base_argument": {
+                          "name": "x",
+                          "op": "var"
+                        },
+                        "base_sign": 1
+                      },
+                      {
+                        "coefficient": {
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": 1
+                            },
+                            {
+                              "name": "a",
+                              "op": "var"
+                            }
+                          ],
+                          "op": "sub"
+                        },
+                        "argument": {
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": -1
+                            },
+                            {
+                              "op": "int",
+                              "value": 2
+                            }
+                          ],
+                          "op": "div"
+                        },
+                        "base_kind": "rational",
+                        "base_value": {
+                          "numerator": -1,
+                          "denominator": 2
+                        }
+                      }
+                    ],
+                    "scalar_expressions": [
+                      {
+                        "args": [
+                          {
+                            "name": "x",
+                            "op": "var"
+                          },
+                          {
+                            "args": [
+                              {
+                                "op": "int",
+                                "value": 1
+                              },
+                              {
+                                "base": {
+                                  "name": "x",
+                                  "op": "var"
+                                },
+                                "exponent": 2,
+                                "op": "pow"
+                              }
+                            ],
+                            "op": "add"
+                          }
+                        ],
+                        "op": "div"
+                      },
+                      {
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": -1
+                          },
+                          {
+                            "op": "int",
+                            "value": 2
+                          }
+                        ],
+                        "op": "div"
+                      },
+                      {
+                        "args": [
+                          {
+                            "op": "int",
+                            "value": 1
+                          },
+                          {
+                            "name": "a",
+                            "op": "var"
+                          }
+                        ],
+                        "op": "sub"
+                      },
+                      {
+                        "name": "a",
+                        "op": "var"
+                      }
+                    ],
+                    "nonzero_denominators": [],
+                    "required_conditions": [
+                      {
+                        "kind": "abs_lt_one",
+                        "argument": {
+                          "args": [
+                            {
+                              "name": "x",
+                              "op": "var"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "op": "int",
+                                  "value": 1
+                                },
+                                {
+                                  "base": {
+                                    "name": "x",
+                                    "op": "var"
+                                  },
+                                  "exponent": 2,
+                                  "op": "pow"
+                                }
+                              ],
+                              "op": "add"
+                            }
+                          ],
+                          "op": "div"
+                        }
+                      },
+                      {
+                        "kind": "abs_lt_one",
+                        "argument": {
+                          "args": [
+                            {
+                              "op": "int",
+                              "value": -1
+                            },
+                            {
+                              "op": "int",
+                              "value": 2
+                            }
+                          ],
+                          "op": "div"
+                        }
+                      }
+                    ],
+                    "original": {
+                      "index": "k",
+                      "op": "geometric_series_definition",
+                      "term": {
+                        "args": [
+                          {
+                            "args": [
+                              {
+                                "name": "a",
+                                "op": "var"
+                              },
+                              {
+                                "base": {
+                                  "args": [
+                                    {
+                                      "name": "x",
+                                      "op": "var"
+                                    },
+                                    {
+                                      "args": [
+                                        {
+                                          "op": "int",
+                                          "value": 1
+                                        },
+                                        {
+                                          "base": {
+                                            "name": "x",
+                                            "op": "var"
+                                          },
+                                          "exponent": 2,
+                                          "op": "pow"
+                                        }
+                                      ],
+                                      "op": "add"
+                                    }
+                                  ],
+                                  "op": "div"
+                                },
+                                "exponent": {
+                                  "name": "k",
+                                  "op": "var"
+                                },
+                                "op": "pow"
+                              }
+                            ],
+                            "op": "mul"
+                          },
+                          {
+                            "args": [
+                              {
+                                "args": [
+                                  {
+                                    "op": "int",
+                                    "value": 1
+                                  },
+                                  {
+                                    "name": "a",
+                                    "op": "var"
+                                  }
+                                ],
+                                "op": "sub"
+                              },
+                              {
+                                "base": {
+                                  "args": [
+                                    {
+                                      "op": "int",
+                                      "value": -1
+                                    },
+                                    {
+                                      "op": "int",
+                                      "value": 2
+                                    }
+                                  ],
+                                  "op": "div"
+                                },
+                                "exponent": {
+                                  "name": "k",
+                                  "op": "var"
+                                },
+                                "op": "pow"
+                              }
+                            ],
+                            "op": "mul"
+                          }
+                        ],
+                        "op": "add"
+                      }
+                    }
+                  },
+                  "parameter_domain": "real",
+                  "elementary_functions": {
+                    "arsinh": "Real.arsinh on all real arguments",
+                    "cos": "Real.cos on all real arguments",
+                    "sin": "Real.sin on all real arguments",
+                    "sinh": "Real.sinh on all real arguments"
+                  },
+                  "index_domain": "nat",
+                  "first_index": 0,
+                  "convergence": "HasSum and Summable; each base has proved absolute value below one"
+                },
+                "definition": "ResearchAdvanced_3a6696db636081d74397ba2a69439339210b2f63a001de3de37e80f7d88cf7c6",
+                "bridge": "ResearchAdvanced_3a6696db636081d74397ba2a69439339210b2f63a001de3de37e80f7d88cf7c6_bridge",
+                "theorems": [
+                  "ResearchAdvanced_3a6696db636081d74397ba2a69439339210b2f63a001de3de37e80f7d88cf7c6_contract"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
