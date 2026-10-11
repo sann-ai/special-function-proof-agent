@@ -1,6 +1,19 @@
 # Special Function Proof Agent
 
-特殊関数の入力を固定した命題へ変換し、制限された証明候補をLeanで検査・保存する独立ツールです。Codexからの依頼とターミナルの両方で利用できます。[Bessel Proof Agentの固定版](UPSTREAM.md)を基盤に、Gamma/Betaの実積分、Hermite・Legendre・Laguerre・Jacobi多項式、誤差関数、正実軸のBessel Yへ拡張しました。ライセンスは[MIT](LICENSE)です。
+**Codexに式を伝え、CodexがこのツールでLean検証し、日本語の手順と形式証明を返す**特殊関数の検証基盤です。利用者は自然言語やTeXで依頼し、入力の構造化・コマンド実行・証拠の再検査はCodexが行います。手動操作用のCLIも利用できます。[Bessel Proof Agentの固定版](UPSTREAM.md)を基盤に、Gamma/Betaの実積分、Hermite・Legendre・Laguerre・Jacobi多項式、誤差関数、正実軸のBessel Yへ拡張しました。ライセンスは[MIT](LICENSE)です。
+
+## Codexから使う
+
+1. このリポジトリをcloneするか、[ZIP](https://github.com/sann-ai/special-function-proof-agent/archive/refs/heads/main.zip)を展開します。
+2. 取得したフォルダをCodexの作業フォルダとして開きます。Codex CLIを使う場合は、そのフォルダで `codex` を起動します。
+3. 初回は「このプロジェクトのAGENTS.mdと初回セットアップを確認し、既存のツールで固定Lean環境を準備してください。不足するツールがあれば教えてください」と依頼します。
+4. 準備後、調べたい式と条件を伝えます。例えば：
+
+> 正の実数 shape について、Γ(shape+1)=shape Γ(shape) をこのエージェントで確かめてください。日本語の証明手順とLean証明を示し、結果を自分用の `~/SpecialFunctionProofAgentData/archive` に保存してください。同じ条件の検証済み履歴があれば再検査して使ってください。
+
+Codexは元の式・変数・条件を確認し、対応する検査を実行します。結果には証明の範囲、`report.md` と成功した `certificate.lean` の場所を添えます。条件の不足や対応外の式も、元の依頼と照合して説明します。保存先は既定でリポジトリ外の `~/SpecialFunctionProofAgentData/archive` です。
+
+[初回セットアップ](docs/setup.md) · [対話から検証・説明・履歴再利用まで](docs/codex-workflow.md) · [対応する式と条件](#対応する関数と公式)
 
 ## 対応する関数と公式
 
@@ -20,7 +33,7 @@
 
 登録表は `special_function_agent/registry.py`、関数別Lean基盤は `BesselProofAgent/` と `SpecialFunctionProofAgent/` にあります。
 
-## 導入
+## 手動で導入する
 
 Python 3.12以上、Git、elanを準備します。Leanは4.34.0、mathlibは固定コミットを使います。
 
@@ -38,7 +51,7 @@ python3 scripts/doctor.py
 
 Python追加パッケージの自動導入はありません。数値診断は既存のmpmathを検出した場合に実行し、未導入時は `numerical.json` に `diagnostic: backend_unavailable` を残して、対応する解析・Lean・保存を続けます。
 
-## すぐに検証する
+## 手動で検証する
 
 出力先は未使用のディレクトリを指定します。
 
@@ -106,7 +119,7 @@ python3 -m special_function_agent parse examples/beta-integral.txt --output runs
 
 > `examples/cross-product-root.txt` を元の3条件のまま直接・自然言語ステップ両経路で検証してください。左分母のX₀₂、右分子のX₀₀、正エネルギーから両分母の非零性へ進む証明を確認してください。旧条件付き記録を保持し、新しい完全証明をarchiveへ保存して再利用してください。
 
-既存のCodex CLIで新たな候補を生成する場合は、本人のCLI認証を利用します。モデルはCLI設定を引き継ぎ、推論量はUltraです。
+通常の対話では、現在のCodexが入力と証明計画を用意し、ローカルの `verify` を実行します。以下は、対話とは別に候補生成をコマンドから実行したい人向けの補助手順です。単独生成器は本人のCodex CLI認証を使い、モデルはCLI設定を引き継ぎ、推論量はUltraです。
 
 ```sh
 python3 -m special_function_agent.generate examples/beta-integral.target.json --route direct --output runs/beta-ai-direct
@@ -171,7 +184,7 @@ python3 scripts/replay_examples.py
 
 Legendre/Laguerre/Jacobiの公開例は、偶奇性・低次数値・端点値・微分・特殊化の17式と、三項漸化式2式・隣接直交積分1式・一般直交積分と規格化の2式です。整数Yの完全証明例は `integer-y-complete`、`integer-y-zero-derivative`、`integer-y-one-derivative`、`integer-y-wronskian`、`integer-y-cross-same-point` です。根条件付き交差積の完全証明例は `cross-product-root` です。半整数Yは `yhalf-recurrence` と `yhalf-derivative` を公開しています。各例の `.txt` と `.target.json` は `examples/` にあります。
 
-後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。研究拡張の後続は自由次数を持つ補題、階乗核の有限線形結合以外の級数、多項式以外の被積分関数、非線形・非斉次ODEと領域の拡張です。ユーザー指定式の対応範囲は [解析式の定義](docs/research-user-analytic-definitions.md) に記載しています。
+後続範囲は、Hermite/Laguerre/Jacobiの直交性・規格化・重み付き積分、Jacobiの一般漸化式、hypergeometric/confluent/Airy、associated Legendre/spherical harmonics/ellipticです。一般複数根系、一般整数次数のY引数微分を使う入力、複素枝、近似誤差と漸近剰余の評価も、それぞれ必要な定義・条件・証明を追加して扱います。研究拡張の後続は自由次数を持つ補題、階乗核・対応する幾何核を超える級数、多項式・対応するexp/sin/cosを超える被積分関数、下記の対応クラスを超える非線形・非斉次ODEと領域の拡張です。ユーザー指定式の対応範囲は [解析式の定義](docs/research-user-analytic-definitions.md) と [追加の解析定義](docs/research-advanced-analytic-definitions.md) に記載しています。
 
 ### 幾何級数・初等積分・非線形と二階ODE
 

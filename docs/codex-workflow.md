@@ -1,113 +1,82 @@
-# Codexからの共通操作
+# Codexで式を伝え、検証結果を受け取る
 
-プロジェクト全体のルールは [AGENTS.md](../AGENTS.md) にあります。入力をparseし、全仮定・型・束縛を確認してから検証します。ユーザーが指定した全条件を保存し、証明候補で追加しません。
+利用者との対話はCodexが担当し、このプロジェクトのCLIが固定した命題をLeanで検査します。式の構造化、証明計画、実行と結果の読み取りをCodexに依頼できます。
 
-ローカルで登録済みのGamma/Beta/Hermite/erf、Legendre/Laguerre/Jacobi、固定半整数Y・整数Yレシピを使えます。例えばBeta積分は次のように検査します。
+## 最初の一回
 
-```sh
-python3 -m special_function_agent verify examples/beta-integral.txt --route direct --output runs/beta-direct
-python3 -m special_function_agent verify examples/beta-integral.txt --route steps --output runs/beta-steps
-python3 -m special_function_agent replay runs/beta-steps
-```
+リポジトリをcloneまたはZIP展開し、そのフォルダをCodexの作業フォルダとして開きます。Codex CLIを利用する場合は取得したフォルダで `codex` を起動します。プロジェクトの指示は [AGENTS.md](../AGENTS.md) にあります。Codexの[プロジェクト指示の読み込み](https://learn.chatgpt.com/docs/agent-configuration/agents-md)と[初回利用](https://learn.chatgpt.com/docs/quickstart)は公式資料を参照してください。
 
-AIがレシピ/理由を選ぶ場合は `python3 -m special_function_agent.generate examples/beta-integral.target.json --route steps --output runs/beta-ai` を使います。既存Codex CLIのモデルと本人の認証を利用し、Ultraで候補を生成します。targetは生成側へ固定データとして渡し、応答はproofだけを受け取ります。
+> このプロジェクトのAGENTS.mdとdocs/setup.mdを確認し、既存ツールで固定Lean環境を準備してください。不足するツールと必要な操作があれば教えてください。準備後、正の実数 shape に対する Γ(shape+1)=shape Γ(shape) を、日本語の手順付きでLean検証してください。
 
-依頼例：「正のshape,rateについてGamma積分を検証し、元命題のLean状態・数値診断・残る定義域条件を確認してください。直接/ステップ両経路をreplayし、外部archiveに保存してください。」
+Python 3.12以上、Git、elanが管理する固定Lean環境を使います。Codexは `doctor.py` で現在の状態を確認し、[セットアップ](setup.md)の取得・ビルドを行います。初回の依存取得にはネット接続と数GB規模の領域が必要です。利用者のCodex設定・認証・グローバルskillは保持します。実行に必要な権限が足りない場合は、具体的な操作と理由を伝えます。
 
-## Hermiteと誤差関数
+## 普段の依頼
 
-`H_n` は物理学規約、`He_n` は確率論規約です。Hermiteの次数は `n natural` と宣言し、微分の `H_{n-1}` / `He_{n-1}` に必要な `n>=1` を元条件に含めます。実数の引数には正値条件は不要です。誤差関数は `erf(x)=2/sqrt(pi)*int(0,x,exp(-t^2),t)` の定義を使います。
+式、変数の型や範囲、採用する規約を分かる範囲で伝えてください。文章、TeX、式を含むファイルを使えます。次はそのまま依頼できる例です。
 
-```sh
-python3 -m special_function_agent verify examples/hermite-h-derivative.txt --route direct --output runs/hermite-direct
-python3 -m special_function_agent verify examples/erf-derivative.txt --route steps --output runs/erf-steps
-python3 -m special_function_agent verify examples/gaussian-finite-integral.txt --route steps --output runs/gaussian-steps
-python3 -m special_function_agent.generate examples/hermite-h-derivative.target.json --route direct --output runs/hermite-ai --archive
-python3 -m special_function_agent.generate examples/erf-derivative.target.json --route steps --output runs/erf-ai --archive
-```
+> 正の実数 shape について、Γ(shape+1)=shape Γ(shape) をこのエージェントで確かめてください。日本語の証明手順とLean証明を示し、結果を自分用の `~/SpecialFunctionProofAgentData/archive` に保存してください。同じ条件の検証済み履歴があれば再検査して使ってください。
 
-依頼例：「物理学規約のHermite微分公式を `n natural,n>0,x real` の全条件で検証してください。次に誤差関数の微分と、任意実端点のGaussian積分をステップ経路で検証してください。各段階で定義・規約・条件を保持し、証拠を保存してreplayしてください。」
+> 実数 x に対する erf(-x)=-erf(x) を、追加の符号条件を置かずにLeanで検証し、日本語で説明してください。今回は外部履歴への保存は不要です。
 
-## 多項式と固定半整数Y
+> 先ほど保存した正の実数 shape のGamma漸化式を、同じ変数・条件・ステップ経路で再検査して使い、結果と証明ファイルを示してください。
 
-Legendre/Laguerre/Jacobiは自然数次数を使い、引数とパラメータを実数として宣言します。微分では他のパラメータを固定し、次数 `n-1` の下限条件を元入力から確認します。Laguerreの通常規約はα=0です。[定義・対応公式](orthogonal-polynomials.md)を参照してください。
+表記の意味が一意なら、Codexは解釈した式と条件を短く示して進めます。例えばHermiteのH/He、積分端点、次数の型が曖昧な場合は、その点だけ確認します。実数全域を指定した依頼に正値条件が必要になった場合は、元の依頼の検査結果と必要な条件を説明し、条件を採用するか利用者に確認します。
 
-```sh
-python3 -m special_function_agent verify examples/jacobi-derivative.txt --route direct --output runs/jacobi-direct
-python3 -m special_function_agent verify examples/yhalf-derivative.txt --route steps --output runs/yhalf-steps
-python3 -m special_function_agent replay runs/yhalf-steps
-```
+## Codexが行う処理
 
-依頼例：「`examples/jacobi-derivative.txt` を、自然数n≥1、実数a,b,xの条件で検証してください。a,bを固定したx微分として、元式・全条件・規約を確認し、両経路の証明を保存してreplayしてください。」
+1. 作業用の新しい `runs/` サブフォルダに元の依頼文を保存する。既存ファイルを上書きしない。
+2. 対応する式表記へ変換し、`parse` で固定targetを作る。変数名・型・全条件・束縛・関数規約を元の依頼に照合する。対応する研究関数では定義IDと元の呼出しも保持する。
+3. 履歴再利用を依頼されていれば、同じtargetと経路を `archive lookup` で検索する。現環境のLean再検査まで成功した完全証明を使う。
+4. 新規検証は `verify --route steps` または指定された `direct` を実行する。説明を求められた場合はstepsを使う。複数段の計画が必要なら、既存の構造化ステップだけを作り検査へ渡す。
+5. `result.json`、`report.md`、成功した `certificate.lean` を読み、検査された式と条件、証明範囲、説明、保存場所を返す。保存依頼があるときは外部archiveへ登録する。
 
-依頼例：「`examples/yhalf-recurrence.txt` と `examples/yhalf-derivative.txt` を直接・ステップ両経路で検証してください。明示名 `YNoninteger` の固定次数−1/2・1/2・3/2と正の実引数を保持し、Leanの完全証明と保存証明のreplayを確認してください。」
+通常の対話は現在のCodexとローカル検証器で進みます。`special_function_agent.generate` は単独の候補生成を明示的に依頼した場合の補助コマンドです。利用者がJSONを書く必要のある場面では、Codexが既存形式に沿って準備します。
 
-`YNoninteger` は標準のJ接続式から定義した非整数Yへ接続します。整数Yは次数微分の定義に対して、次数方向の微分可能性と標準整数極限を証明しました。任意整数n、x>0の三項漸化式に加え、次の引数微分・Wronskianも完全証明できます。[Yの形式化範囲](bessel-y-formalization.md)に定義と各条件を記載しています。
+一つの依頼を処理するために、本体の数学コードや対応範囲を変更する作業は含めません。必要な式が未対応なら、該当する入力形式・定理・条件を具体的に報告し、拡張は別の依頼として扱います。
 
-## 整数Yの引数微分・Wronskian・同点交差積
+## 受け取る説明とファイル
 
-`integer-y-zero-derivative` と `integer-y-one-derivative` はx>0での `Y_0'=-Y_1`、`Y_1'=Y_0-Y_1/x`、`integer-y-wronskian` は任意整数nとx>0での `J_{n+1}Y_n-J_nY_{n+1}=2/(pi*x)`、`integer-y-cross-same-point` はx>0での `X_01(x,x)=-2/(pi*x)` です。各例は `examples/` に `.txt` と `.target.json` があり、direct/steps両経路を使えます。次数・引数の微分交換とWronskianの定数2/πは既存の標準J/Y定義から証明済みです。
+成功したGammaの例では、次の内容を日本語で示します。
 
-```sh
-python3 -m special_function_agent verify examples/integer-y-zero-derivative.txt --route direct --output runs/y0-direct --archive
-python3 -m special_function_agent verify examples/integer-y-wronskian.txt --route steps --output runs/y-wronskian-steps --archive
-python3 -m special_function_agent replay runs/y-wronskian-steps
-```
+> shapeを正の実数として、Γ(shape+1)=shape Γ(shape) のLean検証が成功しました。正の引数に対するGammaの漸化式を適用し、元の等式を得ます。検査した条件はshape>0です。日本語手順はreport.md、形式証明はcertificate.leanにあります。
 
-依頼例：「整数Yの4例を直接・自然言語ステップ両経路で検証してください。微分する実変数とx>0、Wronskianの `n integer`、同点交差積の2引数と負符号を保持し、元命題の完全証明を保存してreplayしてください。」
+`report.md` には入力式、条件、状態、ステップごとの等式と理由を記録します。`certificate.lean` は成功した形式証明、`request.json` は元の型・全条件と検査した証明計画、`result.json` は機械判定と環境情報です。`analysis.json` と `numerical.json` がある経路では、それぞれ解析情報と数値診断を確認できます。
 
-## 引き継いだBesselの操作例
+自然言語の理由は説明用の文章です。検査の根拠は各ステップの等式、固定された全条件、Leanの証明結果です。Codexはこの範囲に沿って説明を補い、証明済み部分と未解決部分を分けて伝えます。検査に失敗した `proof_attempt.lean` は途中の試行として扱います。
 
-# Codexから使う手順
+- `proved`：元の型・全条件の命題がLeanと公理監査を通過。
+- `needs_conditions`：現在の入力・対応レシピで必要な条件を確認できない。条件の追加は利用者の判断で行う。
+- `unresolved`：対応外の形式、証明計画の失敗、環境の未準備、または明示前提付きの部分証拠。理由と確認済みの範囲を示す。
+- `refuted`：対応する反証経路で検査された反証。未対応、検索ヒットなし、数値の不一致とは区別する。
 
-このリポジトリで恒等式を調べる際は、[導入手順](setup.md)と[蓄積機能](archive.md)を参照し、
-次の順で進めます。
+`no_mismatch_found` などの数値診断は数値欄で報告します。任意の `mpmath` が未導入でも、対応するLean検証と証拠の保存は続けられます。
 
-1. 元の式と全条件を保存し、`parse` の正規化表示を確認する。対応する条件が不足する場合は
-   `needs_conditions` と理由を保存して、必要な条件を利用者に確認する。
-2. `archive search` / `archive show` で関連記録と条件を読む。文字列検索の一致は候補の選択に使い、
-   実際の再利用には命題全体と条件の一致を確認する。
-3. 新しい出力先で `python3 -m special_function_agent.generate TARGET.json --route direct --output DIR --archive`
-   を実行する。段階経路には `--route steps` を使う。生成器自身が同一命題・同一経路の保存証拠を
-   再検査し、利用可能ならAIを呼ばず再利用する。
-4. 結果を `proved` / `refuted` / `unresolved` / `needs_conditions` で報告する。
-   数値診断は反例候補として併記する。
-5. 証拠と日本語レポートの保存場所、アーカイブ記録IDを示す。保存証拠の再検査が必要な場合は
-   `archive replay RECORD_ID` を使う。
+## 履歴の場所と再利用
 
-整数Yの登録漸化式・引数微分・Wronskian・同点交差積、および次の根条件付き分数式以外の `Y_n`・`Y(order,x)`・交差積を含むschema version 2の診断入力は、3のAI証明探索の代わりに
-`python3 -m special_function_agent verify INPUT --output DIR --archive` で診断する。
-生成器へ渡した場合も診断へ進み、元の式と全条件を保持する。
+外部履歴の既定保存先は `~/SpecialFunctionProofAgentData/archive`、研究用の補題・定義は `~/SpecialFunctionProofAgentData/research` です。会話や研究設定で保存・再利用と保存先が既に決まっていれば、その範囲で確認を繰り返さず継続します。初めて保存する利用者が保存先を指定していない場合は、既定の場所を提案し、その点だけ確認します。作業ファイルはGit対象外の `runs/` に置きます。別の保存先を使う場合も、Codexへの依頼で指定できます。
 
-`examples/cross-product-root.txt` は、`z>0`、`0<lambda<1`、`X_01(z,lambda*z)=0` の元条件から完全証明する。
-正エネルギー積分を通じて左分母の正値性と右分母の非零性を導き、X₀₂を含む左分母とX₀₀の右分子を保持する。
+同じ命題の再利用では、式・名前・型・全仮定・規約を照合し、現環境で再検査します。`archive lookup` が返す `ai_called: false` は、保存証拠の検索と検査で新しいAI候補生成を行わなかったことを表します。元の記録は保持します。環境差や証拠改変があれば理由を報告し、再検証を依頼されたときは同じ元targetから新しい記録を作ります。
+
+別の命題へ補題を適用する場合は、[研究補題](research-lemmas.md)の仕組みを使います。[研究関数](research-functions.md)と解析的定義には個別の対応範囲があります。共有は利用者が選んだ定義・補題とその依存だけを明示的にexportします。
+
+## Codexが使う最小のコマンド例
+
+以下は会話の内部でCodexが実行する例です。手動でも使えます。プロジェクトのルートから、新しい作業フォルダを作ります。
 
 ```sh
-python3 -m special_function_agent verify examples/cross-product-root.txt --route direct --output runs/cross-root-direct --archive
-python3 -m special_function_agent verify examples/cross-product-root.txt --route steps --output runs/cross-root-steps --archive
-python3 -m special_function_agent replay runs/cross-root-steps
+mkdir -p runs
+sf_run=$(mktemp -d "$PWD/runs/conversation.XXXXXX")
+printf '%s\n' 'Gamma(shape+1)=shape*Gamma(shape); shape>0' > "$sf_run/input.txt"
+python3 -m special_function_agent parse "$sf_run/input.txt" --output "$sf_run/target.json"
+python3 -m special_function_agent archive lookup "$sf_run/target.json" --route steps
 ```
 
-依頼例：「根条件付き交差積を元の3条件で両経路から検証してください。左分母のX₀₂、右分子のX₀₀、変数対応と両分母の非零証明を確認し、完全証明を保存してreplayしてください。」
+lookupが `not_found` の場合は新規検証へ進めます。保存依頼がある例：
 
-旧 `proof.mode: diagnostic` の記録は元の条件付きscopeを保持する。新たに同じ診断経路を選ぶ場合は `--route diagnostic` を指定し、`unresolved`、`full_bessel_proof: false` と条件付き代数証明の結果を報告する。数値バックエンドの有無と有限標本の結果は、選んだLean検証経路と併せて記録する。
+```sh
+python3 -m special_function_agent verify "$sf_run/input.txt" --route steps \
+  --output "$sf_run/verification" --archive
+python3 -m special_function_agent archive lookup "$sf_run/target.json" --route steps
+```
 
-外部の個人用保存先は上流GitHubへのcommit対象に含めません。配布用の共通例へ追加する場合は、
-利用者が公開対象として選んだ内容だけを別途レビューします。
-生成器は空の一時ディレクトリで動くため、この使用文書の読み込みをAIへ暗黙には期待せず、
-アーカイブの完全一致検索と再検査をPython側で実行します。
-
-そのまま使える依頼例:
-
-> このリポジトリで、J_{n-1}(x)+J_{n+1}(x)=2n J_n(x)/x を、nは整数・x>0の条件で検証してください。
-> 元の命題と条件を固定し、個人用アーカイブを検索してください。既存証拠を再検査して再利用するか、
-> AIで直接経路と段階経路を生成してLeanで検査し、すべての試行を保存してください。
-> 4状態の判定、条件、レポートと証明の保存場所、記録IDを教えてください。
-
-## 一般Legendre直交性・規格化と整数Y
-
-依頼例：「`examples/legendre-orthogonal.txt` と `examples/legendre-norm.txt` を両経路で検証してください。自然数m,nの型、m≠n、区間[-1,1]を保持し、証明を保存して同じ命題に再利用してください。」
-
-依頼例：「`examples/integer-y-complete.txt` を任意整数n、x>0で直接・自然言語ステップ両経路へ接続してください。標準整数Yの定義と極限、生成定理の全前提を確認し、完全証明をarchiveへ保存してください。」
-
-古い整数Y・根条件付き交差積のdiagnostic記録は元ファイルと明示前提を保持します。同じ診断経路を選ぶには `--route diagnostic` を指定します。完全証明へ移す場合は、保存requestからproofを除いたtargetを `verify --route direct` または `--route steps` に渡し、同じtarget IDに新しい履歴を追加します。整数Y・交差積の具体的手順は[保存仕様](archive.md#条件付き記録から完全証明へ)を参照してください。
+保存を依頼されていなければ `--archive` を付けずに検証します。lookupは完全一致する `proved` 証拠を再検査し、ヒット時に元記録IDと証拠の場所を返します。該当なし・不一致のときは新しいAI呼出しや保存を行いません。終了コードと詳細は[archive仕様](archive.md)を参照してください。

@@ -35,10 +35,10 @@ def main() -> int:
         command.add_argument("--archive-dir", type=Path)
     saved = subparsers.add_parser("archive", help="Manage the external local evidence archive.")
     operations = saved.add_subparsers(dest="archive_command", required=True)
-    for operation in ("add", "import-bessel", "list", "search", "show", "replay"):
+    for operation in ("add", "import-bessel", "list", "search", "show", "replay", "lookup"):
         command = operations.add_parser(operation)
         command.add_argument("--archive-dir", type=Path)
-        if operation in {"add", "import-bessel", "replay"}:
+        if operation in {"add", "import-bessel", "replay", "lookup"}:
             command.add_argument("--timeout", type=float, default=60)
         if operation in {"add", "import-bessel"}:
             command.add_argument("directory", type=Path)
@@ -47,6 +47,11 @@ def main() -> int:
             command.add_argument("query")
         elif operation in {"show", "replay"}:
             command.add_argument("record_id")
+        elif operation == "lookup":
+            command.add_argument("input", type=Path)
+            command.add_argument("--route", choices=("direct", "steps"), required=True)
+            command.add_argument("--format", choices=("auto", "json", "text"), default="auto")
+            command.add_argument("--conditions", help="Explicit conditions for text input.")
     again = subparsers.add_parser("replay")
     again.add_argument("directory", type=Path)
     again.add_argument("--timeout", type=float, default=60)
@@ -59,6 +64,8 @@ def main() -> int:
     original_input = None
 
     def save_failure(result):
+        if args.command == "archive" and args.archive_command == "lookup":
+            return {**result, "ai_called": False}
         if getattr(args, "archive", False):
             try:
                 record = archive.register_failure(result, args.archive_dir, original_input=original_input,
@@ -85,10 +92,19 @@ def main() -> int:
                           for record in records]
             elif operation == "show":
                 result = archive.show_record(args.record_id, root)
+            elif operation == "lookup":
+                is_json = args.format == "json" or (args.format == "auto" and args.input.suffix.lower() == ".json")
+                if is_json:
+                    if args.conditions:
+                        raise InputError("JSON assumptions are fixed in the input; use --conditions with text input.")
+                    data = load_json(args.input)
+                else:
+                    data = parse_identity(args.input.read_text(encoding="utf-8"), args.conditions)
+                result = archive.lookup(data, args.route, root, args.timeout)
             else:
                 result = archive.replay_record(args.record_id, root, args.timeout)
             print(json.dumps(result, ensure_ascii=False, indent=2))
-            return 1 if operation == "replay" and not result.get("replayed") else 0
+            return 1 if operation in {"replay", "lookup"} and not result.get("replayed") else 0
         if args.command in {"parse", "verify"}:
             original_input = args.input.read_text(encoding="utf-8")
         if args.command == "parse":

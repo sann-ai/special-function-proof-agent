@@ -58,7 +58,25 @@ python3 -m special_function_agent archive add "$bessel_run/recurrence"
 取り込み元のファイルは変更しません。証明済み・反証済みの記録は、コピーした証拠を
 Leanで再検査してから登録します。
 
-## AI生成と完全一致の再利用
+## Codexの対話から完全一致の証拠を再利用する
+
+現在のCodexから既存証拠を使う場合は、対象の式を固定targetへ変換し、次を実行します。
+
+```sh
+python3 -m special_function_agent archive lookup examples/gamma-recurrence.txt --route steps
+```
+
+入力はJSONまたは対応するテキスト/TeXです。テキストには `--conditions` も指定できます。JSONの変数・条件は入力どおりに固定し、保存候補の `proof` があれば命題照合からだけ除きます。`--archive-dir PATH` で対象の外部archiveを選べます。
+
+式・変数名・型・全仮定・規約と経路が一致する `proved` 記録を探し、現在の環境でLeanの再検査まで成功すると、`status: proved`、`replayed: true`、`reused_record_id`、`certificate_dir`、`target_sha256`、`ai_called: false` を返します。Codexはその証拠を読み、日本語の結果と証明ファイルを示します。
+
+該当する完全証明がなければ `status: not_found` と理由を返し、終了コードは `1` です。環境差・改変などで使えなかった記録は `skipped` で確認できます。入力や保存先のエラーは `unresolved` と終了コード `2` です。これらは検索・再検査の状態として扱います。lookupはAI候補の生成、索引の更新、新しい記録の保存を行いません。元証拠のバイト列も保持します。
+
+新しい証明が必要な場合は、Codexが同じ元targetを `verify` で検査します。保存の依頼があるときに `--archive` を付けます。未解決・条件付き・数値診断のみの記録は、その状態のまま履歴に残ります。
+
+## 単独のAI生成と完全一致の再利用
+
+以下は、利用者がコマンドから候補生成を依頼する場合の補助経路です。
 
 ```sh
 python3 -m special_function_agent.generate demo/target.json --route direct \
@@ -78,7 +96,7 @@ python3 -m special_function_agent.generate demo/target.json --route direct \
 新規生成の作業証拠は `agent/attempt-1/verification/` などにあります。
 
 ここで再利用するのは、固定された命題の証拠と許可された証明計画です。
-異なる定理で補題として利用する機能は、宣言名の一意化や検証操作の追加を伴う今後の範囲です。
+異なる定理へ補題として適用するときは、[研究補題の登録と再利用](research-lemmas.md)を使います。
 
 ## 条件・履歴・保存場所
 

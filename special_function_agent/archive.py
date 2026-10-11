@@ -202,7 +202,8 @@ def _index(root: Path, records: list[dict]) -> None:
     _replace(root / "catalog.md", "\n".join(lines).encode("utf-8"))
 
 
-def list_records(archive_root: Path | str | None = None) -> list[dict]:
+def list_records(archive_root: Path | str | None = None, *, read_only: bool = False,
+                 skipped: list[dict] | None = None) -> list[dict]:
     root = resolve_archive_root(archive_root)
     if not root.exists():
         return []
@@ -214,9 +215,15 @@ def list_records(archive_root: Path | str | None = None) -> list[dict]:
         for entry in sorted(entries.iterdir()):
             if entry.name.startswith(".pending-"):
                 continue
-            records.append(_load_record(entry))
+            try:
+                records.append(_load_record(entry))
+            except (InputError, OSError, UnicodeError) as exc:
+                if skipped is None:
+                    raise
+                skipped.append({"record_id": entry.name, "reason": "invalid_record", "detail": str(exc)})
     records.sort(key=lambda record: (record["created_at"], record["id"]), reverse=True)
-    _index(root, records)  # Entries are authoritative; stale/corrupt indexes are rebuilt.
+    if not read_only:
+        _index(root, records)  # Entries are authoritative; stale/corrupt indexes are rebuilt.
     return records
 
 
@@ -235,10 +242,11 @@ def search_records(query: str, archive_root: Path | str | None = None) -> list[d
             if query in " ".join([record["id"], record["expression"], record["status"], *record["conditions"]]).casefold()]
 
 
-def find_exact(target: dict, archive_root: Path | str | None = None) -> list[dict]:
+def find_exact(target: dict, archive_root: Path | str | None = None, *, read_only: bool = False,
+               skipped: list[dict] | None = None) -> list[dict]:
     canonical = canonical_target(target)
     key = _digest(_json_bytes(canonical))
-    return [record for record in list_records(archive_root)
+    return [record for record in list_records(archive_root, read_only=read_only, skipped=skipped)
             if record["target_sha256"] == key and record["canonical_target"] == canonical]
 
 
@@ -246,6 +254,38 @@ def replay_record(record_id: str, archive_root: Path | str | None = None, timeou
     record = show_record(record_id, archive_root)
     result = replay(Path(record["verification_dir"]), timeout)
     return {**result, "record_id": record_id}
+
+
+def lookup(target: dict, route: str, archive_root: Path | str | None = None, timeout: float = 60) -> dict:
+    """Read exact full-proof history and replay it without adding or updating records."""
+    if route not in {"direct", "steps"}:
+        raise InputError("Archive lookup requires route direct or steps.")
+    if not 0 < timeout <= 600:
+        raise InputError("Archive lookup timeout must be positive and at most 600 seconds.")
+    key = target_hash(target)
+    skipped = []
+    common = {"target_sha256": key, "ai_called": False, "skipped": skipped}
+    for record in find_exact(target, archive_root, read_only=True, skipped=skipped):
+        if record["status"] != "proved":
+            skipped.append({"record_id": record["id"], "reason": "not_full_proof"})
+            continue
+        candidate = record.get("candidate")
+        if not isinstance(candidate, dict) or candidate.get("mode") != route:
+            skipped.append({"record_id": record["id"], "reason": "route_mismatch"})
+            continue
+        try:
+            checked = replay_record(record["id"], archive_root, timeout)
+        except (InputError, OSError, UnicodeError) as exc:
+            skipped.append({"record_id": record["id"], "reason": "replay_failed", "detail": str(exc)})
+            continue
+        if (checked.get("status") != "proved" or checked.get("replayed") is not True
+                or checked.get("verification", {}).get("accepted") is not True
+                or checked.get("full_bessel_proof") is False or checked.get("full_function_proof") is False):
+            skipped.append({"record_id": record["id"], "reason": "replay_rejected"})
+            continue
+        return {**common, "status": "proved", "replayed": True, "reused_record_id": record["id"],
+                "certificate_dir": record["verification_dir"], "verification": checked["verification"]}
+    return {**common, "status": "not_found", "reason": "No exact full proof passed replay for the requested route."}
 
 
 def _register(*, directory: Path | None, result: dict | None, archive_root: Path | str | None,

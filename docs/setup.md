@@ -1,10 +1,8 @@
 # 初回セットアップ
 
-保存済み候補の検証には Python 3.12以上、Git、elan が管理する固定版の Lean / Lake を使います。Python追加パッケージは不要です。最初のツール・依存取得にはネット接続が必要で、Lean、mathlib、ビルドキャッシュは数GB規模になります。
+利用者は、取得したこのプロジェクトのフォルダをCodexで開き、準備と数式の検証をチャットで依頼します。Codexが内部のJSONとコマンドを扱い、元の式・変数・全条件を確認してLean検証へ進めます。日常の依頼と履歴再利用の手順は[Codexでの使い方](codex-workflow.md)を参照してください。
 
-数値診断は、実行中のPythonから既存の `mpmath` を検出した場合に利用します。未導入時は `numerical.json` に `backend_unavailable` を記録し、対応する完全Lean証明、従来Y・交差積の条件付きLean検査、アーカイブ保存とreplayを続けます。Legendreの一般直交性・規格化、Laguerre/Jacobi、固定半整数 `YNoninteger`、整数Yの漸化式・引数微分・Wronskian・同点交差積と根条件付き分数式もこの手順を使います。通常の準備手順と診断コマンドは追加パッケージを自動導入しません。数値結果を再現する際は、保存された計算精度・標本・数値環境も確認してください。
-
-macOS・Linuxでは、[Lean公式のインストール案内](https://lean-lang.org/install/)に従って elan を導入し、`python3`、`git`、`elan` がターミナルから利用できる状態にしてください。以下はmacOS・Linux向けの手順です。Windows向けの初回手順は未検証です。
+以下はmacOS・Linux向けの手順です。Windows向けの初回手順は未検証です。Codex自体の導入・サインインとフォルダの選択は[OpenAI公式のQuickstart](https://developers.openai.com/codex/quickstart)を参照してください。
 
 ## ソースを取得する
 
@@ -24,9 +22,57 @@ cd special-function-proof-agent-main
 
 ZIPにはプロジェクトのGit履歴が含まれません。Lakeはmathlibなどの依存をGitで取得するため、ZIPから利用する場合もGitを用意してください。
 
-## 固定環境を準備する
+## フォルダをCodexで開き、初回準備を依頼する
 
-プロジェクトのディレクトリ内で実行します。
+`README.md`、`AGENTS.md`、`lean-toolchain` があるフォルダをCodexの作業対象に選びます。ZIPの場合も、展開したプロジェクトの直下を選んでください。Codexは作業前にプロジェクトの `AGENTS.md` を読み取ります。[OpenAI公式のAGENTS.md案内](https://developers.openai.com/codex/guides/agents-md)
+
+最初のチャットで、次のように依頼します。
+
+```text
+このフォルダの sann-ai/special-function-proof-agent を初回利用できる状態にしてください。
+AGENTS.md と docs/setup.md を読み、対象フォルダと既存の Python・Git・elan・Lean/Lake を確認してください。
+Pythonが利用できれば scripts/doctor.py を実行し、不足ツールや固定版との相違を具体的に報告してください。
+Lean 4.34.0 とリポジトリに固定されたmathlib・lockfileを維持して、必要な固定環境の取得とビルドを進めてください。
+基礎モジュールと3つの解析定義モジュールをビルドし、doctorを再実行して、Gammaの例1件をverifyとreplayで確認してください。
+不足ツールや追加パッケージの導入が必要なら、対象と理由を示して確認してください。
+個人設定・グローバルのAGENTS.md・skillは変更しないでください。
+このチャットで準備を進め、Codex CLIを入れ子に起動したAI候補生成は行わないでください。
+今回の準備では外部archiveへの保存は不要です。
+```
+
+固定Lean、mathlibとビルドキャッシュの初回取得にはネット接続と数GB規模の空き容量を使います。Python追加パッケージは不要です。既存の数値計算用 `mpmath` があれば利用し、未導入時は数値欄に `backend_unavailable` を記録して、対応するLean検証を進めます。
+
+## 準備後は式と条件をチャットで渡す
+
+自然言語やTeXで、式・変数の型・条件をCodexに渡します。例えば次のように依頼できます。
+
+> 正の実数xについて、$\Gamma(x+1)=x\Gamma(x)$ を検証してください。元の式と条件を確認し、直接証明と、理由を添えたステップ証明をLeanで検査してreplayしてください。
+
+通常はこのチャットのCodexが `verify --route direct` / `verify --route steps` を使います。既存の履歴を利用する依頼では、同一命題の厳密照合と現在の環境でのreplayを行い、その記録の証明状態を確認します。型・束縛・条件・規約を含めた照合の手順は[Codexでの使い方](codex-workflow.md)に従います。
+
+検証ごとに `runs/` 内の未使用サブフォルダへ出力します。通常の検証結果は次のファイルで確認できます。
+
+- `request.json`：固定した命題・全条件と証明候補。
+- `result.json`：証明の状態、実行結果、環境情報。
+- `proof_attempt.lean`：Leanへ渡した証明候補。受理された証明は `certificate.lean` に保存します。
+- `report.md`：式・条件・検証結果の説明。
+- `analysis.json` / `numerical.json`：v2入力の解析と数値診断。
+
+入力検査で停止した場合は、コマンドの診断と、その時点までに作成したファイルを確認します。数値結果を再現する際は、保存された計算精度・標本・数値環境も参照してください。
+
+長期保存を希望するときは、例えば「この証拠を `~/SpecialFunctionProofAgentData/archive` へ保存し、次回から同じ命題の履歴を再利用してください」と依頼します。Codexは承認された保存方針に従って `--archive` を使います。会話や研究設定で保存・再利用と保存先が承認済みなら、都度の確認を挟まず継続します。新規利用者で保存先が未指定の場合は、リポジトリ外の既定先 `~/SpecialFunctionProofAgentData/archive` を提案し、保存先だけ確認します。共有・公開する記録は利用者が選びます。
+
+## 補助：固定環境をコマンドで準備する
+
+ここからは、Codexが実行する内容を確認したい場合や、ターミナルで操作する場合の補助手順です。保存済み候補の検証にはPython 3.12以上、Git、elanが管理する固定版Lean / Lakeを使います。不足ツールは名前と必要な版を確認して準備します。elanの導入方法は[Lean公式のインストール案内](https://lean-lang.org/install/)を参照してください。
+
+プロジェクトのディレクトリ内で、まず既存環境を診断します。初回は未取得の依存や未ビルドの項目が「要準備」になります。
+
+```sh
+python3 scripts/doctor.py
+```
+
+Python・Git・elanが利用できる状態で固定環境を取得し、ビルド後に再診断します。
 
 ```sh
 elan toolchain install leanprover/lean4:v4.34.0
@@ -40,17 +86,25 @@ python3 scripts/doctor.py
 
 `doctor.py` はPython、Git、固定版のLean / Lake、依存コミット、ビルド出力の存在を確認します。インストール、AI実行、認証情報の読み取り、個人記録ディレクトリの作成は行いません。終了コード `0` は全項目確認済み、`1` は準備が必要な項目があることを表します。ソース更新後のビルドと証明の検査は、次の手順で行います。
 
-## 最初の検証と再検証
+## 補助：最初の検証と再検証
 
-保存されたAI候補を検証し、生成された証明を再検査します。出力先には未使用のディレクトリを指定してください。
+Gamma漸化式を検証し、生成された証明と配布済みの証明を再検査します。出力先には未使用のディレクトリを指定してください。
 
 ```sh
-python3 -m special_function_agent verify demo/direct/request.json --output runs/first-check
+python3 -m special_function_agent verify examples/gamma-recurrence.txt --route direct --output runs/first-check
 python3 -m special_function_agent replay runs/first-check
-python3 -m special_function_agent replay demo/direct
+python3 -m special_function_agent replay demo/gamma-direct
 ```
 
 `proved` と、再検査時の `replayed: true` を確認します。これらの操作はCodex CLI、AIへの接続、APIキーを使いません。固定環境の取得とビルドが完了した端末ではローカルで実行できます。
+
+保存済みの同じ命題・経路を利用するときは、厳密照合とreplayをまとめて実行します。
+
+```sh
+python3 -m special_function_agent archive lookup examples/gamma-recurrence.target.json --route direct
+```
+
+成功時は `proved`、`replayed: true` と再利用した記録IDを確認します。該当する証拠がない場合は `not_found`（終了コード1）となるので、Codexへ新しい検証を依頼します。この照合はAI呼出しや新規保存を行いません。保存先を指定する場合は `--archive-dir PATH` を付けます。
 
 多項式の漸化式・隣接直交と半整数Yを確認する場合：
 
@@ -99,11 +153,11 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 
 `runs/` は手動検証の一時出力先としてGit管理から除外しています。個人の蓄積記録の既定保存先はリポジトリ外の `~/SpecialFunctionProofAgentData/archive` です。共有・公開の対象は、記録を作成した利用者が選びます。アーカイブ操作はREADMEの対応節を参照してください。
 
-検証した等式を別の命題に使う場合は、[研究補題の登録と再利用](research-lemmas.md)に従って `research add` で外部研究フォルダへ登録します。既存関数の有限合成による新しい研究関数は、[明示定義の登録](research-functions.md)から始めます。追加の依存導入は不要です。新たなAI候補を生成する場合は、次節の本人のCodex CLI認証を使います。
+検証した等式を別の命題に使う場合は、[研究補題の登録と再利用](research-lemmas.md)に従って `research add` で外部研究フォルダへ登録します。既存関数の有限合成による新しい研究関数は、[明示定義の登録](research-functions.md)から始めます。追加の依存導入は不要です。いずれもCodexへ定義・条件と登録の希望を伝えて依頼できます。
 
-## 新しいAI候補を生成する場合
+## 補助：独立したAI候補生成を明示的に選ぶ場合
 
-新規生成には、利用者本人の [Codex CLI](https://learn.chatgpt.com/docs/codex/cli) と [認証](https://learn.chatgpt.com/docs/auth)を用意します。本人のChatGPTアカウントまたはAPIキーによる認証を使用し、リポジトリに認証情報を保存しません。
+独立した生成コマンドを利用者が選ぶ場合は、既存の本人のCodex CLI認証を使います。導入・サインインは[OpenAI公式のQuickstart](https://developers.openai.com/codex/quickstart)を参照してください。この経路は新しいAI呼出しを伴います。認証情報の保存先は本人のCodex環境とします。
 
 ```sh
 codex login
