@@ -342,6 +342,8 @@ def verify(data, output_dir, timeout):
                 (output_dir/'certificate.lean').write_text(source, encoding='utf-8')
                 result.update(status='proved', reason='full_lean_certificate', full_function_proof=True,
                               certificate_kind='proof', certificate_sha256=_sha(source.encode()))
+            else:
+                result['reason'] = checked.get('reason', 'lean_rejected')
     if bessel_scope:
         result['full_bessel_proof'] = result['full_function_proof']
     _save_json(output_dir/'analysis.json', analysis or {'status':'no_matching_template'})
@@ -349,13 +351,38 @@ def verify(data, output_dir, timeout):
     _save_json(output_dir/'result.json', result)
     lines = ['# Special Function Proof Agent', '', result['statement'], '', '条件：'+'、'.join(labels(data)), '',
              '完全Lean証明：'+result['status'], '数値診断：'+numeric['diagnostic']]
+    lines += ['', '数値診断は有限標本の補助情報です。数値の一致や不一致だけで証明・反証とは判定しません。']
+    if result['status'] == 'proved':
+        lines += ['', '元の式と全条件のLean検証・標準公理監査が成功しました。形式証明は certificate.lean です。']
+    else:
+        lines += ['', '元の命題の完全証明は得られていません。この結果は命題が偽であることを意味しません。',
+                  '理由：'+result['reason']]
+        if pending:
+            lines += ['確認が必要な条件：'+'、'.join(sorted(set(pending))),
+                      'これらの条件は元の入力に追加していません。採用する前に利用者へ確認してください。']
+        for attempt in result['attempts']:
+            reason = attempt.get('reason', 'lean_rejected')
+            advice = {'lean_unavailable': '固定Lean環境を scripts/doctor.py と docs/setup.md で確認してください。',
+                      'timeout': '制限時間に達しました。環境と証明計画を確認し、再実行は利用者の依頼に沿って行ってください。',
+                      'audit_rejected': '公理監査に通っていません。成功した証明として使わないでください。',
+                      'lean_rejected': '証明候補がLeanで受理されませんでした。元の命題を保持して候補を見直してください。'}
+            lines += ['Lean検査：'+reason, advice.get(reason, '詳細は result.json の attempts を確認してください。')]
+            diagnostic = attempt.get('audit_error') or attempt.get('stderr') or attempt.get('stdout')
+            if diagnostic:
+                lines += ['Lean診断（最大2000文字）：', '```text', diagnostic[:2000], '```']
+        if not result['attempts'] and not pending:
+            lines += ['この経路では完全なLean証明を検査していません。対応範囲と証明計画を確認してください。']
+        lines += ['proof_attempt.lean がある場合も未受理の候補です。完全証明として再利用しないでください。',
+                  '詳細は result.json、入力は request.json、対応範囲とエラー時の手順は docs/setup.md を参照してください。']
     if defined:
         lines[2] = defined_proof.display(data, data['lhs'])+' = '+defined_proof.display(data, data['rhs'])
         bridge = '検証済みの解析的橋渡し定理' if research_functions.uses_analytic(data['definitions']) else 'Leanの定義等式'
         lines += ['', '研究関数の明示定義：元の呼出しを含むtheorem targetと、定義を展開したexpanded_targetを'+bridge+'で接続します。']
         lines += defined_proof.definition_lines(data)
         lines += ['展開後の式：'+display(expanded['lhs'])+' = '+display(expanded['rhs']),
-                  '定義・依存関係・元条件は request.json、analysis.json、certificate.lean に保存します。']
+                  '定義・依存関係・元条件は request.json、analysis.json に保存しています。']
+        if result['status'] == 'proved':
+            lines += ['元の呼出しを含む形式証明は certificate.lean に保存しています。']
     if research:
         lines += ['', '研究補題の再利用：元の命題と全条件を固定し、各補題の仮定をこの命題の条件からLeanで確認します。']
         for dependency in dependencies:
@@ -369,7 +396,9 @@ def verify(data, output_dir, timeout):
                 application_index += 1
                 arguments = '、'.join(name+' ← '+display(value) for name, value in use['arguments'].items())
                 lines += [f'適用{application_index}：{use["lemma"]}、{arguments}。'+('右辺から左辺へ使います。' if use['reverse'] else '左辺から右辺へ使います。')]
-        lines += ['証明と依存関係は certificate.lean、request.json、analysis.json に保存します。']
+        lines += ['依存関係は request.json、analysis.json に保存しています。']
+        if result['status'] == 'proved':
+            lines += ['形式証明は certificate.lean に保存しています。']
     from .real_bessel import _walk
     if any(node.get('op') in {'hermite_h', 'hermite_he'} for node in _walk([data['lhs'], data['rhs']])):
         lines += ['', 'Hermite規約：Hは物理学規約、Heは確率論規約。次数は自然数です。']
@@ -380,7 +409,9 @@ def verify(data, output_dir, timeout):
     if cross_complete.complete_target(data):
         lines += ['', '交差積規約：X_nm(s,t)=J_n(s)*Y_m(t)-Y_n(s)*J_m(t)。', cross_complete.REASONS['cross_product_root']]
     if data['proof']['mode'] == 'steps':
-        lines += ['', '構造化ステップ（各等式を元の全条件で検査）：']
+        heading = ('構造化ステップ（各等式を元の全条件で検査済み）：' if result['status'] == 'proved' else
+                   '構造化ステップ候補（元の全条件での検証は未完了）：')
+        lines += ['', heading]
         for i,step in enumerate(data['proof']['steps'],1):
             step_display = (lambda node: defined_proof.display(data, node)) if defined else display
             lines += [f'{i}. {step_display(step["before"])} = {step_display(step["after"])}', '   '+step['reason']]

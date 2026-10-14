@@ -4,14 +4,24 @@
 
 ## Codexから使う
 
-1. このリポジトリをcloneするか、[ZIP](https://github.com/sann-ai/special-function-proof-agent/archive/refs/heads/main.zip)を展開します。
-2. 取得したフォルダをCodexの作業フォルダとして開きます。Codex CLIを使う場合は、そのフォルダで `codex` を起動します。
-3. 初回は「このプロジェクトのAGENTS.mdと初回セットアップを確認し、既存のツールで固定Lean環境を準備してください。不足するツールがあれば教えてください」と依頼します。
-4. 準備後、調べたい式と条件を伝えます。例えば：
+Codexのローカル作業用チャットに、次をそのまま貼って始められます。導入手順やJSONを書く必要はありません。
+
+```text
+https://github.com/sann-ai/special-function-proof-agent
+この特殊関数検証エージェントを使えるようにしてください。未取得なら作業用フォルダへ取得し、取得先をCodexで開く必要があれば案内してください。プロジェクトのAGENTS.mdとdocs/setup.mdに従って固定環境を準備し、Gammaの例をLean検証・replayしてください。現在のチャットで進め、入れ子のAI候補生成は使わないでください。
+```
+
+Codexが取得先と不足ツールを案内します。作業フォルダの変更が必要な場合は、案内されたフォルダをCodexで開いて続けます。既にcloneや[ZIP](https://github.com/sann-ai/special-function-proof-agent/archive/refs/heads/main.zip)で取得済みなら、そのフォルダで同じ依頼を使えます。準備後は、普段のCodexチャットで調べたい式と条件を伝えます。例えば：
 
 > 正の実数 shape について、Γ(shape+1)=shape Γ(shape) をこのエージェントで確かめてください。日本語の証明手順とLean証明を示し、結果を自分用の `~/SpecialFunctionProofAgentData/archive` に保存してください。同じ条件の検証済み履歴があれば再検査して使ってください。
 
 Codexは元の式・変数・条件を確認し、対応する検査を実行します。結果には証明の範囲、`report.md` と成功した `certificate.lean` の場所を添えます。条件の不足や対応外の式も、元の依頼と照合して説明します。保存先は既定でリポジトリ外の `~/SpecialFunctionProofAgentData/archive` です。
+
+この版は、登録済みの公式・証明手順と限定された研究定義を扱います。未知の恒等式を一般に自動証明する機能はありません。対応外の依頼は元の式と条件を保持して報告し、条件の追加は利用者の同意を得て行います。対応範囲の拡張は別の依頼として扱います。
+
+導入対象はmacOS・Linuxです（Windows未検証）。Python 3.12以上、Git、elan、固定Lean 4.34.0と固定mathlibを使い、初回はネット接続と数GB規模の空き容量が必要です。ローカルの `verify` / `replay` 自体は外部AIやAPIキーを使いません。Codexとの対話は利用者のアカウントの契約・利用枠を使います。このツール用の別のAPI契約は必須ではありません。[Codexの認証](https://developers.openai.com/codex/auth)と[料金・利用枠](https://developers.openai.com/codex/pricing)は公式案内を参照してください。独立した候補生成器は追加のAI呼出しを行うため、通常の対話では起動しません。
+
+Codexへ渡す数式やファイル内容はクラウドのAIへ送信されます。入力・証明・検査ログは `runs/` や指定したarchive・researchフォルダに平文で保存されます。未公開の数式や秘密を含む場合は、所属先の方針と保存先を確認してください。共有用exportには選択した証拠に加えて、依存する補題・定義の元入力や出典も含まれます。詳しくは[データの扱い](docs/codex-workflow.md#データの扱いと共有)を参照してください。
 
 [初回セットアップ](docs/setup.md) · [対話から検証・説明・履歴再利用まで](docs/codex-workflow.md) · [対応する式と条件](#対応する関数と公式)
 
@@ -119,7 +129,7 @@ python3 -m special_function_agent parse examples/beta-integral.txt --output runs
 
 > `examples/cross-product-root.txt` を元の3条件のまま直接・自然言語ステップ両経路で検証してください。左分母のX₀₂、右分子のX₀₀、正エネルギーから両分母の非零性へ進む証明を確認してください。旧条件付き記録を保持し、新しい完全証明をarchiveへ保存して再利用してください。
 
-通常の対話では、現在のCodexが入力と証明計画を用意し、ローカルの `verify` を実行します。以下は、対話とは別に候補生成をコマンドから実行したい人向けの補助手順です。単独生成器は本人のCodex CLI認証を使い、モデルはCLI設定を引き継ぎ、推論量はUltraです。
+通常の対話では、現在のCodexが入力と証明計画を用意し、ローカルの `verify` を実行します。以下は、対話とは別に候補生成をコマンドから実行したい人向けの補助手順です。単独生成器は本人のCodex CLI認証を使い、モデルはCLI設定を引き継ぎ、推論量はUltraです。新しいAI呼出しで利用枠を消費し、認証方法によってはAPI料金が発生します。通常の対話や初回セットアップで入れ子に起動しません。
 
 ```sh
 python3 -m special_function_agent.generate examples/beta-integral.target.json --route direct --output runs/beta-ai-direct

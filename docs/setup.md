@@ -1,10 +1,14 @@
 # 初回セットアップ
 
-利用者は、取得したこのプロジェクトのフォルダをCodexで開き、準備と数式の検証をチャットで依頼します。Codexが内部のJSONとコマンドを扱い、元の式・変数・全条件を確認してLean検証へ進めます。日常の依頼と履歴再利用の手順は[Codexでの使い方](codex-workflow.md)を参照してください。
+最初は[READMEのGitHub URLと導入プロンプト](../README.md#codexから使う)をCodexのローカル作業用チャットへ貼ってください。Codexがソースの取得を進め、取得先を作業フォルダとして開く操作が必要なら案内します。取得済みの場合は、そのフォルダで準備を依頼できます。Codexが内部のJSONとコマンドを扱い、元の式・変数・全条件を確認してLean検証へ進めます。日常の依頼と履歴再利用の手順は[Codexでの使い方](codex-workflow.md)を参照してください。
 
 以下はmacOS・Linux向けの手順です。Windows向けの初回手順は未検証です。Codex自体の導入・サインインとフォルダの選択は[OpenAI公式のQuickstart](https://developers.openai.com/codex/quickstart)を参照してください。
 
-## ソースを取得する
+Codexでの対話は利用者のアカウントの契約・利用枠を使い、このツール用の別のAPI契約は必須ではありません。準備済みの環境でのローカル検査・再検査は外部AIを呼びません。数式のクラウド送信、平文保存と選択共有の範囲は[データの扱い](codex-workflow.md#データの扱いと共有)を確認してください。
+
+## 補助：ソースを手動で取得する
+
+通常はCodexへ取得を依頼できます。以下は手動で取得する場合や、Codexが行う操作を確認する場合の手順です。
 
 Gitで取得する場合:
 
@@ -157,7 +161,7 @@ SF_RUN_LEAN_TESTS=1 BESSEL_RUN_LEAN_TESTS=1 python3 -m unittest discover -s test
 
 ## 補助：独立したAI候補生成を明示的に選ぶ場合
 
-独立した生成コマンドを利用者が選ぶ場合は、既存の本人のCodex CLI認証を使います。導入・サインインは[OpenAI公式のQuickstart](https://developers.openai.com/codex/quickstart)を参照してください。この経路は新しいAI呼出しを伴います。認証情報の保存先は本人のCodex環境とします。
+独立した生成コマンドを利用者が選ぶ場合は、既存の本人のCodex CLI認証を使います。導入・サインインは[OpenAI公式のQuickstart](https://developers.openai.com/codex/quickstart)を参照してください。この経路は推論量Ultraで新しいAI呼出しを行い、利用枠を消費します。認証方法によってはAPI料金が発生します。通常の対話や初回セットアップでは入れ子に起動しません。認証情報の保存先は本人のCodex環境とします。
 
 ```sh
 codex login
@@ -168,6 +172,8 @@ python3 -m special_function_agent.generate demo/target.json --route direct --out
 モデル・推論量の条件と生成経路の指定はREADMEの「Codexへの依頼例」を参照してください。セットアップや環境診断がCodexをインストールしたりログインしたりすることはありません。
 
 ## 準備に失敗した場合
+
+Codexへ「直前の診断を読み、止まった操作・原因・必要な次の操作を説明してください」と依頼できます。既存の研究ファイルは保持し、固定環境を最新版へ更新して切り抜けることはしません。サポートへ伝える場合は、OS・Python/Lean版、停止したコマンド、`doctor`の該当項目とエラーメッセージを抜き出してください。研究式・元入力・認証情報を含むログ全体を送る必要はありません。
 
 - `python3`、`git`、`elan` が見つからない: それぞれを導入し、ターミナルを開き直してPATHを確認してください。
 - 固定版Leanが未導入: 上記の `elan toolchain install` を実行してください。doctorは自動ダウンロードを行いません。

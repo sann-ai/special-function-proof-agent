@@ -85,4 +85,4 @@ python3 -m special_function_agent research import ~/gamma-step.research.json --r
 - 保存できる証拠の状態は完全証明、元の追加前提付き検証、未解決、条件不足です。新targetへ適用する補題は、完全なLean証明と標準公理監査が通った等式に限ります。
 - 1候補は最大12回の適用・12補題の依存閉包・深さ4、JSONとpackageは256 KiBまでです。現在の代数整理と条件導出で扱えない候補は `unresolved` となります。
 - 数値診断は既存mpmathがある場合に実行します。未導入時もLean検査と保存を続けます。
-- 既存関数の有限合成による新関数は[研究関数の明示定義](research-functions.md)で登録できます。ODE・無限級数・新しい積分による定義は後続です。
+- 既存関数の有限合成による新関数は[研究関数の明示定義](research-functions.md)で登録できます。級数・積分・ODEの定義も、[固定3形式](research-analytic-definitions.md)、[利用者指定式の限定クラス](research-user-analytic-definitions.md)、[幾何級数・初等積分・非線形と二階ODE](research-advanced-analytic-definitions.md)に対応します。これらのクラスを超える定義は後続です。
